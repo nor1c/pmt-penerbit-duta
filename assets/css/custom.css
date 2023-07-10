@@ -1,0 +1,77 @@
+body{
+	background-color: #fff;
+}
+
+#login-box{
+	width: 80%;
+	height: 60%;
+	margin-left: 10%;
+	margin-right: 10%;
+	margin-top: 20%;
+	margin-bottom: 20%;
+	padding: 10px;
+}
+
+
+.header-login{
+	text-align: center;
+	font-weight: bold;
+	color: #ccc;
+}
+
+body{
+	background-color: #fff;
+}
+
+#login-box{
+	width: 80%;
+	height: 60%;
+	margin-left: 10%;
+	margin-right: 10%;
+	margin-top: 20%;
+	margin-bottom: 20%;
+	padding: 10px;
+}
+
+
+.header-login{
+	text-align: center;
+	font-weight: bold;
+	color: #ccc;
+}
+
+fieldset {
+	border: solid 1px rgb(226, 226, 226);
+	border-radius: 2px;
+	padding: 10px;
+	width: 100%;
+	margin-top: 20px;
+}
+
+fieldset.noFieldset {
+	border: none;
+	margin-top: 0;
+}
+
+fieldset legend {
+	font-size: 14px;
+	font-weight: bold;
+	border: solid 1px #eee;
+	padding: 3px 10px;
+	width: 300px;
+}
+
+/* utilities */
+.mb-30 {
+	margin-bottom: 30px;
+}
+
+.px-4 {
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+/* no job */
+#no-job {
+	
+}
