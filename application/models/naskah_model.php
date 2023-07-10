@@ -7,7 +7,17 @@ class Naskah_model extends CI_Model {
         parent::__construct();
     }
 
-    public function getAll() {
+    public function getAll($filters) {
+        if (isset($filters) && $filters != [""] && count($filters)) {
+            foreach ($filters as $filter) {
+                $filter = explode('=', $filter);
+    
+                if ($filter[1] != '') {
+                    $this->db->where($filter[0], $filter[1]);
+                }
+            }
+        }
+
         $naskah = $this->db->get($this->table);
 
         $data = $naskah->result_array();
@@ -19,8 +29,27 @@ class Naskah_model extends CI_Model {
         ];
     }
 
+    public function findByNoJob($no_job) {
+        $naskah = $this->db->where('no_job', $no_job)
+                           ->get($this->table)
+                           ->result_array();
+
+        return $naskah;
+    }
+
     public function save($data) {
         $this->db->insert('naskah', $data);
+
+        return $this->db->affected_rows();
+    }
+
+    public function update($data) {
+        foreach ($data as $column => $value) {
+            $this->db->set($column, $value);
+        }
+
+        $this->db->where('no_job', $data['no_job'])
+                 ->update($this->table);
 
         return $this->db->affected_rows();
     }

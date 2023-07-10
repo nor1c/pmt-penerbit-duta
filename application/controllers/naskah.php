@@ -17,7 +17,9 @@ class Naskah extends CI_Controller {
     }
 
     public function data() {
-        $naskah = $this->Naskah_model->getAll();
+        $filters = explode('&', $this->input->post('filters'));
+
+        $naskah = $this->Naskah_model->getAll($filters);
 
         $formattedData = array_map(function ($item) {
             return ['', $item['no_job'], $item['kode'], $item['judul'], $item['jilid'], $item['penulis']];
@@ -40,8 +42,24 @@ class Naskah extends CI_Controller {
         echo json_encode($new_naskah);
     }
 
+    public function update() {
+        $post_data = $this->input->post();
+
+        $naskah_updated = $this->Naskah_model->update($post_data);
+
+        echo json_encode($naskah_updated ? true : false);
+    }
+
+    public function naskahDetail() {
+        $no_job = $this->input->get('no_job');
+
+        $naskah = $this->Naskah_model->findByNoJob($no_job);
+
+        echo json_encode($naskah[0]);
+    }
+
     public function deleteNaskah() {
-        $no_job = $this->input->post('no_job') . 'a';
+        $no_job = $this->input->post('no_job');
 
         // delete process
         $naskah_deleted = $this->Naskah_model->delete($no_job);

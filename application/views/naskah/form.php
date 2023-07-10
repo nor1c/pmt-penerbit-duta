@@ -3,7 +3,7 @@
         <div class="modal-content">
             <form id="formNaskah">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title" id="formModalTitle"></h5>
+                    <h5 class="modal-title" id="naskahFormTitle">Buat Naskah Baru</h5>
                     <span id="closeNaskahFormModalButton" type="button" data-bs-dismiss="modal" aria-label="Close">
                         <i class="ti-close"></i>
                     </span>

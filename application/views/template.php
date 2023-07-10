@@ -98,6 +98,28 @@
 							</li>
 						</ul>
 					</li>
+					<li class="nav-item dropdown">
+						<a class="dropdown-toggle" href="javascript:void(0);">
+							<span class="icon-holder">
+								<i class="c-gray-600 ti-layout-accordion-list"></i>
+							</span>
+							<span class="title">Data Master</span>
+							<span class="arrow">
+								<i class="ti-angle-right"></i>
+							</span>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="<?=site_url('jenjang')?>" class="sidebar-link">Jenjang</a>
+							</li>
+							<li>
+								<a href="<?=site_url('mapel')?>" class="sidebar-link">Mapel</a>
+							</li>
+							<li>
+								<a href="<?=site_url('kategori')?>" class="sidebar-link">Kategori</a>
+							</li>
+						</ul>
+					</li>
 					<li class="nav-item">
 						<a class="sidebar-link" href="<?=site_url('naskah/index')?>">
 							<span class="icon-holder">
@@ -375,7 +397,20 @@
 	</div>
 
 	<script type="text/javascript">
-		var base_url = '<?php echo base_url(); ?>';
+		const base_url = '<?php echo base_url(); ?>'
+
+		let table
+		refreshTable = function() {
+            table.ajax.reload(null, false)
+        }
+
+		let filters = []
+		$('#filter').submit(function (e) {
+			e.preventDefault()
+
+			filters.filters = $(this).serialize()
+			refreshTable()
+		})
 	</script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/jquery-ui/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/custom.js"></script>
