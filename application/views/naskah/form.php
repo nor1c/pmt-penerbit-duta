@@ -12,7 +12,7 @@
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <label class="form-label">No Job</label>
-                            <input type="text" name="no_job" id="" class="form-control" required>
+                            <input type="text" name="no_job" id="" class="form-control" value="<?=date('Y', time()) . str_pad($last_naskah_id, 4, '0', STR_PAD_LEFT)?>" required>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Kode Buku</label>
@@ -52,7 +52,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Kategori</label>
-                            <select name="kategori_id" id="mapel" class="form-control" required>
+                            <select name="kategori_id" id="kategori" class="form-control" required>
                                 <option selected disabled>--Pilih Kategori--</option>
                                 <?php foreach ($kategoris as $kategori) { ?>
                                     <option value="<?=$kategori['id']?>"><?=$kategori['nama_kategori']?></option>
@@ -65,7 +65,14 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Ukuran</label>
-                            <input type="text" name="ukuran" id="" class="form-control" required>
+                            <select name="ukuran" id="ukuran" class="form-control" required>
+                                <option selected disabled>--Pilih Ukuran--</option>
+                                <option value="148mm x 210mm">148mm x 210mm</option>
+                                <option value="176mm x 250mm">176mm x 250mm</option>
+                                <option value="195mm x 255mm">195mm x 255mm</option>
+                                <option value="210mm x 260mm">210mm x 260mm</option>
+                                <option value="210mm x 297mm">210mm x 297mm</option>
+                            </select>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Halaman</label>

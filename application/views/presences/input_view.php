@@ -1,3 +1,14 @@
+<?php
+
+// echo $_SERVER['HTTP_USER_AGENT'] . "<br>";
+exec("wmic /node:$_SERVER[REMOTE_ADDR] COMPUTERSYSTEM Get UserName", $user);
+echo($user[1]);
+
+echo gethostname();
+
+?>
+
+
 <!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/custom.css"> -->
 

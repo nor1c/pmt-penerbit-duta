@@ -311,7 +311,9 @@ class Presences extends CI_Controller {
         }
 
         $user_id = $this->session->userdata('user_id');
-        $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+        // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+        exec("wmic /node:$_SERVER[REMOTE_ADDR] COMPUTERSYSTEM Get UserName", $device);
+        $computer_name = $device[1];
 
         $now = explode(':', date('H:i'));
 

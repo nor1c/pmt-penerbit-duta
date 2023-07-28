@@ -12,6 +12,7 @@ class Naskah extends CI_Controller {
         $data['jenjangs'] = $this->jenjang_m->getAll();
         $data['mapels'] = $this->mapel_m->getAll();
         $data['kategoris'] = $this->kategori_m->getAll();
+        $data['last_naskah_id'] = $this->Naskah_model->getLastInsertedNaskahId();
 
         $this->template->display('naskah/index.php', $data);
     }

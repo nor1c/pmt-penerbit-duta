@@ -229,7 +229,7 @@
 
                 for (let column in data) {
                     if (data.hasOwnProperty(column)) {
-                        if (column === 'jenjang_id' || column === 'mapel_id' || column === 'kategori_id') {
+                        if (column === 'jenjang_id' || column === 'mapel_id' || column === 'kategori_id' || column === 'ukuran') {
                             $('select[name='+column+'] option[value='+data[column]+']').attr('selected', 'selected')
                         } else {
                             $('input[name='+column+']').val(data[column])

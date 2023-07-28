@@ -37,6 +37,19 @@ class Naskah_model extends CI_Model {
         return $naskah;
     }
 
+    public function getLastInsertedNaskahId() {
+        $query = $this->db->select('id')->from($this->table)->order_by('id', 'DESC')->limit(1)->get();
+
+        if ($query->num_rows() > 0) {
+            $row = $query->row();
+            $last_id = $row->id;
+        } else {
+            $last_id = 0;
+        }
+
+        return $last_id+1;
+    }
+
     public function save($data) {
         $this->db->insert('naskah', $data);
 
