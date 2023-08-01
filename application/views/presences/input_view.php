@@ -1,14 +1,3 @@
-<?php
-
-// echo $_SERVER['HTTP_USER_AGENT'] . "<br>";
-exec("wmic /node:$_SERVER[REMOTE_ADDR] COMPUTERSYSTEM Get UserName", $user);
-echo($user[1]);
-
-echo gethostname();
-
-?>
-
-
 <!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/custom.css"> -->
 
@@ -41,355 +30,401 @@ echo gethostname();
 
 <div id="input" style="display:none">
   <div class="row">
-    <div id="lateMessage" class="col-md-12">
-      <center>
-        <h5>
-          Anda melewati batas waktu absensi yakni pukul <b>08:30 WIB</b>, silahkan menghubungi admin untuk mengurus
-          surat keterlambatan. Terima kasih!
-          </h4>
-      </center>
-    </div>
-    <div id="workTimeTracker" class="col-md-12">
-      <center>
-        <h3>
-          Anda telah bekerja selama <div style="height:50px;" id="txtWorkTime"></div>
-        </h3>
-      </center>
-    </div>
+    <div class="col-md-12">
+      <div class="bgc-white bd bdrs-3 p-20 mB-20">
+        <div id="lateMessage" class="col-md-12">
+          <center>
+            <h5>
+              Anda melewati batas waktu absensi yakni pukul <b>08:30 WIB</b>, silahkan menghubungi admin untuk mengurus
+              surat keterlambatan. Terima kasih!
+              </h4>
+          </center>
+        </div>
+        <div id="workTimeTracker" class="col-md-12">
+          <center>
+            <h3>
+              Anda telah bekerja selama <div style="height:50px;" id="txtWorkTime"></div>
+            </h3>
+          </center>
+        </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        <center>
-          <h3>
-            <div style="height:50px;" id="txtDatang"></div>
-            <button id="buttonDatang" class="btn btn-primary" onclick="clockIn()">Datang</button>
-          </h3>
-        </center>
-      </div>
+        <div class="row">
+          <div class="col-md-6">
+            <center>
+              <h3>
+                <div style="height:50px;" id="txtDatang"></div>
+                <button id="buttonDatang" class="btn btn-primary" onclick="clockIn()">Datang</button>
+              </h3>
+            </center>
+          </div>
 
-      <div class="col-md-6">
-        <center>
-          <h3>
-            <div style="height:50px;" id="txtPulang"></div>
-            <button id="buttonPulang" class="btn btn-warning" onclick="clockOut()">Pulang</button>
-          </h3>
-        </center>
+          <div class="col-md-6">
+            <center>
+              <h3>
+                <div style="height:50px;" id="txtPulang"></div>
+                <button id="buttonPulang" class="btn btn-warning" onclick="clockOut()">Pulang</button>
+              </h3>
+            </center>
+          </div>
+        </div>
+
+        <br><br><br><br>
+
+        <h4 class="c-grey-900 mB-20">RIWAYAT KEHADIRAN</h4>
+        
+        <div class="mB-20">
+          <form id="filter">
+            <div class="row mB-10">
+                <div class="col-md-2">
+                    <label class="form-label">Tanggal Mulai</label>
+                    <input type="text" name="attendance_history_filter_start_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_start_date" value="<?=date('m/d/Y')?>">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tanggal Akhir</label>
+                    <input type="text" name="attendance_history_filter_finish_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_finish_date" value="<?=date('m/d/Y')?>">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Nama Karyawan</label>
+                    <select class="form-control" id="attendance_history_filter_karyawan" name="attendance_history_filter_karyawan">
+                      <option selected disabled>--Pilih Karyawan--</option>
+                      <?php
+                          $this->db->order_by('nama', 'ASC');
+                          foreach($this->db->get('t_karyawan')->result() as $kar) {
+                            if ($kar->id_karyawan == $this->session->userdata('id_karyawan')) {
+                              $selected = 'selected';
+                            } else {
+                              $selected = '';
+                            }
+                            echo "<option value='".$kar->id_karyawan."' ".$selected.">".$kar->nama."</option>";
+                          }
+                      ?>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                  <label class="form-label">&nbsp;</label>
+                  <input type="submit" class="form-control btn btn-primary btn-color" value="Filter" />
+                </div>
+                <div class="col-md-1">
+                  <label class="form-label">&nbsp;</label>
+                  <input type="button" class="form-control btn btn-success btn-color" value="Rekap (PDF)" onclick="attendanceHistoryRekap()" />
+                </div>
+            </div>
+          </form>
+        </div>
+
+        <table id="attendanceHistoryTable" class="table table-striped" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th>NIK</th>
+              <th>Nama</th>
+              <th>Hari, Tanggal</th>
+              <th>Waktu Datang</th>
+              <th>Datang Melalui</th>
+              <th>Waktu Pulang</th>
+              <th>Pulang Melalui</th>
+              <th>Keterangan</th>
+            </tr>
+          </thead>
+        </table>
       </div>
     </div>
   </div>
 
-  <br>
-  <br>
-  <br>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bgc-white bd bdrs-3 p-20 mB-20">
+        <div>
+          <div class="form-group row">
+            <div class="col-md-6">
+              <b>Drive untuk Share File saja</b>
+              <br>
+              <b><a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="nofollow">Link Login</a>
+              / Salin Link:</b> https://drive.google.com/drive/u/0/my-drive
+              <br>
+              <b>Email:</b> garasicrew123@qmail.id<p>
+              <b>Password:</b> pastiduta123 <br><br>
+            </div>
+            <div class="col-md-6">
+              <b>Drive untuk Save Data Penting (kapasitas 200GB)</b>
+              <br>
+              <b><a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="nofollow">Link Login</a>
+              / Salin Link:</b> https://drive.google.com/drive/u/0/my-drive
+              <br>
+              <b>Email:</b> drivedutadepok@gmail.com<p>
+              <b>Password:</b> pastidutadepok
+            </div>
+          </div>
 
-  <div>
-    <div class="form-group row">
-      <div class="col-md-6">
-        <b>Drive untuk Share File saja</b>
-        <br>
-        <a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="nofollow">Link Login</a>
-        / Salin Link: https://drive.google.com/drive/u/0/my-drive
-        <br>
-        Email : garasicrew123@qmail.id<p>
-          Password: pastiduta123 <br><br>
-      </div>
-      <div class="col-md-6">
-        <b>Drive untuk Save Data Penting (kapasitas 200GB)</b>
-        <br>
-        <a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="nofollow">Link Login</a>
-        / Salin Link: https://drive.google.com/drive/u/0/my-drive
-        <br>
-        Email : drivedutadepok@gmail.com<p>
-          Password: pastidutadepok
+          <center>
+            <b> Disarankan Login menggunakan browser chrome incognito, ketik CTRL + SHIFT + N di Halaman Google chrome</b>
+          </center>
+        </div>
       </div>
     </div>
-
-    <center>
-      <b> Disarankan Login menggunakan browser chrome incognito, ketik CTRL + SHIFT + N di Halaman Google chrome</b>
-    </center>
   </div>
-
-  <br><br>
 
   <!-- START OF:: Input pekerjaan -->
   <div class="row">
-    <fieldset>
-      <legend>Input pekerjaan</legend>
-      <form id="input-pekerjaan-form" action="<?= site_url('presences/report_pekerjaan') ?>" method="post">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group">
-              <select class="form-control" id="pekerjaan-opt" name="pekerjaan" required>
-                <option disabled selected value="">Pekerjaan</option>
+    <div class="col-md-12">
+      <div class="bgc-white bd bdrs-3 p-20 mB-20">
+        <fieldset>
+          <legend>Input pekerjaan</legend>
+          <form id="input-pekerjaan-form" action="<?= site_url('presences/report_pekerjaan') ?>" method="post">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <select class="form-control" id="pekerjaan-opt" name="pekerjaan" required>
+                    <option disabled selected value="">Pekerjaan</option>
 
-                <optgroup label="Editor">
-                  <option disable-realisasi="true" value="Menulis Naskah">Menulis Naskah</option>
-                  <option disable-realisasi="true" value="Editing">Editing</option>
-                  <option disable-realisasi="true" value="K1">K1</option>
-                  <option disable-realisasi="true" value="K2">K2</option>
-                  <option disable-realisasi="true" value="K3">K3</option>
-                  <option disable-realisasi="true" value="Koreksi Artwork Final">Koreksi Artwork Final</option>
-                  <option disable-realisasi="true" value="Koreksi Silang (Bedah Naskah)">Koreksi Silang (Bedah Naskah)
-                  </option>
+                    <optgroup label="Editor">
+                      <option disable-realisasi="true" value="Menulis Naskah">Menulis Naskah</option>
+                      <option disable-realisasi="true" value="Editing">Editing</option>
+                      <option disable-realisasi="true" value="K1">K1</option>
+                      <option disable-realisasi="true" value="K2">K2</option>
+                      <option disable-realisasi="true" value="K3">K3</option>
+                      <option disable-realisasi="true" value="Koreksi Artwork Final">Koreksi Artwork Final</option>
+                      <option disable-realisasi="true" value="Koreksi Silang (Bedah Naskah)">Koreksi Silang (Bedah Naskah)
+                      </option>
 
-                <optgroup label="Picture Archivist">
-                  <option disable-realisasi="true" value="Foto dan ilustrasi">Foto dan ilustrasi</option>
-                  <option disable-realisasi="true" value="Update bank gambar">Update bank gambar</option>
+                    <optgroup label="Picture Archivist">
+                      <option disable-realisasi="true" value="Foto dan ilustrasi">Foto dan ilustrasi</option>
+                      <option disable-realisasi="true" value="Update bank gambar">Update bank gambar</option>
 
-                <optgroup label="Desainer">
-                  <option disable-realisasi="true" value="S1">S1</option>
-                  <option disable-realisasi="true" value="S2">S2</option>
-                  <option disable-realisasi="true" value="S3">S3</option>
-                  <option disable-realisasi="true" value="Proses PDF">Proses PDF</option>
-                  <option disable-realisasi="false" value="Membuat cover"> Membuat cover</option>
-                  <option disable-realisasi="true" value="Cek PDF akhir/Artwork">Cek PDF akhir/Artwork</option>
+                    <optgroup label="Desainer">
+                      <option disable-realisasi="true" value="S1">S1</option>
+                      <option disable-realisasi="true" value="S2">S2</option>
+                      <option disable-realisasi="true" value="S3">S3</option>
+                      <option disable-realisasi="true" value="Proses PDF">Proses PDF</option>
+                      <option disable-realisasi="false" value="Membuat cover"> Membuat cover</option>
+                      <option disable-realisasi="true" value="Cek PDF akhir/Artwork">Cek PDF akhir/Artwork</option>
+                  </select>
+                </div>
+                <div class="form-group mb-3">
+                  <select name="id_buku" class="form-control buku" placeholder="Judul Buku" required>
+                    <option disabled selected value="">Judul Buku (Jika tidak ada, ketik manual dikolom catatan)</option>
+                    <?php foreach ($this->db->get('buku_dikerjakan')->result() as $buku) : ?>
+                      <option value="<?php echo $buku->id; ?>"><?php echo $buku->judul_buku; ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+                <div class="form-group mb-3">
+                  <input type="text" class="form-control" placeholder="Kode Buku (Otomatis)" id="kode_buku" disabled>
+                </div>
+                <div class="form-group mb-3">
+                  <input type="text" class="form-control" name="no_job" placeholder="No. Job (Otomatis)" id="no_job" readonly>
+                </div>
+              </div>
 
-                  <!--<optgroup label="Non Rutin">
-                  <option disable-realisasi="false" value="Pengembangan produk">Pengembangan produk</option>
-                  <option disable-realisasi="false" value="Sharing knowledge">Sharing knowledge</option>
-                  <option disable-realisasi="false" value="Perbaikan proyek penilaian">Perbaikan proyek penilaian</option>
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <input name="catatan" type="text" class="form-control" placeholder="Catatan: Subtema / Bab / Pembelajaran, dll" required />
+                </div>
+                <div class="form-group mb-3">
+                  <input id="target" name="target" type="number" min="1" class="form-control" placeholder="Target (Jumlah halaman / Objek)" required />
+                </div>
+                <div class="form-group mb-3">
+                  <input name="realisasi_target" type="number" class="form-control" placeholder="Realisasi Target">
+                </div>
+                <div class="form-group mb-3">
+                  <select class="form-control" required="" name="status">
+                    <option>Status Hasil Kerja</option>
+                    <option value="Target Tercapai">Target Tercapai</option>
+                    <option value="Target Tidak Tercapai">Target Tidak Tercapai</option>
+                    <option value="Melebihi Target">Melebihi Target</option>
+                  </select>
+                </div>
+                <div class="form-group mT-10">
+                  <button id="kirim-button" type="submit" value="Kirim" class="btn btn-warning">Kirim</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </fieldset>
 
-                <optgroup label="Pekerjaan Lain">
-                  <option disable-realisasi="false" value="Administrasi File">Administrasi File</option>
-                  <option disable-realisasi="false" value="Dinas Keluar">Dinas Keluar</option>
-                  <option disable-realisasi="false" value="Meeting">Meeting</option>
-                  <option disable-realisasi="false" value="Build & Maintenance Web Duta">Build & Maintenance Web Duta</option>
-                  <option disable-realisasi="false" value="Youtube Duta">Youtube Duta</option> -->
-              </select>
-            </div>
-            <div class="form-group">
-              <select name="id_buku" class="form-control buku" placeholder="Judul Buku" required>
-                <option disabled selected value="">Judul Buku (Jika tidak ada, ketik manual dikolom catatan)</option>
-                <?php foreach ($this->db->get('buku_dikerjakan')->result() as $buku) : ?>
-                  <option value="<?php echo $buku->id; ?>"><?php echo $buku->judul_buku; ?></option>
-                <?php endforeach ?>
-              </select>
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Kode Buku (Otomatis)" id="kode_buku" disabled>
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-control" name="no_job" placeholder="No. Job (Otomatis)" id="no_job" readonly>
-            </div>
-          </div>
+        <br><br><br>
 
-          <div class="col-md-6">
-            <div class="form-group">
-              <input name="catatan" type="text" class="form-control" placeholder="Catatan: Subtema / Bab / Pembelajaran, dll" required />
+        <fieldset>
+          <form action="<?php echo site_url('presences/laporan_filter') ?>" method="post">
+            <legend style>Filter laporan pekerjaan</legend>
+              <div class="row mB-10">
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label class="form-label" for="presences_date_start">Tanggal Mulai</label>
+                    <input type="text" name="startdate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_start" value="<?php echo (!$this->session->flashdata('startdate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('startdate'))); ?>">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label class="form-label" for="presences_date_start">Tanggal Akhir</label>
+                    <input type="text" name="enddate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_end" value="<?php echo (!$this->session->flashdata('enddate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('enddate'))); ?>">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label class="form-label" for="karyawan">Nama Karyawan</label>
+                    <select class="form-control" id="sel1" name="id_karyawan">
+                      <option width="50px" value="">Semua Karyawan</option>
+                      <?php
+                      $this->db->order_by('nama', 'ASC');
+                      foreach ($this->db->get('t_karyawan')->result() as $kar) {
+                        if ($kar->id_karyawan == $this->session->flashdata('id_karyawan')) {
+                          $selected = 'selected';
+                        } else {
+                          if ($kar->id_karyawan == $this->session->userdata('user_id')) {
+                            $selected = 'selected';
+                          } else {
+                            $selected = '';
+                          }
+                        }
+
+                        echo "<option value='" . $kar->id_karyawan . "'>" . $kar->nama . "</option>";
+                      }
+                      ?>
+                    </select>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label class="form-label" for="karyawan">Judul Buku</label>
+                    <select class="form-control" id="judul_buku_filter" name="id_judul_buku">
+                      <option value="">Semua Buku</option>
+                      <?php foreach ($this->db->get('buku_dikerjakan')->result() as $buku) : ?>
+                        <option <?= ($this->session->flashdata('id_judul_buku') == $buku->id ? 'selected' : '') ?> value="<?php echo $buku->id; ?>"><?php echo $buku->judul_buku; ?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-12">
+                <div class="form-group mb-3" style="float:right">
+                  <button type="submit" class="btn btn-primary">Tampilkan Data Laporan</button>
+                  <input type="submit" name="submit" id="report_pdf" value="Report PDF" class="btn btn-warning">
+                </div>
+              </div>
             </div>
-            <div class="form-group">
-              <input id="target" name="target" type="number" min="1" class="form-control" placeholder="Target (Jumlah halaman / Objek)" required />
-            </div>
-            <div class="form-group">
-              <input name="realisasi_target" type="number" class="form-control" placeholder="Realisasi Target">
-            </div>
-            <div class="form-group">
-              <select class="form-control" required="" name="status">
-                <option>Status Hasil Kerja</option>
-                <option value="Target Tercapai">Target Tercapai</option>
-                <option value="Target Tidak Tercapai">Target Tidak Tercapai</option>
-                <option value="Melebihi Target">Melebihi Target</option>
-              </select>
-            </div>
-            <div class="form-group mT-10">
-              <button id="kirim-button" type="submit" value="Kirim" class="btn btn-warning">Kirim</button>
-            </div>
-          </div>
-        </div>
-      </form>
-    </fieldset>
+          </form>
+        </fieldset>
+      </div>
+    </div>
   </div>
   <!-- END OF:: Input pekerjaan -->
 
-  <br>
-
   <!-- START OF:: FILTER LAPORAN PEKERJAAN -->
   <div class="row">
-    <fieldset>
-      <form action="<?php echo site_url('presences/laporan_filter') ?>" method="post">
-        <legend style>Filter laporan pekerjaan</legend>
-          <div class="row mB-10">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="presences_date_start">Tanggal Mulai</label>
-                <input type="text" name="startdate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_start" value="<?php echo (!$this->session->flashdata('startdate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('startdate'))); ?>">
-              </div>
-              <div class="form-group">
-                <label for="presences_date_start">Tanggal Akhir</label>
-                <input type="text" name="enddate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_end" value="<?php echo (!$this->session->flashdata('enddate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('enddate'))); ?>">
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="karyawan">Nama Karyawan</label>
-                <select class="form-control" id="sel1" name="id_karyawan">
-                  <option width="50px" value="">Semua Karyawan</option>
-                  <?php
-                  $this->db->order_by('nama', 'ASC');
-                  foreach ($this->db->get('t_karyawan')->result() as $kar) {
-                    if ($kar->id_karyawan == $this->session->flashdata('id_karyawan')) {
-                      $selected = 'selected';
-                    } else {
-                      if ($kar->id_karyawan == $this->session->userdata('user_id')) {
-                        $selected = 'selected';
-                      } else {
-                        $selected = '';
-                      }
-                    }
-
-                    echo "<option value='" . $kar->id_karyawan . "'>" . $kar->nama . "</option>";
-                  }
-                  ?>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="karyawan">Judul Buku</label>
-                <select class="form-control" id="judul_buku_filter" name="id_judul_buku">
-                  <option value="">Semua Buku</option>
-                  <?php foreach ($this->db->get('buku_dikerjakan')->result() as $buku) : ?>
-                    <option <?= ($this->session->flashdata('id_judul_buku') == $buku->id ? 'selected' : '') ?> value="<?php echo $buku->id; ?>"><?php echo $buku->judul_buku; ?></option>
-                  <?php endforeach ?>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-12">
-            <div class="form-group" style="float:right">
-              <button type="submit" class="btn btn-primary">Tampilkan Data Laporan</button>
-              <input type="submit" name="submit" id="report_pdf" value="Report PDF" class="btn btn-warning">
-            </div>
-          </div>
-        </div>
-      </form>
-    </fieldset>
+    
   </div>
   <!-- END OF:: FILTER LAPORAN PEKERJAAN -->
 
-  <div style="margin-top:60px;">
-    <center>
-      <h3>Table Laporan Harian</h3>
-    </center>
-    <hr>
-    <div class="row">
-      <div class="col-md-13">
-        <table class="table table-bordered">
-          <thead class="text-white alert-info">
-            <tr>
-              <th>No</th>
-              <th>Tanggal</th>
-              <th>Nama Karyawan</th>
-              <th>
-                <center>Pekerjaan</center>
-              </th>
-              <th>Judul buku</th>
-              <th>
-                <center>Catatan</center>
-              </th>
-              <th>Kode buku</th>
-              <th>No.Job</th>
-              <th>Target (Hal/Objek)</th>
-
-              <th>
-                <center>Realisasi Target</center>
-              </th>
-              <th width="160px">
-                <center>Status<center>
-              </th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-
-            <?php
-
-            $no = 1;
-            if ($this->session->flashdata('startdate') && $this->session->flashdata('enddate')) {
-              if (!empty($this->session->flashdata('id_karyawan'))) {
-                $id_karyawan = " and report_pekerjaan.id_karyawan=" . $this->session->flashdata('id_karyawan') . "";
-              } else {
-                $id_karyawan = "";
-              }
-
-              if (!empty($this->session->flashdata('id_judul_buku'))) {
-                $id_judul_buku = " and report_pekerjaan.id_buku_dikerjakan=" . $this->session->flashdata('id_judul_buku') . "";
-              } else {
-                $id_judul_buku = "";
-              }
-
-              $lh_sql = "	SELECT report_pekerjaan.*, t_karyawan.nama, buku_dikerjakan.judul_buku, buku_dikerjakan.kode_buku
-                          FROM (`report_pekerjaan`)
-                          LEFT JOIN `t_karyawan` ON `t_karyawan`.`id_karyawan` = `report_pekerjaan`.`id_karyawan`
-                          LEFT JOIN `buku_dikerjakan` ON `report_pekerjaan`.`id_buku_dikerjakan` = `buku_dikerjakan`.`id`
-                          WHERE date BETWEEN '" . date("Y-m-d", strtotime($this->session->flashdata('startdate'))) . "'
-                          and '" . date("Y-m-d", strtotime($this->session->flashdata('enddate'))) . "' " . $id_karyawan . $id_judul_buku . "
-                          ORDER BY nama ASC";
-
-              $data = $this->db->query($lh_sql);
-              foreach ($data->result() as $key => $value) { ?>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bgc-white bd bdrs-3 p-20 mB-20">
+        <center>
+          <h3>Table Laporan Harian</h3>
+        </center>
+        <hr>
+        <div class="row">
+          <div class="col-md-13">
+            <table class="table table-bordered">
+              <thead class="text-white alert-info">
                 <tr>
-                  <td><?php echo $no++; ?></td>
-                  <td><?php echo $value->date; ?></td>
-                  <td><?php echo $value->nama; ?></td>
-                  <td><?php echo $value->pekerjaan; ?></td>
-                  <td><?php echo $value->judul_buku; ?></td>
-                  <td><?php echo $value->catatan; ?></td>
-                  <td><?php echo $value->kode_buku; ?></td>
-                  <td><?php echo $value->no_job; ?></td>
-                  <td><?php echo $value->target; ?></td>
-
-                  <td><?php echo $value->realisasi_target; ?></td>
-                  <td><?php echo $value->status; ?></td>
-                  <td>
-                    <button type="button" class="btn btn-primary disabled">Update</button>
-                  </td>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Nama Karyawan</th>
+                  <th><center>Pekerjaan</center></th>
+                  <th>Judul buku</th>
+                  <th><center>Catatan</center></th>
+                  <th>Kode buku</th>
+                  <th>No.Job</th>
+                  <th>Target (Hal/Objek)</th>
+                  <th><center>Realisasi Target</center></th>
+                  <th width="160px"><center>Status<center></th>
+                  <th></th>
                 </tr>
-              <?php } ?>
-              <?php } else {
-              $data = $this->db->query("
-                SELECT
-                  report_pekerjaan.*,
-                  t_karyawan.*,
-                  buku_dikerjakan.*,
-                  report_pekerjaan.no_job,
-                  buku_no_jobs.standar_halaman
-                FROM (`report_pekerjaan`)
-                LEFT JOIN `t_karyawan` ON `t_karyawan`.`id_karyawan` = `report_pekerjaan`.`id_karyawan`
-                LEFT JOIN `buku_dikerjakan` ON `report_pekerjaan`.`id_buku_dikerjakan` = `buku_dikerjakan`.`id`
-                LEFT JOIN buku_no_jobs ON report_pekerjaan.id_buku_dikerjakan=buku_no_jobs.id_buku AND report_pekerjaan.no_job=buku_no_jobs.no_job
-                WHERE DAY(date) = DAY(CURRENT_DATE()) ORDER BY nama ASC");
-              foreach ($data->result() as $key => $value) { ?>
-                <?php if (date("Y-m-d") == $value->date) : ?>
-                  <tr>
-                    <td><?php echo $no++; ?></td>
-                    <td><?php echo $value->date; ?></td>
-                    <td><?php echo $value->nama; ?></td>
-                    <td><?php echo $value->pekerjaan; ?></td>
-                    <td><?php echo $value->judul_buku; ?></td>
-                    <td><?php echo $value->catatan; ?></td>
-                    <td><?php echo $value->kode_buku; ?></td>
-                    <td><?php echo $value->no_job; ?></td>
-                    <td><?php echo $value->target; ?></td>
+              </thead>
+              <tbody>
+                <?php
+                $no = 1;
+                if ($this->session->flashdata('startdate') && $this->session->flashdata('enddate')) {
+                  if (!empty($this->session->flashdata('id_karyawan'))) {
+                    $id_karyawan = " and report_pekerjaan.id_karyawan=" . $this->session->flashdata('id_karyawan') . "";
+                  } else {
+                    $id_karyawan = "";
+                  }
 
-                    <td><?php echo $value->realisasi_target; ?></td>
-                    <td><?php echo $value->status; ?></td>
-                    <td>
-                      <button type="button" class="update-work-button btn <?= $value->status != '0' || $value->id_karyawan != $this->session->userdata('user_id') ? 'disabled btn-secondary' : 'btn-primary' ?>" onclick="updateWork('<?= $value->pekerjaan ?>', <?= $value->id_report_pekerjaan ?>, <?= $value->id_buku_dikerjakan == null ? '0' : $value->id_buku_dikerjakan ?>, '<?= $value->kode_buku ?>', '<?= $value->no_job ?>', '<?= $value->catatan ?>', <?= $value->target ?>, <?= $value->standar_halaman ?>)"><b>Update</b></button>
-                    </td>
-                  </tr>
-                <?php endif ?>
-            <?php }
-            } ?>
+                  if (!empty($this->session->flashdata('id_judul_buku'))) {
+                    $id_judul_buku = " and report_pekerjaan.id_buku_dikerjakan=" . $this->session->flashdata('id_judul_buku') . "";
+                  } else {
+                    $id_judul_buku = "";
+                  }
 
+                  $lh_sql = "	SELECT report_pekerjaan.*, t_karyawan.nama, buku_dikerjakan.judul_buku, buku_dikerjakan.kode_buku
+                              FROM (`report_pekerjaan`)
+                              LEFT JOIN `t_karyawan` ON `t_karyawan`.`id_karyawan` = `report_pekerjaan`.`id_karyawan`
+                              LEFT JOIN `buku_dikerjakan` ON `report_pekerjaan`.`id_buku_dikerjakan` = `buku_dikerjakan`.`id`
+                              WHERE date BETWEEN '" . date("Y-m-d", strtotime($this->session->flashdata('startdate'))) . "'
+                              and '" . date("Y-m-d", strtotime($this->session->flashdata('enddate'))) . "' " . $id_karyawan . $id_judul_buku . "
+                              ORDER BY nama ASC";
 
-            <a href="#" class="ignielToTop"></a>
+                  $data = $this->db->query($lh_sql);
+                  foreach ($data->result() as $key => $value) { ?>
+                    <tr>
+                      <td><?php echo $no++; ?></td>
+                      <td><?php echo $value->date; ?></td>
+                      <td><?php echo $value->nama; ?></td>
+                      <td><?php echo $value->pekerjaan; ?></td>
+                      <td><?php echo $value->judul_buku; ?></td>
+                      <td><?php echo $value->catatan; ?></td>
+                      <td><?php echo $value->kode_buku; ?></td>
+                      <td><?php echo $value->no_job; ?></td>
+                      <td><?php echo $value->target; ?></td>
 
+                      <td><?php echo $value->realisasi_target; ?></td>
+                      <td><?php echo $value->status; ?></td>
+                      <td>
+                        <button type="button" class="btn btn-primary disabled">Update</button>
+                      </td>
+                    </tr>
+                  <?php } ?>
+                  <?php } else {
+                  $data = $this->db->query("
+                    SELECT
+                      report_pekerjaan.*,
+                      t_karyawan.*,
+                      buku_dikerjakan.*,
+                      report_pekerjaan.no_job,
+                      buku_no_jobs.standar_halaman
+                    FROM (`report_pekerjaan`)
+                    LEFT JOIN `t_karyawan` ON `t_karyawan`.`id_karyawan` = `report_pekerjaan`.`id_karyawan`
+                    LEFT JOIN `buku_dikerjakan` ON `report_pekerjaan`.`id_buku_dikerjakan` = `buku_dikerjakan`.`id`
+                    LEFT JOIN buku_no_jobs ON report_pekerjaan.id_buku_dikerjakan=buku_no_jobs.id_buku AND report_pekerjaan.no_job=buku_no_jobs.no_job
+                    WHERE DAY(date) = DAY(CURRENT_DATE()) ORDER BY nama ASC");
+                  foreach ($data->result() as $key => $value) { ?>
+                    <?php if (date("Y-m-d") == $value->date) : ?>
+                      <tr>
+                        <td><?php echo $no++; ?></td>
+                        <td><?php echo $value->date; ?></td>
+                        <td><?php echo $value->nama; ?></td>
+                        <td><?php echo $value->pekerjaan; ?></td>
+                        <td><?php echo $value->judul_buku; ?></td>
+                        <td><?php echo $value->catatan; ?></td>
+                        <td><?php echo $value->kode_buku; ?></td>
+                        <td><?php echo $value->no_job; ?></td>
+                        <td><?php echo $value->target; ?></td>
 
-          </tbody>
-        </table>
+                        <td><?php echo $value->realisasi_target; ?></td>
+                        <td><?php echo $value->status; ?></td>
+                        <td>
+                          <button type="button" class="update-work-button btn <?= $value->status != '0' || $value->id_karyawan != $this->session->userdata('user_id') ? 'disabled btn-secondary' : 'btn-primary' ?>" onclick="updateWork('<?= $value->pekerjaan ?>', <?= $value->id_report_pekerjaan ?>, <?= $value->id_buku_dikerjakan == null ? '0' : $value->id_buku_dikerjakan ?>, '<?= $value->kode_buku ?>', '<?= $value->no_job ?>', '<?= $value->catatan ?>', <?= $value->target ?>, <?= $value->standar_halaman ?>)"><b>Update</b></button>
+                        </td>
+                      </tr>
+                    <?php endif ?>
+                <?php }
+                } ?>
+                <a href="#" class="ignielToTop"></a>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -409,7 +444,60 @@ echo gethostname();
   let attendTime
   let stopWorkTimer = false
 
+  let attendanceHistoryRekap
+
   $(document).ready(function() {
+    table = $('#attendanceHistoryTable').DataTable({
+      "sDom": "Rlfrtip",
+      // "scrollX": true,
+      // "scrollY": "300px",
+      // "scrollCollapse": true,
+      "aLengthMenu": [
+        [5, 10, 15, 20],
+        [5, 10, 15, 20]
+      ],
+      "pageLength": 5,
+      "processing": true,
+      "serverSide": true,
+      "searching": false,
+      "ajax": {
+        "url": "<?= site_url($this->uri->segment(1) . '/histories') ?>",
+        'method': 'POST',
+        'data': function(d) {
+          d.draw = d.draw || 1
+          return $.extend(d, filters);
+        },
+      },
+      "deferRender": true,
+      "columns": [
+        null, null, null, null, null, null, null, null
+      ],
+      "columnDefs": [],
+      "order": [
+        // [0, 'asc']
+      ],
+      "oLanguage": {
+        "sSearch": "Pencarian",
+        "sProcessing": '<image style="width:150px" src="http://superstorefinder.net/support/wp-content/uploads/2018/01/blue_loading.gif">',
+      }
+    });
+    
+    attendanceHistoryRekap = function() {
+      var presences_date_start = $("#attendance_history_filter_start_date").val();
+      var presences_date_end = $("#attendance_history_filter_finish_date").val();
+      var id_karyawan;
+
+      if($("#attendance_history_filter_karyawan").val() != "" || $("#attendance_history_filter_karyawan").val() != null){
+          id_karyawan = '&id_karyawan='+$("#attendance_history_filter_karyawan").val();
+      }else{
+          id_karyawan = "";
+      }
+      var url = '<?php echo base_url(); ?>presences/report_pdf/?startdate='+presences_date_start+'&enddate='+presences_date_end+id_karyawan;
+      console.log(url)
+      
+      window.location.href = url;
+    }
+
     // fitur absensi (new) May 3rd, 2023
     // on load check for attendance status
 
@@ -641,7 +729,7 @@ echo gethostname();
     setTimeout(() => {
       $('#input').css('display', 'block')
       $('.loader').css('display', 'none')
-    }, 2000);
+    }, 200);
 
     let currentHour = new Date().getHours()
 
@@ -675,6 +763,12 @@ echo gethostname();
       pickTime: false
     });
     $("#date_end").datetimepicker({
+      pickTime: false
+    });
+    $("#attendance_history_filter_start_date").datetimepicker({
+      pickTime: false
+    });
+    $("#attendance_history_filter_finish_date").datetimepicker({
       pickTime: false
     });
     $(".buku").change(function() {

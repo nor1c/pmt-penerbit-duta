@@ -122,17 +122,18 @@ class Presences extends CI_Controller {
         $pastmonth = date('Y-m-d', $minus);
 
         if ($startdate || $enddate) {
-            $data['date_start'] = $this->input->get('startdate');
-            $data['date_end'] = $this->input->get('enddate');
+            $data['date_start'] = $startdate;
+            $data['date_end'] = $enddate;
             if ($id_karyawan != null || $id_karyawan != "") {
                 $data['id_karyawan'] = $id_karyawan;
             }
         } else {
-            $data['date_start'] = $this->tanggal->tanggal_indo($pastmonth);
-            $data['date_end'] = $this->tanggal->tanggal_indo($today);
+            $data['date_start'] = $startdate;
+            $data['date_end'] = $enddate;
         }
 
         $data['kehadiran'] = $this->Presences_m->get_attendance($data);
+
         $this->load->view('presences/report_pdf', $data);
     }
 
@@ -220,7 +221,7 @@ class Presences extends CI_Controller {
                                 'created_user' => $this->session->userdata('user_id'),
                                 'active' => '1',
                             );
-                            $data_kehadiran['computer_name'] = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+                            $data_kehadiran['computer_name'] = $this->getComputerName();
                             $this->Presences_m->update($cek->row()->id_kehadiran, $data_kehadiran);
 
                             $this->session->set_flashdata('message_alert', '<div class="alert alert-success">Data Terupdate</div>');
@@ -240,7 +241,7 @@ class Presences extends CI_Controller {
                             'created_user' => $this->session->userdata('user_id'),
                             'active' => '1',
                         );
-                        $data_kehadiran['computer_name'] = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+                        $data_kehadiran['computer_name'] = $this->getComputerName();
                         $this->Presences_m->save($data_kehadiran);
 
                         $this->session->set_flashdata('message_alert', '<div class="alert alert-success">Data Tersimpan</div>');
@@ -257,8 +258,9 @@ class Presences extends CI_Controller {
                             'jam_keluar' => date('Y-m-d H:i:s'),
                             'updated_date' => date('Y-m-d'),
                             'updated_user' => $this->session->userdata('user_id'),
+                            'computer_name_out' => $this->getComputerName()
                         );
-                        $data_kehadiran['computer_name'] = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+                        $data_kehadiran['computer_name'] = $this->getComputerName();
                         $this->Presences_m->update($tmp['id_kehadiran'], $data_kehadiran);
 
                         $this->session->set_flashdata('message_alert', '<div class="alert alert-success">Data Tersimpan</div>');
@@ -300,6 +302,13 @@ class Presences extends CI_Controller {
         return in_array($user_id, $this->special_users);
     }
 
+    public function getComputerName() {
+        exec("wmic /node:$_SERVER[REMOTE_ADDR] COMPUTERSYSTEM Get UserName", $device);
+        $computer_name = $device[1];
+
+        return $computer_name;
+    }
+
     // absen masuk
     public function attend() {
         $is_user_special = $this->is_current_user_special();
@@ -335,7 +344,7 @@ class Presences extends CI_Controller {
             'created_date' => date('Y-m-d'),
             'created_user' => $user_id,
             'active' => '1',
-            'computer_name' => $computer_name,
+            'computer_name' => $this->getComputerName(),
         );
 
         // check if attendance data already exist (auto-generated via cron job)
@@ -437,5 +446,39 @@ class Presences extends CI_Controller {
         $this->session->set_flashdata('id_judul_buku', $id_judul_buku);
 
         redirect('presences/input', 'refresh');
+    }
+
+    public function histories() {
+        $pagination = array(
+            'start' => $this->input->post('start'),
+            'length' => $this->input->post('length')
+        );
+
+        $filters = explode('&', $this->input->post('filters'));
+        if ($filters[0] == "") {
+            if (!isset($filters['attendance_history_filter_start_date'])) {
+                array_push($filters, "attendance_history_filter_start_date=".str_replace('/', '%2F', date('d/m/Y')));
+            }
+            if (!isset($filters['attendance_history_filter_finish_date'])) {
+                array_push($filters, "attendance_history_filter_finish_date=".str_replace('/', '%2F', date('d/m/Y')));
+            }
+        }
+
+        $attendance = $this->Presences_m->getHistories($filters, $pagination);
+
+        $formattedData = array_map(
+            function ($item) {
+                return [$item['nikaryawan'], $item['nama'], $item['tanggal'], $item['jam_masuk'], $item['computer_name'], $item['jam_keluar'], $item['computer_name_out'], $item['keterangan']];
+            },
+            $attendance['data']
+        );
+
+        $data = [
+            'recordsTotal' => $attendance['recordsTotal'],
+            'recordsFiltered' => $attendance['recordsTotal'],
+            'data' => $formattedData
+        ];
+
+        echo json_encode($data);
     }
 }

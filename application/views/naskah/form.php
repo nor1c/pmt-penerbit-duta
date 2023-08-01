@@ -12,7 +12,7 @@
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <label class="form-label">No Job</label>
-                            <input type="text" name="no_job" id="" class="form-control" value="<?=date('Y', time()) . str_pad($last_naskah_id, 4, '0', STR_PAD_LEFT)?>" required>
+                            <input type="text" name="no_job" id="" class="form-control" value="<?=$next_naskah_no_job?>" required>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Kode Buku</label>

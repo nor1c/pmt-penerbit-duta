@@ -37,20 +37,28 @@ class Naskah_model extends CI_Model {
         return $naskah;
     }
 
-    public function getLastInsertedNaskahId() {
-        $query = $this->db->select('id')->from($this->table)->order_by('id', 'DESC')->limit(1)->get();
+    public function nextNaskahNoJob() {
+        // first, we need to check if we have naskah ID with current year
+        $is_current_year_naskah_exist = $this->db->select('no_job')->from($this->table)->like('no_job', date('Y', time()), 'after')->order_by('no_job', 'DESC')->limit(1)->get()->num_rows() > 0;
+        if (!$is_current_year_naskah_exist) {
+            return date('Y', time()) . str_pad(1, 4, '0', STR_PAD_LEFT);
+        }
+
+        $query = $this->db->select('no_job')->from($this->table)->order_by('no_job', 'DESC')->limit(1)->get();
 
         if ($query->num_rows() > 0) {
             $row = $query->row();
-            $last_id = $row->id;
+            $last_id = (int)substr($row->no_job, 4);
         } else {
             $last_id = 0;
         }
 
-        return $last_id+1;
+        $next_number = $last_id+1;
+        return date('Y',time()) . str_pad($next_number, 4, '0', STR_PAD_LEFT);
     }
 
     public function save($data) {
+        $data['no_job'] = $this->nextNaskahNoJob();
         $this->db->insert('naskah', $data);
 
         return $this->db->affected_rows();
