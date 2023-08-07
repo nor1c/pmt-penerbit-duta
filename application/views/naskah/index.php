@@ -13,7 +13,7 @@
                 </div>
 
                 <!-- filters -->
-                <div class="mB-20">
+                <div id="filter" class="mB-20">
                     <form id="filter">
                         <div class="row mB-10">
                             <div class="col-md-2">
@@ -44,7 +44,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Kategori</label>
-                                <select name="kategori_id" id="mapel" class="form-control" required>
+                                <select name="kategori_id" id="kategori" class="form-control" required>
                                     <option selected disabled>--Pilih Kategori--</option>
                                     <?php foreach ($kategoris as $kategori) { ?>
                                         <option value="<?=$kategori['id']?>"><?=$kategori['nama_kategori']?></option>
@@ -230,9 +230,9 @@
                 for (let column in data) {
                     if (data.hasOwnProperty(column)) {
                         if (column === 'jenjang_id' || column === 'mapel_id' || column === 'kategori_id' || column === 'ukuran') {
-                            $('select[name='+column+'] option[value='+data[column]+']').attr('selected', 'selected')
+                            $('#formNaskah select[name='+column+'] option[value="'+data[column]+'"]').attr('selected', 'selected')
                         } else {
-                            $('input[name='+column+']').val(data[column])
+                            $('#formNaskah input[name='+column+']').val(data[column])
                         }
                     }
                 }
