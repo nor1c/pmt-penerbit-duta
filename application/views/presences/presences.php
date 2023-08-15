@@ -85,8 +85,8 @@
 					<th style="text-align:center;">Hari</th>
 					<th style="text-align:center;">Datang</th>
 					<th style="text-align:center;">Pulang</th>
-					<th style="text-align:center:">Akses Melalui</th>
-					<th style="text-align:center">Keterangan</th>
+					<th style="text-align:center;">Akses Melalui</th>
+					<th style="text-align:center;">Keterangan</th>
 					
 				</tr>
 			</thead>

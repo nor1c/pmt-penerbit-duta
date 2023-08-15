@@ -121,6 +121,14 @@
 						</ul>
 					</li>
 					<li class="nav-item">
+						<a class="sidebar-link" href="<?=site_url('pekerjaan')?>">
+							<span class="icon-holder">
+								<i class="c-brown-500 ti-files"></i>
+							</span>
+							<span class="title">Input Pekerjaan</span>
+						</a>
+					</li>
+					<li class="nav-item">
 						<a class="sidebar-link" href="<?=site_url('naskah/index')?>">
 							<span class="icon-holder">
 								<i class="c-brown-500 ti-files"></i>

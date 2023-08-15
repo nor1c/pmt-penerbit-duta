@@ -71,43 +71,43 @@
         <br><br><br><br>
 
         <h4 class="c-grey-900 mB-20">RIWAYAT KEHADIRAN</h4>
-        
+
         <div class="mB-20">
           <form id="filter">
             <div class="row mB-10">
-                <div class="col-md-2">
-                    <label class="form-label">Tanggal Mulai</label>
-                    <input type="text" name="attendance_history_filter_start_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_start_date" value="<?=date('m/d/Y')?>">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Tanggal Akhir</label>
-                    <input type="text" name="attendance_history_filter_finish_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_finish_date" value="<?=date('m/d/Y')?>">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Nama Karyawan</label>
-                    <select class="form-control" id="attendance_history_filter_karyawan" name="attendance_history_filter_karyawan">
-                      <option selected disabled>--Pilih Karyawan--</option>
-                      <?php
-                          $this->db->order_by('nama', 'ASC');
-                          foreach($this->db->get('t_karyawan')->result() as $kar) {
-                            if ($kar->id_karyawan == $this->session->userdata('id_karyawan')) {
-                              $selected = 'selected';
-                            } else {
-                              $selected = '';
-                            }
-                            echo "<option value='".$kar->id_karyawan."' ".$selected.">".$kar->nama."</option>";
-                          }
-                      ?>
-                    </select>
-                </div>
-                <div class="col-md-1">
-                  <label class="form-label">&nbsp;</label>
-                  <input type="submit" class="form-control btn btn-primary btn-color" value="Filter" />
-                </div>
-                <div class="col-md-1">
-                  <label class="form-label">&nbsp;</label>
-                  <input type="button" class="form-control btn btn-success btn-color" value="Rekap (PDF)" onclick="attendanceHistoryRekap()" />
-                </div>
+              <div class="col-md-2">
+                <label class="form-label">Tanggal Mulai</label>
+                <input type="text" name="attendance_history_filter_start_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_start_date" value="<?= date('m/d/Y') ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Tanggal Akhir</label>
+                <input type="text" name="attendance_history_filter_finish_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_finish_date" value="<?= date('m/d/Y') ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Nama Karyawan</label>
+                <select class="form-control" id="attendance_history_filter_karyawan" name="attendance_history_filter_karyawan">
+                  <option selected disabled>--Pilih Karyawan--</option>
+                  <?php
+                  $this->db->order_by('nama', 'ASC');
+                  foreach ($this->db->get('t_karyawan')->result() as $kar) {
+                    if ($kar->id_karyawan == $this->session->userdata('id_karyawan')) {
+                      $selected = 'selected';
+                    } else {
+                      $selected = '';
+                    }
+                    echo "<option value='" . $kar->id_karyawan . "' " . $selected . ">" . $kar->nama . "</option>";
+                  }
+                  ?>
+                </select>
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <input type="submit" class="form-control btn btn-primary btn-color" value="Filter" />
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <input type="button" class="form-control btn btn-success btn-color" value="Rekap (PDF)" onclick="attendanceHistoryRekap()" />
+              </div>
             </div>
           </form>
         </div>
@@ -130,7 +130,140 @@
     </div>
   </div>
 
+  
   <div class="row">
+    <div class="col-md-12">
+      <div class="bgc-white bd bdrs-3 p-20 mB-20">
+        <fieldset>
+          <legend>Progress Naskah</legend>
+
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="content-box">
+                <div class="row" style="margin:0 auto;">
+                  <div class="col-sm">
+                      <div style="margin-top:30%">
+                          <div class="mb-4">
+                              <div class="row">
+                                  <div class="col-sm-2">
+                                    <div style="width:15px;height:15px;background:rgb(124, 181, 236);border-radius:100%;margin-top:4px">&nbsp;</div>
+                                  </div>
+                                  <div class="col-sm-2"><h5 class="font-weight-bold">Halaman</h5></div>
+                              </div>
+                              <div style="margin-left:28px"><span id="total_halaman_terkerjakan">0</span>/<span id="total_halaman">0</span> halaman</div>
+                          </div>
+                          <div>
+                              <div class="row">
+                                  <div class="col-sm-2">
+                                    <div style="width:15px;height:15px;background:#303030;border-radius:100%;margin-top:4px">&nbsp;</div>
+                                  </div>
+                                  <div class="col-sm-2"><h5 class="font-weight-bold">Hari</h5></div>
+                              </div>
+                              <div style="margin-left:28px"><span id="hari_pengerjaan">0</span>/<span id="total_hari_perencanaan">0</span> hari</div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- doughtnut charts -->
+                  <div class="col-sm">
+                      <figure class="highcharts-figure">
+                          <div id="progressChart"></div>
+                      </figure>
+                  </div>
+                  
+                  <!-- buttons -->
+                  <div class="col-sm">
+                    <div style="margin-top:40%;">
+                      <button id="start-naskah-button" onclick="startNaskah()" class="mb-2 form-control btn-info">Mulai</button>
+                      <button id="pause-naskah-button" class="form-control btn-info" data-toggle="modal" data-target="#pauseNaskahModal">Selesai</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-4">
+              <div class="content-box">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <div style="background-color:#333;height:180px;width:100%;border-radius:5px;">
+                      <!--  -->
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="content-box">
+                      <h8><b>10-000-0000-0</b></h8>
+                      <h6><b>Judul Buku 1</b></h6>
+                      <table>
+                        <tbody>
+                          <tr>
+                            <td>Penulis</td>
+                            <td>:</td>
+                            <td>...</td>
+                          </tr>
+                          <tr>
+                            <td>Warna</td>
+                            <td>:</td>
+                            <td>...</td>
+                          </tr>
+                          <tr>
+                            <td>Ukuran</td>
+                            <td>:</td>
+                            <td>...</td>
+                          </tr>
+                          <tr>
+                            <td>Halaman</td>
+                            <td>:</td>
+                            <td>...</td>
+                          </tr>
+                          <tr>
+                            <td>ISBN</td>
+                            <td>:</td>
+                            <td>...</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <br>
+                      <center>
+                        <button class="btn btn-primary" style="margin:0 auto;">Detail</button>
+                      </center>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="content-box">
+                <table class="table table-sm">
+                  <thead class="table-dark">
+                    <tr>
+                      <th scope="col">LEVEL</th>
+                      <th scope="col">PIC</th>
+                      <th scope="col">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Editing</td>
+                      <td>@Editor1</td>
+                      <td>Status</td>
+                    </tr>
+                    <tr>
+                      <td>Setting 1</td>
+                      <td>@Setter1</td>
+                      <td>Status</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="row">
     <div class="col-md-12">
       <div class="bgc-white bd bdrs-3 p-20 mB-20">
         <div>
@@ -139,19 +272,19 @@
               <b>Drive untuk Share File saja</b>
               <br>
               <b><a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="nofollow">Link Login</a>
-              / Salin Link:</b> https://drive.google.com/drive/u/0/my-drive
+                / Salin Link:</b> https://drive.google.com/drive/u/0/my-drive
               <br>
               <b>Email:</b> garasicrew123@qmail.id<p>
-              <b>Password:</b> pastiduta123 <br><br>
+                <b>Password:</b> pastiduta123 <br><br>
             </div>
             <div class="col-md-6">
               <b>Drive untuk Save Data Penting (kapasitas 200GB)</b>
               <br>
               <b><a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="nofollow">Link Login</a>
-              / Salin Link:</b> https://drive.google.com/drive/u/0/my-drive
+                / Salin Link:</b> https://drive.google.com/drive/u/0/my-drive
               <br>
               <b>Email:</b> drivedutadepok@gmail.com<p>
-              <b>Password:</b> pastidutadepok
+                <b>Password:</b> pastidutadepok
             </div>
           </div>
 
@@ -161,10 +294,10 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- START OF:: Input pekerjaan -->
-  <div class="row">
+  <!-- <div class="row">
     <div class="col-md-12">
       <div class="bgc-white bd bdrs-3 p-20 mB-20">
         <fieldset>
@@ -246,56 +379,56 @@
         <fieldset>
           <form action="<?php echo site_url('presences/laporan_filter') ?>" method="post">
             <legend style>Filter laporan pekerjaan</legend>
-              <div class="row mB-10">
-                <div class="col-md-6">
-                  <div class="form-group mb-3">
-                    <label class="form-label" for="presences_date_start">Tanggal Mulai</label>
-                    <input type="text" name="startdate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_start" value="<?php echo (!$this->session->flashdata('startdate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('startdate'))); ?>">
-                  </div>
-                  <div class="form-group mb-3">
-                    <label class="form-label" for="presences_date_start">Tanggal Akhir</label>
-                    <input type="text" name="enddate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_end" value="<?php echo (!$this->session->flashdata('enddate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('enddate'))); ?>">
-                  </div>
+            <div class="row mB-10">
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label class="form-label" for="presences_date_start">Tanggal Mulai</label>
+                  <input type="text" name="startdate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_start" value="<?php echo (!$this->session->flashdata('startdate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('startdate'))); ?>">
                 </div>
-
-                <div class="col-md-6">
-                  <div class="form-group mb-3">
-                    <label class="form-label" for="karyawan">Nama Karyawan</label>
-                    <select class="form-control" id="sel1" name="id_karyawan">
-                      <option width="50px" value="">Semua Karyawan</option>
-                      <?php
-                      $this->db->order_by('nama', 'ASC');
-                      foreach ($this->db->get('t_karyawan')->result() as $kar) {
-                        if ($kar->id_karyawan == $this->session->flashdata('id_karyawan')) {
-                          $selected = 'selected';
-                        } else {
-                          if ($kar->id_karyawan == $this->session->userdata('user_id')) {
-                            $selected = 'selected';
-                          } else {
-                            $selected = '';
-                          }
-                        }
-
-                        echo "<option value='" . $kar->id_karyawan . "'>" . $kar->nama . "</option>";
-                      }
-                      ?>
-                    </select>
-                  </div>
-
-                  <div class="form-group mb-3">
-                    <label class="form-label" for="karyawan">Judul Buku</label>
-                    <select class="form-control" id="judul_buku_filter" name="id_judul_buku">
-                      <option value="">Semua Buku</option>
-                      <?php foreach ($this->db->get('buku_dikerjakan')->result() as $buku) : ?>
-                        <option <?= ($this->session->flashdata('id_judul_buku') == $buku->id ? 'selected' : '') ?> value="<?php echo $buku->id; ?>"><?php echo $buku->judul_buku; ?></option>
-                      <?php endforeach ?>
-                    </select>
-                  </div>
+                <div class="form-group mb-3">
+                  <label class="form-label" for="presences_date_start">Tanggal Akhir</label>
+                  <input type="text" name="enddate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_end" value="<?php echo (!$this->session->flashdata('enddate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('enddate'))); ?>">
                 </div>
               </div>
-              
-              <div class="row">
-                <div class="col-md-12">
+
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label class="form-label" for="karyawan">Nama Karyawan</label>
+                  <select class="form-control" id="sel1" name="id_karyawan">
+                    <option width="50px" value="">Semua Karyawan</option>
+                    <?php
+                    $this->db->order_by('nama', 'ASC');
+                    foreach ($this->db->get('t_karyawan')->result() as $kar) {
+                      if ($kar->id_karyawan == $this->session->flashdata('id_karyawan')) {
+                        $selected = 'selected';
+                      } else {
+                        if ($kar->id_karyawan == $this->session->userdata('user_id')) {
+                          $selected = 'selected';
+                        } else {
+                          $selected = '';
+                        }
+                      }
+
+                      echo "<option value='" . $kar->id_karyawan . "'>" . $kar->nama . "</option>";
+                    }
+                    ?>
+                  </select>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label class="form-label" for="karyawan">Judul Buku</label>
+                  <select class="form-control" id="judul_buku_filter" name="id_judul_buku">
+                    <option value="">Semua Buku</option>
+                    <?php foreach ($this->db->get('buku_dikerjakan')->result() as $buku) : ?>
+                      <option <?= ($this->session->flashdata('id_judul_buku') == $buku->id ? 'selected' : '') ?> value="<?php echo $buku->id; ?>"><?php echo $buku->judul_buku; ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
                 <div class="form-group mb-3" style="float:right">
                   <button type="submit" class="btn btn-primary">Tampilkan Data Laporan</button>
                   <input type="submit" name="submit" id="report_pdf" value="Report PDF" class="btn btn-warning">
@@ -306,16 +439,16 @@
         </fieldset>
       </div>
     </div>
-  </div>
+  </div> -->
   <!-- END OF:: Input pekerjaan -->
 
   <!-- START OF:: FILTER LAPORAN PEKERJAAN -->
-  <div class="row">
-    
-  </div>
+  <!-- <div class="row">
+
+  </div> -->
   <!-- END OF:: FILTER LAPORAN PEKERJAAN -->
 
-  <div class="row">
+  <!-- <div class="row">
     <div class="col-md-12">
       <div class="bgc-white bd bdrs-3 p-20 mB-20">
         <center>
@@ -330,14 +463,22 @@
                   <th>No</th>
                   <th>Tanggal</th>
                   <th>Nama Karyawan</th>
-                  <th><center>Pekerjaan</center></th>
+                  <th>
+                    <center>Pekerjaan</center>
+                  </th>
                   <th>Judul buku</th>
-                  <th><center>Catatan</center></th>
+                  <th>
+                    <center>Catatan</center>
+                  </th>
                   <th>Kode buku</th>
                   <th>No.Job</th>
                   <th>Target (Hal/Objek)</th>
-                  <th><center>Realisasi Target</center></th>
-                  <th width="160px"><center>Status<center></th>
+                  <th>
+                    <center>Realisasi Target</center>
+                  </th>
+                  <th width="160px">
+                    <center>Status<center>
+                  </th>
                   <th></th>
                 </tr>
               </thead>
@@ -427,9 +568,12 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 </div>
 
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
 <script type="text/javascript">
   const pekerjaanOpt = $('select[name=pekerjaan]')
   const judulBukuOpt = $('select[name=id_buku]')
@@ -449,9 +593,6 @@
   $(document).ready(function() {
     table = $('#attendanceHistoryTable').DataTable({
       "sDom": "Rlfrtip",
-      // "scrollX": true,
-      // "scrollY": "300px",
-      // "scrollCollapse": true,
       "aLengthMenu": [
         [5, 10, 15, 20],
         [5, 10, 15, 20]
@@ -473,28 +614,26 @@
         null, null, null, null, null, null, null, null
       ],
       "columnDefs": [],
-      "order": [
-        // [0, 'asc']
-      ],
+      "order": [],
       "oLanguage": {
         "sSearch": "Pencarian",
         "sProcessing": '<image style="width:150px" src="http://superstorefinder.net/support/wp-content/uploads/2018/01/blue_loading.gif">',
       }
     });
-    
+
     attendanceHistoryRekap = function() {
       var presences_date_start = $("#attendance_history_filter_start_date").val();
       var presences_date_end = $("#attendance_history_filter_finish_date").val();
       var id_karyawan;
 
-      if($("#attendance_history_filter_karyawan").val() != "" || $("#attendance_history_filter_karyawan").val() != null){
-          id_karyawan = '&id_karyawan='+$("#attendance_history_filter_karyawan").val();
-      }else{
-          id_karyawan = "";
+      if ($("#attendance_history_filter_karyawan").val() != "" || $("#attendance_history_filter_karyawan").val() != null) {
+        id_karyawan = '&id_karyawan=' + $("#attendance_history_filter_karyawan").val();
+      } else {
+        id_karyawan = "";
       }
-      var url = '<?php echo base_url(); ?>presences/report_pdf/?startdate='+presences_date_start+'&enddate='+presences_date_end+id_karyawan;
+      var url = '<?php echo base_url(); ?>presences/report_pdf/?startdate=' + presences_date_start + '&enddate=' + presences_date_end + id_karyawan;
       console.log(url)
-      
+
       window.location.href = url;
     }
 
@@ -731,162 +870,117 @@
       $('.loader').css('display', 'none')
     }, 200);
 
-    let currentHour = new Date().getHours()
-
-    if (currentHour < 15) {
-      $('.update-work-button').addClass('disabled')
-    }
-
-    $("#report_pdf").click(function() {
-      var presences_date_start = $("#date_start").val();
-      var presences_date_end = $("#date_end").val();
-      var id_karyawan;
-
-      if ($("#sel1").val() != "" || $("#sel1").val() != null) {
-        id_karyawan = '&id_karyawan=' + $("#sel1").val();
-      } else {
-        id_karyawan = "";
-      }
-
-      if ($("#judul_buku_filter").val() != "" || $("#judul_buku_filter").val() != null) {
-        id_judul_buku = '&id_judul_buku=' + $("#judul_buku_filter").val();
-      } else {
-        id_judul_buku = "";
-      }
-
-      var url = '<?php echo base_url(); ?>presences/input_report_pdf/?startdate=' + presences_date_start +
-        '&enddate=' + presences_date_end + id_karyawan + id_judul_buku;
-
-      window.location.href = url;
-    });
-    $("#date_start").datetimepicker({
-      pickTime: false
-    });
-    $("#date_end").datetimepicker({
-      pickTime: false
-    });
     $("#attendance_history_filter_start_date").datetimepicker({
       pickTime: false
     });
     $("#attendance_history_filter_finish_date").datetimepicker({
       pickTime: false
     });
-    $(".buku").change(function() {
-      var id = $(this).val();
-      $.ajax({
-          url: '<?php echo site_url('presences/buku_dikerjakan') ?>',
-          type: 'POST',
-          dataType: 'json',
-          data: {
-            id: id
-          },
-        })
-        .done(function(data) {
-          let sisa_halaman = data.standar_halaman - data.halaman_selesai
 
-          $("#kode_buku").val(data.kode_buku);
-          $("#no_job").val(data.no_job);
-          $("#standar_halaman").val(data.standar_halaman);
-          $("#sisa_halaman").val(sisa_halaman);
-          $("#target").attr('max', sisa_halaman)
-        })
-        .fail(function() {
-          console.log("error");
-        })
-        .always(function() {
-          console.log("complete");
-        });
+    // chart
+    function renderIcons () {}
+    
+    let progressHalaman = 0
+    let progressHari = 0
+    let progressChart = Highcharts.chart('progressChart', {
+        credits: {
+            enabled: false
+        },
+
+        exporting: {
+            enabled: false
+        },
+
+        chart: {
+            type: 'solidgauge',
+            height: '110%',
+            events: {
+                render: renderIcons
+            }
+        },
+
+        title: {
+            text: 'Chart',
+            style: {
+                fontSize: '24px'
+            }
+        },
+
+        tooltip: {
+            borderWidth: 0,
+            backgroundColor: 'none',
+            shadow: false,
+            style: {
+                fontSize: '16px'
+            },
+            valueSuffix: '%',
+            pointFormat: '{series.name}<br><span style="font-size:2em; color: {point.color}; font-weight: bold">{point.y}</span>',
+            positioner: function (labelWidth) {
+                return {
+                    x: (this.chart.chartWidth - labelWidth) / 2,
+                    y: (this.chart.plotHeight / 2) + 15
+                };
+            }
+        },
+
+        pane: {
+            startAngle: 0,
+            endAngle: 360,
+            background: [{ // Track for Move
+                outerRadius: '112%',
+                innerRadius: '88%',
+                backgroundColor: Highcharts.color(Highcharts.getOptions().colors[0])
+                    .setOpacity(0.3)
+                    .get(),
+                borderWidth: 0
+            }, { // Track for Exercise
+                outerRadius: '87%',
+                innerRadius: '63%',
+                backgroundColor: Highcharts.color(Highcharts.getOptions().colors[1])
+                    .setOpacity(0.3)
+                    .get(),
+                borderWidth: 0
+            }]
+        },
+
+        yAxis: {
+            min: 0,
+            max: 100,
+            lineWidth: 0,
+            tickPositions: []
+        },
+
+        plotOptions: {
+            solidgauge: {
+                dataLabels: {
+                    enabled: false
+                },
+                linecap: 'round',
+                stickyTracking: false,
+                rounded: true
+            }
+        },
+
+        series: [{
+            name: 'Halaman',
+            data: [{
+                color: Highcharts.getOptions().colors[0],
+                radius: '112%',
+                innerRadius: '88%',
+                y: progressHalaman
+            }]
+        }, {
+            name: 'Hari',
+            data: [{
+                color: Highcharts.getOptions().colors[1],
+                radius: '87%',
+                innerRadius: '63%',
+                y: progressHari
+            }]
+        }]
     });
-
-    // stupid force submit code
-    // $('#kirim-button').click(function(e) {
-    //   $(this).closest("form")[0].submit();
-    //   $(this).attr('disabled', true);
-    // })
-
-    /* Change either related realisasi inputs is disabled or enabled for certain condition. */
-    function toggleRealisasiInput(isDisable) {
-      isDisable = (isDisable === 'true')
-      if (isDisable) {
-        if (currentHour >= 15) {
-          isDisable = false
-        }
-      }
-
-      $('input[name=realisasi_target]').attr('disabled', isDisable)
-      $('select[name=status]').attr('disabled', isDisable)
-
-      if (!isDisable) {
-        judulBukuOpt.attr('required', false)
-        catatanInput.attr('required', false)
-        targetInput.attr('required', false)
-        $('input[name=realisasi_target]').attr('required', false)
-        $('select[name=status]').attr('required', false)
-      }
-    }
-    $('#pekerjaan-opt').change(function() {
-      let isDisableRealisasi = $('option:selected', this).attr('disable-realisasi')
-      toggleRealisasiInput(isDisableRealisasi)
-
-      if ($(this).val() === 'Update bank gambar') {
-        judulBukuOpt.attr('required', false)
-      }
-    })
-
-    $('input[name=realisasi_target]').keyup(function() {
-      if ($(this).val() > 0) {
-        $('#kirim-button').attr('disabled', false)
-      } else {
-        $('#kirim-button').attr('disabled', true)
-      }
-
-      let realizedTarget = Number($(this).val())
-      const target = Number(targetInput.val())
-
-      if (realizedTarget >= target) {
-        statusOpt.val('Target Tercapai')
-      } else if (realizedTarget > target) {
-        statusOpt.val('Melebihi Target')
-      } else {
-        statusOpt.val('Target Tidak Tercapai')
-      }
-    })
-  });
-
-  /** Update progress of running job */
-  function updateWork(pekerjaan, workId, idBuku, kodeBuku, noJob, catatan, target, standarHalaman) {
-    console.log([
-      kodeBuku,
-      noJob
-    ]);
-    pekerjaanOpt.attr('disabled', true)
-    pekerjaanOpt.val(pekerjaan)
-    judulBukuOpt.attr('disabled', true)
-    judulBukuOpt.val(idBuku)
-    kodeBukuInput.attr('disabled', true)
-    kodeBukuInput.val(kodeBuku)
-    noJobInput.attr('disabled', true)
-    noJobInput.val(noJob)
-    catatanInput.attr('disabled', true)
-    catatanInput.val(catatan)
-    targetInput.attr('disabled', true)
-    targetInput.val(target)
-    $('#standar_halaman').val(standarHalaman)
-    $('input[name=realisasi_target]').attr('max', target)
-
-    $('select[name=status]').attr('readonly', true)
-
-    $('#kirim-button').text('Update')
-    $('#kirim-button').attr('disabled', true)
-
-    $('#input-pekerjaan-form').attr('action', "<?= site_url('presences/update_report_pekerjaan?work-id=') ?>" + workId)
-  }
+  })
 </script>
-
-
-
-
-
 
 <style>
   /* Back to Top Pure CSS by igniel.com */

@@ -398,28 +398,6 @@ class Presences extends CI_Controller {
         echo json_encode($book);
     }
 
-    public function report_pekerjaan() {
-        //
-        $data['id_karyawan'] = $this->session->userdata('user_id');
-        $data['pekerjaan'] = $this->input->post('pekerjaan');
-        if ($this->input->post('id_buku') == "") {
-            $data['id_buku_dikerjakan'] = null;
-        } else {
-            $data['id_buku_dikerjakan'] = $this->input->post('id_buku');
-        }
-        $data['no_job'] = $this->input->post('no_job');
-        $data['catatan'] = $this->input->post('catatan');
-        $data['target'] = $this->input->post('target');
-        $data['status'] = $this->input->post('status');
-        $data['realisasi_target'] = $this->input->post('realisasi_target');
-        $data['date'] = date("Y-m-d");
-
-        if ($this->db->insert('report_pekerjaan', $data)) {
-            $this->session->set_flashdata('success', 1);
-            redirect('presences/input', 'refresh');
-        }
-    }
-
     public function update_report_pekerjaan() {
         $work_id = $this->input->get('work-id');
         $data['realisasi_target'] = $this->input->post('realisasi_target');
@@ -431,21 +409,6 @@ class Presences extends CI_Controller {
             $this->session->set_flashdata('success_update', 1);
             redirect('presences/input', 'refresh');
         }
-    }
-
-    public function laporan_filter() {
-        $startdate = date("Y-m-d", strtotime($this->input->post('startdate')));
-        $enddate = date("Y-m-d", strtotime($this->input->post('enddate')));
-
-        $id_karyawan = $this->input->post('id_karyawan');
-        $id_judul_buku = $this->input->post('id_judul_buku');
-
-        $this->session->set_flashdata('startdate', $startdate);
-        $this->session->set_flashdata('enddate', $enddate);
-        $this->session->set_flashdata('id_karyawan', $id_karyawan);
-        $this->session->set_flashdata('id_judul_buku', $id_judul_buku);
-
-        redirect('presences/input', 'refresh');
     }
 
     public function histories() {
