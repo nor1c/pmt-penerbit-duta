@@ -258,6 +258,31 @@
               </div>
             </div>
           </div>
+
+          <br><br><br>
+
+          <!-- table -->
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="content-box">
+                <table id="attendanceHistoryTable" class="table table-striped" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>Kode Buku</th>
+                      <th>No. Job</th>
+                      <th>Judul Buku</th>
+                      <th>Level</th>
+                      <th>Hal</th>
+                      <th>Rencana Mulai</th>
+                      <th>Rencana Selesai</th>
+                      <th>Status</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
         </fieldset>
       </div>
     </div>

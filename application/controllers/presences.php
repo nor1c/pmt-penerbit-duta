@@ -257,10 +257,10 @@ class Presences extends CI_Controller {
                         $data_kehadiran = array(
                             'jam_keluar' => date('Y-m-d H:i:s'),
                             'updated_date' => date('Y-m-d'),
-                            'updated_user' => $this->session->userdata('user_id'),
-                            'computer_name_out' => $this->getComputerName()
+                            'updated_user' => $this->session->userdata('user_id')
                         );
                         $data_kehadiran['computer_name'] = $this->getComputerName();
+                        $data_kehadiran['computer_name_out'] = $this->getComputerName();
                         $this->Presences_m->update($tmp['id_kehadiran'], $data_kehadiran);
 
                         $this->session->set_flashdata('message_alert', '<div class="alert alert-success">Data Tersimpan</div>');
@@ -383,6 +383,7 @@ class Presences extends CI_Controller {
             'updated_date' => date('Y-m-d'),
             'updated_user' => $user_id,
             'jam_keluar' => $final_clock_out,
+            'computer_name_out' => $this->getComputerName()
         );
 
         $this->Presences_m->update($tmp['id_kehadiran'], $updated_data_kehadiran);
