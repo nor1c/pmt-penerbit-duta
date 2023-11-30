@@ -1,6 +1,6 @@
 <?php
 
-class Jenjang extends DUTA_Controller {
+class Ukuran extends DUTA_Controller {
     public function __construct() {
         parent::__construct();
     }
@@ -8,17 +8,17 @@ class Jenjang extends DUTA_Controller {
     public function getAll() {
         $filters = explode('&', $this->input->post('filters'));
         
-        $data = $this->Jenjang_model->getAll();
+        $data = $this->Ukuran_model->getAll();
 
-        $jenjang = $this->Jenjang_model->getAll($filters);
+        $ukuran = $this->Ukuran_model->getAll($filters);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['nama_jenjang'], $item['is_active']];
-        }, $jenjang['data']);
+            return ['', $item['nama_ukuran'], $item['is_active']];
+        }, $ukuran['data']);
 
         $data = [
-            'recordsTotal' => $jenjang['recordsTotal'],
-            'recordsFiltered' => $jenjang['recordsTotal'],
+            'recordsTotal' => $ukuran['recordsTotal'],
+            'recordsFiltered' => $ukuran['recordsTotal'],
             'data' => $formattedData
         ];
         
@@ -26,9 +26,9 @@ class Jenjang extends DUTA_Controller {
     }
 
     public function getDropdown() {
-        $jenjang_dropdown = $this->Jenjang_model->getDropdown();
+        $ukuran_dropdown = $this->Ukuran_model->getDropdown();
 
-        return $jenjang_dropdown;
+        return $ukuran_dropdown;
     }
 
     public function create() {
@@ -44,6 +44,6 @@ class Jenjang extends DUTA_Controller {
     }
 
     public function index() {
-        $this->template->display('master/jenjang/index');
+        $this->template->display('master/ukuran/index');
     }
 }

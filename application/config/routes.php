@@ -41,6 +41,13 @@
 $route['default_controller'] = "user/login";
 $route['404_override'] = '';
 
+$route['dashboard'] = "presences/input";
+
+// naskah
+$route['naskah/roles/index'] = 'naskah_roles/index';
+$route['naskah/roles/getAll'] = 'naskah_roles/getAll';
+$route['naskah/roles/getMappedKaryawans'] = 'naskah_roles/getMappedKaryawans';
+$route['naskah/roles/saveMapping'] = 'naskah_roles/saveMapping';
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

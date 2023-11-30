@@ -72,53 +72,20 @@
 				<!-- ### $Sidebar Menu ### -->
 				<ul class="sidebar-menu scrollable pos-r">
 					<li class="nav-item mT-30 actived">
-						<a class="sidebar-link" href="<?=site_url('presences/input')?>">
+						<a class="sidebar-link" href="<?=site_url('dashboard')?>">
 							<span class="icon-holder">
 								<i class="c-blue-500 ti-home"></i>
 							</span>
 							<span class="title">Dashboard</span>
 						</a>
 					</li>
-					<li class="nav-item dropdown">
-						<a class="dropdown-toggle" href="javascript:void(0);">
+					<li class="nav-item">
+						<a class="sidebar-link" href="<?=site_url('presences')?>">
 							<span class="icon-holder">
-								<i class="c-orange-500 ti-calendar"></i>
+								<i class="c-brown-500 ti-calendar"></i>
 							</span>
-							<span class="title">Absensi/Kehadiran</span>
-							<span class="arrow">
-								<i class="ti-angle-right"></i>
-							</span>
+							<span class="title">Rekap Absensi</span>
 						</a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="<?=site_url('presences/input')?>" class="sidebar-link" href="basic-table.html">Input Kehadiran</a>
-							</li>
-							<li>
-								<a href="<?=site_url('presences')?>" class="sidebar-link" href="datatable.html">Rekap Absensi</a>
-							</li>
-						</ul>
-					</li>
-					<li class="nav-item dropdown">
-						<a class="dropdown-toggle" href="javascript:void(0);">
-							<span class="icon-holder">
-								<i class="c-gray-600 ti-layout-accordion-list"></i>
-							</span>
-							<span class="title">Data Master</span>
-							<span class="arrow">
-								<i class="ti-angle-right"></i>
-							</span>
-						</a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="<?=site_url('jenjang')?>" class="sidebar-link">Jenjang</a>
-							</li>
-							<li>
-								<a href="<?=site_url('mapel')?>" class="sidebar-link">Mapel</a>
-							</li>
-							<li>
-								<a href="<?=site_url('kategori')?>" class="sidebar-link">Kategori</a>
-							</li>
-						</ul>
 					</li>
 					<li class="nav-item">
 						<a class="sidebar-link" href="<?=site_url('pekerjaan')?>">
@@ -134,6 +101,14 @@
 								<i class="c-brown-500 ti-files"></i>
 							</span>
 							<span class="title">Naskah</span>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="sidebar-link" href="<?=site_url('naskah/roles/index')?>">
+							<span class="icon-holder">
+								<i class="c-brown-500 ti-files"></i>
+							</span>
+							<span class="title">Naskah Roles</span>
 						</a>
 					</li>
 					<li class="nav-item">
@@ -159,6 +134,31 @@
 							</span>
 							<span class="title">Proses Job</span>
 						</a>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="dropdown-toggle" href="javascript:void(0);">
+							<span class="icon-holder">
+								<i class="c-gray-600 ti-layout-accordion-list"></i>
+							</span>
+							<span class="title">Data Master</span>
+							<span class="arrow">
+								<i class="ti-angle-right"></i>
+							</span>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="<?=site_url('master/jenjang')?>" class="sidebar-link">Jenjang</a>
+							</li>
+							<li>
+								<a href="<?=site_url('master/mapel')?>" class="sidebar-link">Mapel</a>
+							</li>
+							<li>
+								<a href="<?=site_url('master/kategori')?>" class="sidebar-link">Kategori</a>
+							</li>
+							<li>
+								<a href="<?=site_url('master/ukuran')?>" class="sidebar-link">Ukuran</a>
+							</li>
+						</ul>
 					</li>
 					<li class="nav-item">
 						<a class="sidebar-link" href="<?=site_url('user/logout')?>">

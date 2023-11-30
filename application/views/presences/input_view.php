@@ -51,10 +51,10 @@
         <div class="row">
           <div class="col-md-6">
             <center>
-              <h3>
+              <h4>
                 <div style="height:50px;" id="txtDatang"></div>
                 <button id="buttonDatang" class="btn btn-primary" onclick="clockIn()">Datang</button>
-              </h3>
+              </h4>
             </center>
           </div>
 
@@ -67,70 +67,11 @@
             </center>
           </div>
         </div>
-
-        <br><br><br><br>
-
-        <h4 class="c-grey-900 mB-20">RIWAYAT KEHADIRAN</h4>
-
-        <div class="mB-20">
-          <form id="filter">
-            <div class="row mB-10">
-              <div class="col-md-2">
-                <label class="form-label">Tanggal Mulai</label>
-                <input type="text" name="attendance_history_filter_start_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_start_date" value="<?= date('m/d/Y') ?>">
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Tanggal Akhir</label>
-                <input type="text" name="attendance_history_filter_finish_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_finish_date" value="<?= date('m/d/Y') ?>">
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Nama Karyawan</label>
-                <select class="form-control" id="attendance_history_filter_karyawan" name="attendance_history_filter_karyawan">
-                  <option selected disabled>--Pilih Karyawan--</option>
-                  <?php
-                  $this->db->order_by('nama', 'ASC');
-                  foreach ($this->db->get('t_karyawan')->result() as $kar) {
-                    if ($kar->id_karyawan == $this->session->userdata('id_karyawan')) {
-                      $selected = 'selected';
-                    } else {
-                      $selected = '';
-                    }
-                    echo "<option value='" . $kar->id_karyawan . "' " . $selected . ">" . $kar->nama . "</option>";
-                  }
-                  ?>
-                </select>
-              </div>
-              <div class="col-md-1">
-                <label class="form-label">&nbsp;</label>
-                <input type="submit" class="form-control btn btn-primary btn-color" value="Filter" />
-              </div>
-              <div class="col-md-1">
-                <label class="form-label">&nbsp;</label>
-                <input type="button" class="form-control btn btn-success btn-color" value="Rekap (PDF)" onclick="attendanceHistoryRekap()" />
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <table id="attendanceHistoryTable" class="table table-striped" cellspacing="0" width="100%">
-          <thead>
-            <tr>
-              <th>NIK</th>
-              <th>Nama</th>
-              <th>Hari, Tanggal</th>
-              <th>Waktu Datang</th>
-              <th>Datang Melalui</th>
-              <th>Waktu Pulang</th>
-              <th>Pulang Melalui</th>
-              <th>Keterangan</th>
-            </tr>
-          </thead>
-        </table>
       </div>
     </div>
   </div>
 
-  
+
   <div class="row">
     <div class="col-md-12">
       <div class="bgc-white bd bdrs-3 p-20 mB-20">
@@ -142,35 +83,39 @@
               <div class="content-box">
                 <div class="row" style="margin:0 auto;">
                   <div class="col-sm">
-                      <div style="margin-top:30%">
-                          <div class="mb-4">
-                              <div class="row">
-                                  <div class="col-sm-2">
-                                    <div style="width:15px;height:15px;background:rgb(124, 181, 236);border-radius:100%;margin-top:4px">&nbsp;</div>
-                                  </div>
-                                  <div class="col-sm-2"><h5 class="font-weight-bold">Halaman</h5></div>
-                              </div>
-                              <div style="margin-left:28px"><span id="total_halaman_terkerjakan">0</span>/<span id="total_halaman">0</span> halaman</div>
+                    <div style="margin-top:30%">
+                      <div class="mb-4">
+                        <div class="row">
+                          <div class="col-sm-2">
+                            <div style="width:15px;height:15px;background:rgb(124, 181, 236);border-radius:100%;margin-top:4px">&nbsp;</div>
                           </div>
-                          <div>
-                              <div class="row">
-                                  <div class="col-sm-2">
-                                    <div style="width:15px;height:15px;background:#303030;border-radius:100%;margin-top:4px">&nbsp;</div>
-                                  </div>
-                                  <div class="col-sm-2"><h5 class="font-weight-bold">Hari</h5></div>
-                              </div>
-                              <div style="margin-left:28px"><span id="hari_pengerjaan">0</span>/<span id="total_hari_perencanaan">0</span> hari</div>
+                          <div class="col-sm-2">
+                            <h5 class="font-weight-bold">Halaman</h5>
                           </div>
+                        </div>
+                        <div style="margin-left:28px"><span id="total_halaman_terkerjakan">0</span>/<span id="total_halaman">0</span> halaman</div>
                       </div>
+                      <div>
+                        <div class="row">
+                          <div class="col-sm-2">
+                            <div style="width:15px;height:15px;background:#303030;border-radius:100%;margin-top:4px">&nbsp;</div>
+                          </div>
+                          <div class="col-sm-2">
+                            <h5 class="font-weight-bold">Hari</h5>
+                          </div>
+                        </div>
+                        <div style="margin-left:28px"><span id="hari_pengerjaan">0</span>/<span id="total_hari_perencanaan">0</span> hari</div>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- doughtnut charts -->
                   <div class="col-sm">
-                      <figure class="highcharts-figure">
-                          <div id="progressChart"></div>
-                      </figure>
+                    <figure class="highcharts-figure">
+                      <div id="progressChart"></div>
+                    </figure>
                   </div>
-                  
+
                   <!-- buttons -->
                   <div class="col-sm">
                     <div style="margin-top:40%;">
@@ -265,7 +210,7 @@
           <div class="row">
             <div class="col-sm-12">
               <div class="content-box">
-                <table id="attendanceHistoryTable" class="table table-striped" cellspacing="0" width="100%">
+                <table id="naskahTable" class="table table-striped" cellspacing="0" width="100%">
                   <thead>
                     <tr>
                       <th>Kode Buku</th>
@@ -613,55 +558,7 @@
   let attendTime
   let stopWorkTimer = false
 
-  let attendanceHistoryRekap
-
   $(document).ready(function() {
-    table = $('#attendanceHistoryTable').DataTable({
-      "sDom": "Rlfrtip",
-      "aLengthMenu": [
-        [5, 10, 15, 20],
-        [5, 10, 15, 20]
-      ],
-      "pageLength": 5,
-      "processing": true,
-      "serverSide": true,
-      "searching": false,
-      "ajax": {
-        "url": "<?= site_url($this->uri->segment(1) . '/histories') ?>",
-        'method': 'POST',
-        'data': function(d) {
-          d.draw = d.draw || 1
-          return $.extend(d, filters);
-        },
-      },
-      "deferRender": true,
-      "columns": [
-        null, null, null, null, null, null, null, null
-      ],
-      "columnDefs": [],
-      "order": [],
-      "oLanguage": {
-        "sSearch": "Pencarian",
-        "sProcessing": '<image style="width:150px" src="http://superstorefinder.net/support/wp-content/uploads/2018/01/blue_loading.gif">',
-      }
-    });
-
-    attendanceHistoryRekap = function() {
-      var presences_date_start = $("#attendance_history_filter_start_date").val();
-      var presences_date_end = $("#attendance_history_filter_finish_date").val();
-      var id_karyawan;
-
-      if ($("#attendance_history_filter_karyawan").val() != "" || $("#attendance_history_filter_karyawan").val() != null) {
-        id_karyawan = '&id_karyawan=' + $("#attendance_history_filter_karyawan").val();
-      } else {
-        id_karyawan = "";
-      }
-      var url = '<?php echo base_url(); ?>presences/report_pdf/?startdate=' + presences_date_start + '&enddate=' + presences_date_end + id_karyawan;
-      console.log(url)
-
-      window.location.href = url;
-    }
-
     // fitur absensi (new) May 3rd, 2023
     // on load check for attendance status
 
@@ -903,106 +800,106 @@
     });
 
     // chart
-    function renderIcons () {}
-    
+    function renderIcons() {}
+
     let progressHalaman = 0
     let progressHari = 0
     let progressChart = Highcharts.chart('progressChart', {
-        credits: {
-            enabled: false
-        },
+      credits: {
+        enabled: false
+      },
 
-        exporting: {
-            enabled: false
-        },
+      exporting: {
+        enabled: false
+      },
 
-        chart: {
-            type: 'solidgauge',
-            height: '110%',
-            events: {
-                render: renderIcons
-            }
-        },
+      chart: {
+        type: 'solidgauge',
+        height: '110%',
+        events: {
+          render: renderIcons
+        }
+      },
 
-        title: {
-            text: 'Chart',
-            style: {
-                fontSize: '24px'
-            }
-        },
+      title: {
+        text: 'Chart',
+        style: {
+          fontSize: '24px'
+        }
+      },
 
-        tooltip: {
-            borderWidth: 0,
-            backgroundColor: 'none',
-            shadow: false,
-            style: {
-                fontSize: '16px'
-            },
-            valueSuffix: '%',
-            pointFormat: '{series.name}<br><span style="font-size:2em; color: {point.color}; font-weight: bold">{point.y}</span>',
-            positioner: function (labelWidth) {
-                return {
-                    x: (this.chart.chartWidth - labelWidth) / 2,
-                    y: (this.chart.plotHeight / 2) + 15
-                };
-            }
+      tooltip: {
+        borderWidth: 0,
+        backgroundColor: 'none',
+        shadow: false,
+        style: {
+          fontSize: '16px'
         },
+        valueSuffix: '%',
+        pointFormat: '{series.name}<br><span style="font-size:2em; color: {point.color}; font-weight: bold">{point.y}</span>',
+        positioner: function(labelWidth) {
+          return {
+            x: (this.chart.chartWidth - labelWidth) / 2,
+            y: (this.chart.plotHeight / 2) + 15
+          };
+        }
+      },
 
-        pane: {
-            startAngle: 0,
-            endAngle: 360,
-            background: [{ // Track for Move
-                outerRadius: '112%',
-                innerRadius: '88%',
-                backgroundColor: Highcharts.color(Highcharts.getOptions().colors[0])
-                    .setOpacity(0.3)
-                    .get(),
-                borderWidth: 0
-            }, { // Track for Exercise
-                outerRadius: '87%',
-                innerRadius: '63%',
-                backgroundColor: Highcharts.color(Highcharts.getOptions().colors[1])
-                    .setOpacity(0.3)
-                    .get(),
-                borderWidth: 0
-            }]
-        },
-
-        yAxis: {
-            min: 0,
-            max: 100,
-            lineWidth: 0,
-            tickPositions: []
-        },
-
-        plotOptions: {
-            solidgauge: {
-                dataLabels: {
-                    enabled: false
-                },
-                linecap: 'round',
-                stickyTracking: false,
-                rounded: true
-            }
-        },
-
-        series: [{
-            name: 'Halaman',
-            data: [{
-                color: Highcharts.getOptions().colors[0],
-                radius: '112%',
-                innerRadius: '88%',
-                y: progressHalaman
-            }]
-        }, {
-            name: 'Hari',
-            data: [{
-                color: Highcharts.getOptions().colors[1],
-                radius: '87%',
-                innerRadius: '63%',
-                y: progressHari
-            }]
+      pane: {
+        startAngle: 0,
+        endAngle: 360,
+        background: [{ // Track for Move
+          outerRadius: '112%',
+          innerRadius: '88%',
+          backgroundColor: Highcharts.color(Highcharts.getOptions().colors[0])
+            .setOpacity(0.3)
+            .get(),
+          borderWidth: 0
+        }, { // Track for Exercise
+          outerRadius: '87%',
+          innerRadius: '63%',
+          backgroundColor: Highcharts.color(Highcharts.getOptions().colors[1])
+            .setOpacity(0.3)
+            .get(),
+          borderWidth: 0
         }]
+      },
+
+      yAxis: {
+        min: 0,
+        max: 100,
+        lineWidth: 0,
+        tickPositions: []
+      },
+
+      plotOptions: {
+        solidgauge: {
+          dataLabels: {
+            enabled: false
+          },
+          linecap: 'round',
+          stickyTracking: false,
+          rounded: true
+        }
+      },
+
+      series: [{
+        name: 'Halaman',
+        data: [{
+          color: Highcharts.getOptions().colors[0],
+          radius: '112%',
+          innerRadius: '88%',
+          y: progressHalaman
+        }]
+      }, {
+        name: 'Hari',
+        data: [{
+          color: Highcharts.getOptions().colors[1],
+          radius: '87%',
+          innerRadius: '63%',
+          y: progressHari
+        }]
+      }]
     });
   })
 </script>

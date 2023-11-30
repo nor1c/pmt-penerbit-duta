@@ -117,6 +117,10 @@ class Presences_m extends CI_Model{
 		$this->db->from($this->table_name);
 		$this->db->join("t_karyawan", "t_karyawan.id_karyawan=$this->table_name.id_karyawan", "left");
 
+		if ($this->session->userdata('id_jabatan') != 1) {
+			$this->db->where('t_kehadiran.id_karyawan', $this->session->userdata('user_id'));
+		}
+
         if (isset($filters) && $filters != [""] && count($filters)) {
             foreach ($filters as $filter) {
                 $filter = explode('=', $filter);
@@ -135,9 +139,9 @@ class Presences_m extends CI_Model{
 					$this->db->where("$this->table_name.id_karyawan", $filter[1]);
 				}
 				
-                if ($filter[1] != '' && $filter[0] != 'attendance_history_filter_start_date' && $filter[0] != 'attendance_history_filter_finish_date' && $filter[0] != 'attendance_history_filter_karyawan') {
-                    $this->db->where($filter[0], $filter[1]);
-                }
+                // if ($filter[1] != '' && $filter[0] != 'attendance_history_filter_start_date' && $filter[0] != 'attendance_history_filter_finish_date' && $filter[0] != 'attendance_history_filter_karyawan') {
+                //     $this->db->where($filter[0], $filter[1]);
+                // }
             }
         }
 
@@ -153,7 +157,6 @@ class Presences_m extends CI_Model{
         $naskah = $this->db->get();
 
         $data = $naskah->result_array();
-        $recordsTotal = $naskah->num_rows();
 
         return [
             'data' => $data,

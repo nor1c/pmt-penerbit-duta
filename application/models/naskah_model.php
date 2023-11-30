@@ -31,8 +31,8 @@ class Naskah_model extends CI_Model {
 
     public function findByNoJob($no_job) {
         $naskah = $this->db->where('no_job', $no_job)
-                           ->get($this->table)
-                           ->result_array();
+            ->get($this->table)
+            ->result_array();
 
         return $naskah;
     }

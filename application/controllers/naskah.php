@@ -1,20 +1,24 @@
 <?php
 
-class Naskah extends CI_Controller {
+class Naskah extends DUTA_Controller {
     public function __construct() {
         parent::__construct();
         
-        $this->load->model(array('Naskah_model', 'master/jenjang_m', 'master/kategori_m', 'master/mapel_m'));
+        $this->load->model(array('Naskah_model'));
         $this->load->library('template');
     }
 
     public function index() {
-        $data['jenjangs'] = $this->jenjang_m->getAll();
-        $data['mapels'] = $this->mapel_m->getAll();
-        $data['kategoris'] = $this->kategori_m->getAll();
+        $data['jenjangs'] = $this->Jenjang_model->getDropdown();
+        $data['mapels'] = $this->Mapel_model->getDropdown();
+        $data['kategoris'] = $this->Kategori_model->getDropdown();
         $data['next_naskah_no_job'] = $this->Naskah_model->nextNaskahNoJob();
 
         $this->template->display('naskah/index.php', $data);
+    }
+
+    public function next_new_no_job() {
+        echo json_encode((int)$this->Naskah_model->nextNaskahNoJob());
     }
 
     public function data() {
@@ -66,5 +70,13 @@ class Naskah extends CI_Controller {
         $naskah_deleted = $this->Naskah_model->delete($no_job);
 
         echo json_encode($naskah_deleted ? true : false);
+    }
+
+    public function view() {
+        $data['no_job'] = $this->uri->segment(3);
+
+        $data['naskah'] = $this->Naskah_model->findByNoJob($data['no_job'])[0];
+
+        $this->template->display('naskah/view.php', $data);
     }
 }

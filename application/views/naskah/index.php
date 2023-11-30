@@ -26,7 +26,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Jenjang</label>
-                                <select name="jenjang_id" id="jenjang" class="form-control" required>
+                                <select name="id_jenjang" id="jenjang" class="form-control" required>
                                     <option selected disabled>--Pilih Jenjang--</option>
                                     <?php foreach ($jenjangs as $jenjang) { ?>
                                         <option value="<?=$jenjang['id']?>"><?=$jenjang['nama_jenjang']?></option>
@@ -35,7 +35,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Mapel</label>
-                                <select name="mapel_id" id="mapel" class="form-control" required>
+                                <select name="id_mapel" id="mapel" class="form-control" required>
                                     <option selected disabled>--Pilih Mapel--</option>
                                     <?php foreach ($mapels as $mapel) { ?>
                                         <option value="<?=$mapel['id']?>"><?=$mapel['nama_mapel']?></option>
@@ -44,7 +44,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Kategori</label>
-                                <select name="kategori_id" id="kategori" class="form-control" required>
+                                <select name="id_kategori" id="kategori" class="form-control" required>
                                     <option selected disabled>--Pilih Kategori--</option>
                                     <?php foreach ($kategoris as $kategori) { ?>
                                         <option value="<?=$kategori['id']?>"><?=$kategori['nama_kategori']?></option>
@@ -69,9 +69,9 @@
                             <th>Judul Buku</th>
                             <th>Jilid</th>
                             <th>Penulis</th>
-                            <th>Aksi</th>
-                            <th>Spek</th>
                             <th>Rencana Produksi</th>
+                            <!-- <th>Spek</th>
+                            <th>Rencana Produksi</th> -->
                         </tr>
                     </thead>
                 </table>
@@ -90,8 +90,8 @@
             "scrollY": "300px",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 10, 10, 150, 50, 100, 5, 5, 5],
-                [5, 10, 10, 150, 50, 100, 5, 5, 5],
+                [5, 10, 10, 150, 50, 100, 5],
+                [5, 10, 10, 150, 50, 100, 5],
             ],
             "pageLength": 50,
             "processing": true,
@@ -123,13 +123,18 @@
                 null,
                 null,
                 null,
-                null,
-                null
+                // null,
+                // null
             ],
             "columnDefs": [
                 {
                     "render": function(data, type, row) {
                         return '<div class="peers mR-15">' +
+                            '<div class="peer">' +
+                            '<a href="<?=site_url('/naskah/view')?>/'+ row[1] +'" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                            '<i class="c-green-500 ti-eye"></i>' +
+                            '</a>' +
+                            '</div>' +
                             '<div class="peer">' +
                             '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
                             '<i class="c-blue-500 ti-pencil"></i>' +
@@ -144,35 +149,35 @@
                     },
                     "targets": 6,
                 },
-                {
-                    "render": function(data, type, row) {
-                        return '<div class="peers mR-15">' +
-                            '<div class="peer">' +
-                            '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
-                            '<i class="c-orange-600 ti-eye"></i>' +
-                            '</a>' +
-                            '</div>' +
-                            '</div>';
-                    },
-                    "targets": 7,
-                },
-                {
-                    "render": function(data, type, row) {
-                        return '<div class="peers mR-15">' +
-                            '<div class="peer">' +
-                            '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
-                            '<i class="c-blue-500 ti-eye"></i>' +
-                            '</a>' +
-                            '</div>' +
-                            '<div class="peer">' +
-                            '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                            '<i class="c-black-500 ti-settings"></i>' +
-                            '</a>' +
-                            '</div>' +
-                            '</div>';
-                    },
-                    "targets": 8,
-                },
+                // {
+                //     "render": function(data, type, row) {
+                //         return '<div class="peers mR-15">' +
+                //             '<div class="peer">' +
+                //             '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
+                //             '<i class="c-orange-600 ti-eye"></i>' +
+                //             '</a>' +
+                //             '</div>' +
+                //             '</div>';
+                //     },
+                //     "targets": 7,
+                // },
+                // {
+                //     "render": function(data, type, row) {
+                //         return '<div class="peers mR-15">' +
+                //             '<div class="peer">' +
+                //             '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
+                //             '<i class="c-blue-500 ti-eye"></i>' +
+                //             '</a>' +
+                //             '</div>' +
+                //             '<div class="peer">' +
+                //             '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                //             '<i class="c-black-500 ti-settings"></i>' +
+                //             '</a>' +
+                //             '</div>' +
+                //             '</div>';
+                //     },
+                //     "targets": 8,
+                // },
             ],
             'select': {
                 'style': 'multi'
@@ -188,7 +193,17 @@
 
         let isEdit = false
         $('#addNaskahButton').click(function () {
+            resetNaskahForm()
+            $('#perencanaanProduksiDiv').hide()
             isEdit = false
+
+            $.ajax({
+                url: '<?=site_url($this->uri->segment(1))?>/next_new_no_job',
+                type: 'GET',
+            }).then((res) => {
+                console.log(res)
+                $('#formNaskah input[name=no_job]').val(res)
+            })
         })
 
         $('#formNaskah').submit(function(e) {
@@ -216,11 +231,19 @@
             })
         })
 
+        function resetNaskahForm() {
+            $('#formNaskah')[0].reset()
+        }
+
         editNaskah = function(noJob) {
+            $('#perencanaanProduksiDiv').show()
+
             $.ajax({
                 url: "<?=site_url('naskah/naskahDetail')?>?no_job=" + noJob,
                 method: 'GET',
             }).then((res) => {
+                resetNaskahForm()
+
                 const data = JSON.parse(res)
 
                 isEdit = true
@@ -229,10 +252,12 @@
 
                 for (let column in data) {
                     if (data.hasOwnProperty(column)) {
-                        if (column === 'jenjang_id' || column === 'mapel_id' || column === 'kategori_id' || column === 'ukuran') {
+                        if (column === 'id_jenjang' || column === 'id_mapel' || column === 'id_kategori' || column === 'ukuran') {
                             $('#formNaskah select[name='+column+'] option[value="'+data[column]+'"]').attr('selected', 'selected')
+                            $('#formNaskah select[name='+column+']').prop('disabled', true)
                         } else {
                             $('#formNaskah input[name='+column+']').val(data[column])
+                            $('#formNaskah input[name='+column+']').prop('disabled', true)
                         }
                     }
                 }

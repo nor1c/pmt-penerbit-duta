@@ -317,7 +317,7 @@ class User extends CI_Controller{
 							);
 				$this->session->set_userdata($user_sess);
 
-				redirect('presences/input');
+				redirect('dashboard');
 			}else{
 				$this->session->set_flashdata('login_failed','<div class="alert alert-danger">Username or password is not registered.</div>');
 				redirect('user/login');
