@@ -53,7 +53,11 @@ function flashData($status) {
 
 // database
 function DBS() {
-    return ci()->db();
+    return ci()->db;
+}
+
+function lastQuery() {
+    return DBS()->last_query();
 }
 
 function uriSegment($segmentNumber = NULL) {

@@ -5,12 +5,12 @@
 	<title>Sistem Absensi Duta</title>
 	<!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/bootstrap/css/bootstrap.min.css"> -->
 	<!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/custom.css"> -->
-	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/vendor/bootstrap-datetimepicker.css">
-	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/vendor/fullcalendar/fullcalendar.css">
-	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/vendor/jquery-ui/jquery-ui.min.css">
+	<!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/vendor/bootstrap-datetimepicker.css"> -->
+	<!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/vendor/fullcalendar/fullcalendar.css"> -->
+	<!-- <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/vendor/jquery-ui/jquery-ui.min.css"> -->
 	<link rel="stylesheet" href="//cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
 	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
+	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 	<!-- adminator -->
 	<link rel="stylesheet" href="<?= base_url('assets/adminator/style.css') ?>">
 
@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/bootstrap/js/bootstrap.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
 	<!-- adminator -->
 	<script src="<?= base_url('assets/adminator/main.js') ?>" defer></script>
@@ -95,29 +96,25 @@
 							<span class="title">Input Pekerjaan</span>
 						</a>
 					</li>
-					<li class="nav-item">
-						<a class="sidebar-link" href="<?=site_url('naskah/index')?>">
+					
+					<li class="nav-item dropdown">
+						<a class="dropdown-toggle" href="javascript:void(0);">
 							<span class="icon-holder">
 								<i class="c-brown-500 ti-files"></i>
 							</span>
 							<span class="title">Naskah</span>
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="sidebar-link" href="<?=site_url('naskah/roles/index')?>">
-							<span class="icon-holder">
-								<i class="c-brown-500 ti-files"></i>
+							<span class="arrow">
+								<i class="ti-angle-right"></i>
 							</span>
-							<span class="title">Naskah Roles</span>
 						</a>
-					</li>
-					<li class="nav-item">
-						<a class="sidebar-link" href="compose.html">
-							<span class="icon-holder">
-								<i class="c-blue-500 ti-book"></i>
-							</span>
-							<span class="title">Buku</span>
-						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="<?=site_url('naskah/index')?>" class="sidebar-link">Naskah</a>
+							</li>
+							<li>
+								<a href="<?=site_url('naskah/roles/index')?>" class="sidebar-link">Naskah Roles</a>
+							</li>
+						</ul>
 					</li>
 					<li class="nav-item">
 						<a class="sidebar-link" href="calendar.html">
@@ -133,6 +130,14 @@
 								<i class="c-deep-purple-500 ti-loop"></i>
 							</span>
 							<span class="title">Proses Job</span>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="sidebar-link" href="compose.html">
+							<span class="icon-holder">
+								<i class="c-blue-500 ti-book"></i>
+							</span>
+							<span class="title">Buku</span>
 						</a>
 					</li>
 					<li class="nav-item dropdown">
@@ -157,6 +162,9 @@
 							</li>
 							<li>
 								<a href="<?=site_url('master/ukuran')?>" class="sidebar-link">Ukuran</a>
+							</li>
+							<li>
+								<a href="<?=site_url('holidays')?>" class="sidebar-link">Hari Libur</a>
 							</li>
 						</ul>
 					</li>
@@ -416,15 +424,26 @@
 		$('#filter').submit(function (e) {
 			e.preventDefault()
 
-			filters.filters = $(this).serialize()
+			filters.filters = $('form').serialize()
 			refreshTable()
 		})
+
+		function addOneDay(date) {
+			const initialDate = new Date(date)
+			initialDate.setDate(initialDate.getDate() + 1)
+			const day = String(initialDate.getDate()).padStart(2, '0')
+			const month = String(initialDate.getMonth() + 1).padStart(2, '0')
+			const year = initialDate.getFullYear()
+			const nextDate = day + '/' + month + '/' + year
+
+			return nextDate
+		}
 	</script>
-	<script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/jquery-ui/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/custom.js"></script>
+	<!-- <script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/jquery-ui/jquery-ui.min.js"></script> -->
+	<!-- <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/custom.js"></script> -->
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/moment-develop/moment.js"></script>
-	<script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/bootstrap-datetimepicker.js"></script>
-	<script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/fullcalendar/fullcalendar.js"></script>
+	<!-- <script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/bootstrap-datetimepicker.js"></script> -->
+	<!-- <script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/fullcalendar/fullcalendar.js"></script> -->
 
 	<script src="//cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>

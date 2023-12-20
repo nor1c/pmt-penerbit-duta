@@ -792,13 +792,6 @@
       $('.loader').css('display', 'none')
     }, 200);
 
-    $("#attendance_history_filter_start_date").datetimepicker({
-      pickTime: false
-    });
-    $("#attendance_history_filter_finish_date").datetimepicker({
-      pickTime: false
-    });
-
     // chart
     function renderIcons() {}
 

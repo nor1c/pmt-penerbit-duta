@@ -65,4 +65,21 @@ class Naskah_role_model extends CI_Model {
         return $this->db->where('role_key', $key)
                         ->delete('naskah_role_karyawan');
     }
+
+    public function getEveryPICs() {
+        $query = '
+            SELECT 
+                naskah_role_karyawan.role_key,
+                CONCAT(\'[\', GROUP_CONCAT(\'{"id":\', t_karyawan.id_karyawan, \',"nama":"\', t_karyawan.nama, \'"}\'), \']\') AS karyawan
+            FROM naskah_roles
+            LEFT JOIN naskah_role_karyawan ON (naskah_role_karyawan.role_key = naskah_roles.key)
+            LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan = naskah_role_karyawan.id_karyawan)
+            WHERE naskah_roles.is_active = "1"
+            GROUP BY naskah_role_karyawan.role_key;
+        ';
+
+        $data = DBS()->query($query)->result_array();
+
+        return $data;
+    }
 }

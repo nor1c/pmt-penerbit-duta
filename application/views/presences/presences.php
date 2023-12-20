@@ -9,11 +9,11 @@
                         <div class="row mB-10">
                         <div class="col-md-2">
                             <label class="form-label">Tanggal Mulai</label>
-                            <input type="text" name="attendance_history_filter_start_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_start_date" value="<?= date('m/d/Y') ?>">
+                            <input type="text" name="attendance_history_filter_start_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_start_date" data-provide="datepicker" value="<?= date('m/d/Y') ?>">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Tanggal Akhir</label>
-                            <input type="text" name="attendance_history_filter_finish_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_finish_date" value="<?= date('m/d/Y') ?>">
+                            <input type="text" name="attendance_history_filter_finish_date" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="attendance_history_filter_finish_date" data-provide="datepicker" value="<?= date('m/d/Y') ?>">
                         </div>
                         <?php if ($this->session->userdata('id_jabatan') == 1) { ?>
                             <div class="col-md-2">
@@ -123,11 +123,11 @@
             window.location.href = url;
         }
 
-        $("#attendance_history_filter_start_date").datetimepicker({
-            pickTime: false
-        });
-        $("#attendance_history_filter_finish_date").datetimepicker({
-            pickTime: false
-        });
+        // $("#attendance_history_filter_start_date").datetimepicker({
+        //     pickTime: false
+        // });
+        // $("#attendance_history_filter_finish_date").datetimepicker({
+        //     pickTime: false
+        // });
     })
 </script>

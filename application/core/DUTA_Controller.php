@@ -23,7 +23,8 @@ class DUTA_Controller extends CI_Controller {
                 'file',
                 // 'cookie',
                 // 'ins_helper',
-                // 'api_helper'
+                // 'api_helper',
+                'global'
             )
         );
 

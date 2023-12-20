@@ -126,11 +126,11 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                 <label class="form-label" for="presences_date_start">Tanggal Mulai</label>
-                                    <input type="text" name="startdate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_start" value="<?php echo (!$this->session->flashdata('startdate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('startdate'))); ?>">
+                                    <input type="text" name="startdate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_start" data-provide="datepicker" value="<?php echo (!$this->session->flashdata('startdate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('startdate'))); ?>">
                                 </div>
                                 <div class="form-group mb-3">
                                 <label class="form-label" for="presences_date_start">Tanggal Akhir</label>
-                                    <input type="text" name="enddate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_end" value="<?php echo (!$this->session->flashdata('enddate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('enddate'))); ?>">
+                                    <input type="text" name="enddate" class="form-control date" required="required" placeholder="dd/mm/yyyy" id="date_end" data-provide="datepicker" value="<?php echo (!$this->session->flashdata('enddate')) ? date('m/d/Y') : date("m/d/Y", strtotime($this->session->flashdata('enddate'))); ?>">
                                 </div>
                             </div>
 
@@ -276,12 +276,12 @@
             window.location.href = url;
         });
 
-        $("#date_start").datetimepicker({
-            pickTime: false
-        });
-        $("#date_end").datetimepicker({
-            pickTime: false
-        });
+        // $("#date_start").datetimepicker({
+        //     pickTime: false
+        // });
+        // $("#date_end").datetimepicker({
+        //     pickTime: false
+        // });
 
         // stupid force submit code
         // $('#kirim-button').click(function(e) {

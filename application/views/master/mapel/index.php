@@ -22,8 +22,6 @@
         table = $('#naskahTable').DataTable({
             "sDom": "Rlfrtip",
             "scrollX": true,
-            // "scrollY": "300px",
-            // "scrollCollapse": true,
             "aLengthMenu": [
                 [1, 25, 10],
                 [1, 25, 10],

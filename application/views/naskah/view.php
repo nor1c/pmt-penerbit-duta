@@ -46,88 +46,112 @@
                 <div class="col-md-4">
                     <div class="each-field">
                         <h6><b>No Job</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['no_job']; ?></span>
-                        <input type="text" class="editable form-control" name="no_job" value="<?= $naskah['no_job']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->no_job; ?></span>
+                        <input type="text" class="editable form-control" name="no_job" value="<?= $naskah->no_job; ?>" readonly>
                     </div>
                     <div class="each-field">
                         <h6><b>Kode Buku</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['kode']; ?></span>
-                        <input type="text" class="editable form-control" name="kode" value="<?= $naskah['kode']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->kode; ?></span>
+                        <input type="text" class="editable form-control" name="kode" value="<?= $naskah->kode; ?>">
                     </div>
                     <div class="each-field">
                         <h6><b>Judul Buku</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['judul']; ?></span>
-                        <input type="text" class="editable form-control" name="judul" value="<?= $naskah['judul']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->judul; ?></span>
+                        <input type="text" class="editable form-control" name="judul" value="<?= $naskah->judul; ?>">
                     </div>
                     <div class="each-field">
                         <h6><b>Jenjang</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['id_jenjang']; ?></span>
-                        <input type="text" class="editable form-control" name="id_jenjang" value="<?= $naskah['id_jenjang']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->nama_jenjang; ?></span>
+                        <select name="id_jenjang" id="jenjang" class="editable form-control" required>
+                            <option selected disabled default>--Pilih Jenjang--</option>
+                            <?php foreach ($jenjangs as $jenjang) { ?>
+                                <option value="<?=$jenjang['id']?>" <?=$naskah->id_jenjang == $jenjang['id'] ? 'selected' : ''?>><?=$jenjang['nama_jenjang']?></option>
+                            <?php } ?>
+                        </select>
                     </div>
                     <div class="each-field">
                         <h6><b>Mapel</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['id_mapel']; ?></span>
-                        <input type="text" class="editable form-control" name="id_mapel" value="<?= $naskah['id_mapel']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->nama_mapel; ?></span>
+                        <select name="id_mapel" id="mapel" class="editable form-control" required>
+                            <option selected disabled default>--Pilih Mapel--</option>
+                            <?php foreach ($mapels as $mapel) { ?>
+                                <option value="<?=$mapel['id']?>" <?=$naskah->id_mapel == $mapel['id'] ? 'selected' : ''?>><?=$mapel['nama_mapel']?></option>
+                            <?php } ?>
+                        </select>
                     </div>
                     <div class="each-field">
                         <h6><b>Kategori</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['id_kategori']; ?></span>
-                        <input type="text" class="editable form-control" name="id_kategori" value="<?= $naskah['id_kategori']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->nama_kategori; ?></span>
+                        <select name="id_kategori" id="kategori" class="editable form-control" required>
+                            <option selected disabled default>--Pilih Kategori--</option>
+                            <?php foreach ($kategoris as $kategori) { ?>
+                                <option value="<?=$kategori['id']?>" <?=$naskah->id_kategori == $kategori['id'] ? 'selected' : ''?>><?=$kategori['nama_kategori']?></option>
+                            <?php } ?>
+                        </select>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="each-field">
                         <h6><b>Penulis</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['penulis']; ?></span>
-                        <input type="text" class="editable form-control" name="penulis" value="<?= $naskah['penulis']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->penulis; ?></span>
+                        <input type="text" class="editable form-control" name="penulis" value="<?= $naskah->penulis; ?>">
                     </div>
                     <div class="each-field">
                         <h6><b>Ukuran</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['ukuran']; ?></span>
-                        <input type="text" class="editable form-control" name="ukuran" value="<?= $naskah['ukuran']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->nama_ukuran; ?></span>
+                        <select name="id_ukuran" id="ukuran" class="editable form-control" required>
+                            <option selected disabled default>--Pilih Ukuran--</option>
+                            <?php foreach ($ukurans as $ukuran) { ?>
+                                <option value="<?=$ukuran['id']?>" <?=$naskah->id_ukuran == $ukuran['id'] ? 'selected' : ''?>><?=$ukuran['nama_ukuran']?></option>
+                            <?php } ?>
+                        </select>
                     </div>
                     <div class="each-field">
                         <h6><b>Warna</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['warna']; ?></span>
-                        <input type="text" class="editable form-control" name="warna" value="<?= $naskah['warna']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->warna; ?></span>
+                        <input type="text" class="editable form-control" name="warna" value="<?= $naskah->warna; ?>">
                     </div>
                     <div class="each-field">
                         <h6><b>Halaman</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['halaman']; ?></span>
-                        <input type="text" class="editable form-control" name="halaman" value="<?= $naskah['halaman']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->halaman; ?></span>
+                        <input type="text" class="editable form-control" name="halaman" value="<?= $naskah->halaman; ?>">
                     </div>
                     <div class="each-field">
                         <h6><b>ISBN Jil. Lengkap</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['isbn_jil_lengkap']; ?></span>
-                        <input type="text" class="editable form-control" name="isbn_jil_lengkap" value="<?= $naskah['isbn_jil_lengkap']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->isbn_jil_lengkap; ?></span>
+                        <input type="text" class="editable form-control" name="isbn_jil_lengkap" value="<?= $naskah->isbn_jil_lengkap; ?>">
                     </div>
                     <div class="each-field">
                         <h6><b>ISBN</b></h6>
-                        <span class="hide-on-edit"><?= $naskah['isbn']; ?></span>
-                        <input type="text" class="editable form-control" name="isbn" value="<?= $naskah['isbn']; ?>">
+                        <span class="hide-on-edit"><?= $naskah->isbn; ?></span>
+                        <input type="text" class="editable form-control" name="isbn" value="<?= $naskah->isbn; ?>">
                     </div>
                     <div class="each-field">
-                        <button id="save-button" type="submit" class="btn btn-success text-white">Save</button>
+                        <button id="save-button" type="submit" class="editable btn btn-success text-white">Save</button>
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-12 text-center">
-                                <h4><b>Cover Buku</b></h4>
+                    <form action="" enctype="multipart/form-data">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <h4><b>Cover Buku</b></h4>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <img src="<?=$naskah->cover != NULL ? base_url('uploads/cover_naskah/' . $naskah->cover) : 'https://marketplace.canva.com/EAFersXpW3g/1/0/1003w/canva-blue-and-white-modern-business-book-cover-cfxNJXYre8I.jpg'?>" width="200">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-center mT-10">
+                                    <input class="d-none" type="file" id="fileInput" name="file" accept="image/*" onchange="uploadImage()">
+                                    <button type="button" id="uploadButton" class="btn btn-primary" onclick="chooseFile()">Ubah Cover</button>
+                                    <input class="d-none" type="submit" value="Submit">
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-12 text-center">
-                                <img src="https://marketplace.canva.com/EAFersXpW3g/1/0/1003w/canva-blue-and-white-modern-business-book-cover-cfxNJXYre8I.jpg" width="200">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 text-center mT-10">
-                                <button class="btn btn-primary">Upload</button>
-                            </div>
-                        </div>
-                    </div>
+                    </form>
                 </div>
                 <div class="col-md-2">
                     <div class="btn-group" role="group">
@@ -189,15 +213,76 @@
                 processData: false,
                 cache: false,
             }).then((res) => {
-                Swal.fire(
-                    'Berhasil disimpan!',
-                    'Data naskah berhasil disimpan.',
-                    'success'
-                )
+                res = JSON.parse(res)
+
+                if (res.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal menyimpan perubahan',
+                        text: res.message,
+                    })
+                } else {
+                    Swal.fire(
+                        'Berhasil disimpan!',
+                        'Data naskah berhasil disimpan.',
+                        'success'
+                    ).then(function() {
+                        location.reload()
+                    })
+                }
             })
 
             $('.editable').hide()
             $('.hide-on-edit').show()
         })
     })
+
+    function chooseFile() {
+        document.getElementById('fileInput').click();
+    }
+
+    function uploadImage() {
+        let fileInput = document.getElementById('fileInput')
+        let fileNameDisplay = document.getElementById('fileName')
+
+        let fileExtension = getFileExtension(fileInput.files[0].name)
+        let newFileName = "<?=$naskah->id?>" + '.' + fileExtension
+
+        let formData = new FormData();
+        formData.append('file', fileInput.files[0], newFileName)
+
+        $.ajax({
+            url: "<?=site_url(uriSegment(1).'/changeCover?naskahId=' . $naskah->id) . '&prevFileName=' . $naskah->cover?>",
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                res = JSON.parse(res)
+
+                if (res.error != true) {
+                    Swal.fire(
+                        'Berhasil merubah cover naskah!',
+                        'Naskah cover terupdate.',
+                        'success'
+                    ).then(function() {
+                        location.reload()
+                    })
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops... Gagal merubah cover naskah!',
+                        text: res.message,
+                    })
+                }
+            },
+            error: function(error) {
+                console.error('Upload error:', error)
+            }
+        });
+    }
+
+    function getFileExtension(filename) {
+        return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+    }
 </script>

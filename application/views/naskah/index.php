@@ -26,8 +26,8 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Jenjang</label>
-                                <select name="id_jenjang" id="jenjang" class="form-control" required>
-                                    <option selected disabled>--Pilih Jenjang--</option>
+                                <select name="id_jenjang" id="jenjang" class="form-control">
+                                    <option value="" selected>--Semua Jenjang--</option>
                                     <?php foreach ($jenjangs as $jenjang) { ?>
                                         <option value="<?=$jenjang['id']?>"><?=$jenjang['nama_jenjang']?></option>
                                     <?php } ?>
@@ -35,8 +35,8 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Mapel</label>
-                                <select name="id_mapel" id="mapel" class="form-control" required>
-                                    <option selected disabled>--Pilih Mapel--</option>
+                                <select name="id_mapel" id="mapel" class="form-control">
+                                    <option value="" selected>--Semua Mapel--</option>
                                     <?php foreach ($mapels as $mapel) { ?>
                                         <option value="<?=$mapel['id']?>"><?=$mapel['nama_mapel']?></option>
                                     <?php } ?>
@@ -44,8 +44,8 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Kategori</label>
-                                <select name="id_kategori" id="kategori" class="form-control" required>
-                                    <option selected disabled>--Pilih Kategori--</option>
+                                <select name="id_kategori" id="kategori" class="form-control">
+                                    <option value="" selected>--Semua Kategori--</option>
                                     <?php foreach ($kategoris as $kategori) { ?>
                                         <option value="<?=$kategori['id']?>"><?=$kategori['nama_kategori']?></option>
                                     <?php } ?>
@@ -86,17 +86,15 @@
     $(document).ready(function() {
         table = $('#naskahTable').DataTable({
             "sDom": "Rlfrtip",
-            "scrollX": true,
-            "scrollY": "300px",
             "scrollCollapse": true,
             "aLengthMenu": [
                 [5, 10, 10, 150, 50, 100, 5],
                 [5, 10, 10, 150, 50, 100, 5],
             ],
-            "pageLength": 50,
+            "pageLength": 10,
             "processing": true,
             "serverSide": true,
-            "searching": false,
+            "searching": true,
             "ajax": {
                 "url": "<?= site_url($this->uri->segment(1) . '/data') ?>",
                 'method': 'POST',
@@ -110,21 +108,37 @@
                 {
                     "className": 'datatables-number',
                     "data": null,
-                    "orderable": true,
+                    "orderable": false,
                     "searchable": false,
                     "defaultContent": '',
                     render: function(data, type, row, meta) {
                         return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 },
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                // null,
-                // null
+                {
+                    "orderable": false,
+                    "searchable": true,
+                },
+                {
+                    "orderable": false,
+                    "searchable": true,
+                },
+                {
+                    "orderable": false,
+                    "searchable": false,
+                },
+                {
+                    "orderable": false,
+                    "searchable": true,
+                },
+                {
+                    "orderable": false,
+                    "searchable": false,
+                },
+                {
+                    "orderable": false,
+                    "searchable": false,
+                },
             ],
             "columnDefs": [
                 {
@@ -149,35 +163,6 @@
                     },
                     "targets": 6,
                 },
-                // {
-                //     "render": function(data, type, row) {
-                //         return '<div class="peers mR-15">' +
-                //             '<div class="peer">' +
-                //             '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
-                //             '<i class="c-orange-600 ti-eye"></i>' +
-                //             '</a>' +
-                //             '</div>' +
-                //             '</div>';
-                //     },
-                //     "targets": 7,
-                // },
-                // {
-                //     "render": function(data, type, row) {
-                //         return '<div class="peers mR-15">' +
-                //             '<div class="peer">' +
-                //             '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
-                //             '<i class="c-blue-500 ti-eye"></i>' +
-                //             '</a>' +
-                //             '</div>' +
-                //             '<div class="peer">' +
-                //             '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                //             '<i class="c-black-500 ti-settings"></i>' +
-                //             '</a>' +
-                //             '</div>' +
-                //             '</div>';
-                //     },
-                //     "targets": 8,
-                // },
             ],
             'select': {
                 'style': 'multi'
@@ -208,6 +193,7 @@
 
         $('#formNaskah').submit(function(e) {
             e.preventDefault()
+            $('#naskahError').hide()
 
             $.ajax({
                 url: '<?= site_url($this->uri->segment(1)) ?>/' + (isEdit ? 'update' : 'create'),
@@ -217,7 +203,12 @@
                 processData: false,
                 cache: false,
             }).then((res) => {
-                if (res) {
+                res = JSON.parse(res)
+
+                if (res.error) {
+                    $('#naskahError').show()
+                    $('#naskahError').text(res.message)
+                } else {
                     refreshTable()
                     $('#closeNaskahFormModalButton').trigger('click')
                     Swal.fire(
@@ -233,6 +224,7 @@
 
         function resetNaskahForm() {
             $('#formNaskah')[0].reset()
+            $('#naskahError').hide()
         }
 
         editNaskah = function(noJob) {
@@ -249,10 +241,11 @@
                 isEdit = true
 
                 $('#naskahFormTitle').html('Edit Naskah ' + data['no_job'])
+                $('#naskahId').html(data['id'])
 
                 for (let column in data) {
                     if (data.hasOwnProperty(column)) {
-                        if (column === 'id_jenjang' || column === 'id_mapel' || column === 'id_kategori' || column === 'ukuran') {
+                        if (column === 'id_jenjang' || column === 'id_mapel' || column === 'id_kategori' || column === 'id_ukuran') {
                             $('#formNaskah select[name='+column+'] option[value="'+data[column]+'"]').attr('selected', 'selected')
                             $('#formNaskah select[name='+column+']').prop('disabled', true)
                         } else {
@@ -281,20 +274,23 @@
                         data: {
                             no_job: noJob
                         }
-                    }).then((success) => {
-                        success = JSON.parse(success)
-                        if (success === true) {
+                    }).then((res) => {
+                        res = JSON.parse(res)
+                        
+                        if (res.error != true) {
                             refreshTable()
                             Swal.fire(
-                                'Berhasil dihapus!',
-                                'Naskah telah dihapus.',
+                                'Berhasil menghapus naskah!',
+                                'Naskah telah terhapus.',
                                 'success'
-                            )
+                            ).then(function() {
+                                refreshTable()
+                            })
                         } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Oops...',
-                                text: 'Gagal menghapus naskah!',
+                                title: 'Oops... Gagal menghapus naskah!',
+                                text: res.message,
                             })
                         }
                     })

@@ -15,6 +15,8 @@
                     </span>
                 </div>
                 <div class="modal-body">
+                    <div id="naskahError" class="alert alert-danger"></div>
+
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <label class="form-label">No Job</label>
@@ -71,13 +73,11 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Ukuran</label>
-                            <select name="ukuran" id="ukuran" class="form-control" required>
+                            <select name="id_ukuran" id="ukuran" class="form-control" required>
                                 <option selected disabled default>--Pilih Ukuran--</option>
-                                <option value="148mm x 210mm">148mm x 210mm</option>
-                                <option value="176mm x 250mm">176mm x 250mm</option>
-                                <option value="195mm x 255mm">195mm x 255mm</option>
-                                <option value="210mm x 260mm">210mm x 260mm</option>
-                                <option value="210mm x 297mm">210mm x 297mm</option>
+                                <?php foreach ($ukurans as $ukuran) { ?>
+                                    <option value="<?=$ukuran['id']?>"><?=$ukuran['nama_ukuran']?></option>
+                                <?php } ?>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -88,11 +88,11 @@
                     <div class="row">
                         <div class="col-md-4">
                             <label class="form-label">ISBN Jil. Lengkap</label>
-                            <input type="text" name="isbn_jil_lengkap" id="" class="form-control" required>
+                            <input type="text" name="isbn_jil_lengkap" id="" class="form-control">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">ISBN</label>
-                            <input type="text" name="isbn" id="" class="form-control" required>
+                            <input type="text" name="isbn" id="" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -100,41 +100,75 @@
                 <div id="perencanaanProduksiDiv">
                     <hr>
 
+                    <div id="naskahId" class="d-none"></div>
+
                     <div class="modal-body">
-                        <h5><b>Perencanaan Produksi</b></h5>
+                        <div>
+                            <div class="mB-10" style="float:left">
+                                <h5><b>Perencanaan Produksi</b></h5>
+                            </div>
+                            
+                            <div class="mB-10" style="float:right">
+                                Auto-sync Tanggal Mulai <input type="checkbox" checked data-toggle="toggle">
+                            </div>
+                        </div>
 
                         <div>
                             <table class="table table-striped table-bordered">
                                 <thead>
-                                    <th width="10">Urutan</th>
+                                    <th width="10">Status</th>
                                     <th>Level Kerja</th>
                                     <th width="70">Durasi</th>
                                     <th>Kecepatan (Hal/Hari)</th>
-                                    <th width="100">Mulai</th>
+                                    <th width="150">Mulai</th>
                                     <th width="10">Libur</th>
-                                    <th width="100">Selesai</th>
+                                    <th width="150">Selesai</th>
                                     <th>PIC</th>
                                     <!-- <th></th> -->
                                 </thead>
                                 <tbody>
-                                    <?php
-                                        for ($i=1; $i <= 10; $i++) {
+                                    <?php 
+                                        $no = 1;
+                                        foreach ($default_level_kerja as $lk_index => $lk) { 
+                                        $no++;
                                     ?>
                                         <tr>
-                                            <td><?=$i?></td>
-                                            <td>Penulisan</td>
+                                            <span id="nextLevel_<?=$lk['key']?>" class="d-none"><?=$level_kerja_key_map[$lk['key']]['next_level']?></span>
+
                                             <td>
-                                                <input type="text" name="" id="" class="form-control">
+                                                <input id="key_<?=$lk['key']?>" type="text" name="key[<?=$lk_index?>]" value="<?=$level_kerja_key_map[$lk['key']]['key']?>" class="d-none">
+                                                <input id="switch_<?=$lk['key']?>" type="checkbox" name="is_disabled[<?=$lk_index?>]" checked data-toggle="toggle" onchange="switchLevelToOff('<?=$lk['key']?>', '<?=$level_kerja_key_map[$lk['key']]['next_level']?>')">
                                             </td>
-                                            <td>Otomatis</td>
-                                            <td>15-03-2023</td>
-                                            <td>1</td>
-                                            <td>19-05-2023</td>
+                                            <td><?=$level_kerja_key_map[$lk['key']]['text']?></td>
                                             <td>
-                                                <select name="" id="" class="form-control">
+                                                <input id="duration_<?=$lk['key']?>" type="text" name="duration[<?=$lk_index?>]" class="form-control" onchange="generateKecepatan('<?=$lk['key']?>')">
+                                            </td>
+                                            <td>
+                                                <span id="kecepatan_<?=$lk['key']?>"></span>
+                                            </td>
+                                            <td>
+                                                <input id="startDate_<?=$lk['key']?>" type="text" name="tgl_rencana_mulai[<?=$lk_index?>]" class="form-control" onchange="startDateChanged('<?=$lk['key']?>')" autocomplete="off" data-date-format="dd/mm/yyyy" data-provide="datepicker" required>
+                                            </td>
+                                            <td>
+                                                <span id="offDays_<?=$lk['key']?>"></span>
+                                                <input id="libur_<?=$lk['key']?>" type="text" name="libur[<?=$lk_index?>]" value="" class="d-none">
+                                            </td>
+                                            <td>
+                                                <span id="endDate_<?=$lk['key']?>"></span>
+                                                <input id="tgl_rencana_selesai_<?=$lk['key']?>" type="text" name="tgl_rencana_selesai[<?=$lk_index?>]" value="" class="d-none">
+                                            </td>
+                                            <td>
+                                                <select id="pic_<?=$lk['key']?>" name="pic_aktif[<?=$lk_index?>]" class="form-control">
                                                     <option value="tentatif">Tentatif</option>
-                                                    <option value="editor">Editor</option>
-                                                    <option value="setter">Setter</option>
+                                                    <?php
+                                                        foreach ($roles_karyawan as $naskah_pic) {
+                                                            if ($naskah_pic['role_key'] == $level_kerja_key_map[$lk['key']]['pic']) {
+                                                                foreach (json_decode($naskah_pic['karyawan']) as $pic) {
+                                                                    echo "<option value='$pic->id'>$pic->nama</option>";
+                                                                }
+                                                            }
+                                                        }
+                                                    ?>
                                                 </select>
                                             </td>
                                             <!-- <td>edit | delete</td> -->
@@ -155,3 +189,178 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        
+    })
+
+    function generateKecepatan(key) {
+        const naskahPage = $('input[name=halaman]').val()
+        const duration = $('#duration_' + key).val()
+        const kecepatan = (naskahPage/parseInt(duration)).toFixed(2).replace('.00', '')
+
+        $('#kecepatan_' + key).text(kecepatan);
+
+        if ($('#startDate_' + key).val() != '') {
+            startDateChanged(key)
+        }
+    }
+
+    let disabledLevels = []
+    let disabledLevelsDetail = {}
+    function switchLevelToOff(key, nextLevelKerja) {
+        const checked = $('#switch_' + key).prop('checked')
+
+        if (checked) {
+            const index = disabledLevels.indexOf(key);
+            if (index !== -1) {
+                disabledLevels.splice(index, 1);
+            }
+
+            if (disabledLevelsDetail.hasOwnProperty(key)) {
+                delete disabledLevelsDetail[key];
+            }
+            
+            $('#key_' + key).prop('disabled', false)
+            $('#libur_' + key).prop('disabled', false)
+            $('#duration_' + key).prop('disabled', false)
+            $('#startDate_' + key).prop('disabled', false)
+            $('#tgl_rencana_selesai_' + key).prop('disabled', false)
+            $('#pic_' + key).prop('disabled', false)
+        } else {
+            disabledLevels.push(key)
+            disabledLevelsDetail[key] = nextLevelKerja
+            
+            $('#key_' + key).prop('disabled', true)
+            $('#libur_' + key).prop('disabled', true)
+            $('#duration_' + key).prop('disabled', true)
+            $('#startDate_' + key).prop('disabled', true)
+            $('#tgl_rencana_selesai_' + key).prop('disabled', true)
+            $('#pic_' + key).prop('disabled', true)
+        }
+
+        startDateChanged('penulisan')
+    }
+
+    function startDateChanged(key) {
+        const pickedDate = $('#startDate_' + key).val()
+        const duration = $('#duration_' + key).val()
+
+        // get total libur
+        // rumus: rentang tgl terpilih+durasi
+        $.ajax({
+            url: "<?=site_url(uriSegment(1).'/getOffDaysTotal')?>?duration=" + duration + "&startDate=" + pickedDate,
+            method: 'GET',
+        }).then((res) => {
+            if (res != []) {
+                res = JSON.parse(res)
+
+                $('#offDays_' + key).text(res.offDays)
+                $('#libur_' + key).val(res.offDays)
+                $('#endDate_' + key).text(res.endDate)
+                $('#tgl_rencana_selesai_' + key).val(res.endDate)
+                
+                let nextLevelKerja = $('#nextLevel_' + key).text()
+                if (nextLevelKerja && nextLevelKerja != 'null' && nextLevelKerja != null) {
+                    if (disabledLevels.includes(nextLevelKerja)) {
+                        nextLevelKerja = disabledLevelsDetail[nextLevelKerja]
+                    }
+
+                    const nextDay = addOneDay(res.endDate)
+                    $('#startDate_' + nextLevelKerja).val(nextDay)
+
+                    if (nextLevelKerja != null) {
+                        startDateChanged(nextLevelKerja)
+                    }
+                }
+            }
+        })
+    }
+
+    $('#formNaskah').submit(function(e) {
+        e.preventDefault()// Serialize the form data
+        var data = $(this).serializeArray();
+
+        const idNaskah = $('#naskahId').text()
+
+        const transformedData = [];
+
+        for (let i = 0; i < data.length / 7; i++) {
+            const startIndex = i * 7;
+            const newObj = {};
+
+            for (let j = startIndex; j < startIndex + 7; j++) {
+                const key = data[j].name.replace(/\[\d+\]/, '');
+                newObj[key] = data[j].value;
+            }
+
+            transformedData.push(newObj);
+        }
+
+        const dataWithKey = {};
+        for (const key in transformedData) {
+            if (transformedData.hasOwnProperty(key)) {
+                const entry = transformedData[key];
+                dataWithKey[entry.key] = entry;
+            }
+        }
+
+        const totalLevelKerja = parseInt("<?=count($default_level_kerja)?>")
+
+        // get level kerja mapping
+        $.ajax({
+            method: 'GET',
+            url: "<?=site_url(uriSegment(1) . '/getLevelKerjaKeyMapJson')?>",
+        }).then((levelKerjaMap) => {
+            const levelKerja = JSON.parse(levelKerjaMap)
+
+            // transform all data as final data
+            let finalData = []
+            for (const key in levelKerja) {
+                if (dataWithKey[key] !== undefined) {
+                    finalData.push({
+                        order: levelKerja[key].order,
+                        key: levelKerja[key].key,
+                        id_naskah: idNaskah,
+                        durasi: dataWithKey[key]['duration'],
+                        tgl_rencana_mulai: dataWithKey[key]['tgl_rencana_mulai'],
+                        libur: dataWithKey[key]['total_libur'],
+                        tgl_rencana_selesai: dataWithKey[key]['tgl_rencana_selesai'],
+                        total_libur: dataWithKey[key]['libur'],
+                        is_disabled: 0,
+                        id_pic_aktif: dataWithKey[key]['pic_aktif'] == 'tentatif' ? 0 : dataWithKey[key]['pic_aktif'],
+                    })
+                } else {
+                    finalData.push({
+                        order: levelKerja[key].order,
+                        key: levelKerja[key].key,
+                        id_naskah: idNaskah,
+                    })
+                }
+            }
+
+            // save personalized level kerja to database
+            $.ajax({
+                method: 'POST',
+                url: "<?=site_url(uriSegment(1) . '/saveLevelKerja')?>?id_naskah=" + idNaskah,
+                data: {
+                    data: finalData
+                }
+            }).then((res) => {
+                res = JSON.parse(res)
+
+                if (res == true) {
+                    Swal.fire(
+                        'Berhasil mengatur level naskah!',
+                        'Data Level Naskah telah tersimpan.',
+                        'success'
+                    ).then(function() {
+                        $("[data-bs-dismiss=modal]").trigger({ type: "click" })
+                        refreshTable()
+                    })
+                }
+            })
+        })
+    })
+</script>

@@ -6,12 +6,12 @@ $(document).ready(function(){
 	});
 
 	//USER PAGE
-	$('#tanggal_lahir').datetimepicker({
-		pickTime: false
-	});
-	$('#tanggal_masuk').datetimepicker({
-		pickTime: false
-	});
+	// $('#tanggal_lahir').datetimepicker({
+	// 	pickTime: false
+	// });
+	// $('#tanggal_masuk').datetimepicker({
+	// 	pickTime: false
+	// });
 	/*var status_username = 0;
 	$('#submit_user_add').attr('disabled','true');
 	$('#user_name').keyup(function(){
@@ -109,25 +109,25 @@ $(document).ready(function(){
 
 	/******** MASTER JAM KERJA *********/
 	/***********************************/
-	$('#master_jam_masuk').datetimepicker({
-		pickDate:false
-	});
+	// $('#master_jam_masuk').datetimepicker({
+	// 	pickDate:false
+	// });
 
-	$('#master_jam_keluar').datetimepicker({
-		pickDate:false
-	});
+	// $('#master_jam_keluar').datetimepicker({
+	// 	pickDate:false
+	// });
 
 	/***************END*******************/
 
 
 	//********* PRESENCES ***************/
-	$('#presences_date_start').datetimepicker({
-		pickTime:false
-	});
+	// $('#presences_date_start').datetimepicker({
+	// 	pickTime:false
+	// });
 
-	$('#presences_date_end').datetimepicker({
-		pickTime:false
-	});
+	// $('#presences_date_end').datetimepicker({
+	// 	pickTime:false
+	// });
 	//***********************************/
 
 
@@ -136,9 +136,9 @@ $(document).ready(function(){
 	var counter = 0;
 	var html_add = '';
 
-	$('#tanggal_request').datetimepicker({
-		pickTime:false
-	});
+	// $('#tanggal_request').datetimepicker({
+	// 	pickTime:false
+	// });
 
 	$('#add_alasan_request').click(function(){
 		if($('#tanggal_request').val()==''){
