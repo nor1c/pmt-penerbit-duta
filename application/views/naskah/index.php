@@ -254,6 +254,8 @@
                         }
                     }
                 }
+
+                getNaskahLevelKerja(data['id'])
             })
         }
 

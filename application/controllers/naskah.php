@@ -117,6 +117,14 @@ class Naskah extends DUTA_Controller {
         echo json_encode((int)$this->Naskah_model->nextNaskahNoJob());
     }
 
+    public function getNaskahLevelKerja() {
+        $idNaskah = inputGet('id_naskah');
+
+        $level_kerja = $this->Naskah_model->getNaskahLevelKerja($idNaskah);
+
+        echo json_encode($level_kerja);
+    }
+
     public function data() {
         $pagination = array(
             'start' => $this->input->post('start'),

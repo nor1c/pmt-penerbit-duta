@@ -154,4 +154,13 @@ class Naskah_model extends CI_Model {
 
         return true;
     }
+
+    public function getNaskahLevelKerja($idNaskah) {
+        $level_kerja = DBS()->where('id_naskah', $idNaskah)
+                            ->from('naskah_level_kerja')
+                            ->get()
+                            ->result_array();
+
+        return $level_kerja;
+    }
 }

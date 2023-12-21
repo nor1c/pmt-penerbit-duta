@@ -109,7 +109,7 @@
                             </div>
                             
                             <div class="mB-10" style="float:right">
-                                Auto-sync Tanggal Mulai <input type="checkbox" checked data-toggle="toggle">
+                                Auto-sync Tanggal Mulai <input id="autoSync" type="checkbox" checked data-toggle="toggle" onchange="changeAutoSync()">
                             </div>
                         </div>
 
@@ -137,24 +137,25 @@
 
                                             <td>
                                                 <input id="key_<?=$lk['key']?>" type="text" name="key[<?=$lk_index?>]" value="<?=$level_kerja_key_map[$lk['key']]['key']?>" class="d-none">
-                                                <input id="switch_<?=$lk['key']?>" type="checkbox" name="is_disabled[<?=$lk_index?>]" checked data-toggle="toggle" onchange="switchLevelToOff('<?=$lk['key']?>', '<?=$level_kerja_key_map[$lk['key']]['next_level']?>')">
+                                                <input id="switch_<?=$lk['key']?>" class="switch" type="checkbox" name="is_disabled[<?=$lk_index?>]" checked data-toggle="toggle" onchange="switchLevelToOff('<?=$lk['key']?>', '<?=$level_kerja_key_map[$lk['key']]['next_level']?>')">
                                             </td>
                                             <td><?=$level_kerja_key_map[$lk['key']]['text']?></td>
                                             <td>
                                                 <input id="duration_<?=$lk['key']?>" type="text" name="duration[<?=$lk_index?>]" class="form-control" onchange="generateKecepatan('<?=$lk['key']?>')">
                                             </td>
                                             <td>
-                                                <span id="kecepatan_<?=$lk['key']?>"></span>
+                                                <span id="kecepatan_<?=$lk['key']?>" class="kecepatan"></span>
+                                                <input id="kecepatanInput_<?=$lk['key']?>" type="text" name="kecepatanInput[<?=$lk_index?>]" value="" class="d-none">
                                             </td>
                                             <td>
                                                 <input id="startDate_<?=$lk['key']?>" type="text" name="tgl_rencana_mulai[<?=$lk_index?>]" class="form-control" onchange="startDateChanged('<?=$lk['key']?>')" autocomplete="off" data-date-format="dd/mm/yyyy" data-provide="datepicker" required>
                                             </td>
                                             <td>
-                                                <span id="offDays_<?=$lk['key']?>"></span>
+                                                <span id="offDays_<?=$lk['key']?>" class="offDays"></span>
                                                 <input id="libur_<?=$lk['key']?>" type="text" name="libur[<?=$lk_index?>]" value="" class="d-none">
                                             </td>
                                             <td>
-                                                <span id="endDate_<?=$lk['key']?>"></span>
+                                                <span id="endDate_<?=$lk['key']?>" class="endDate"></span>
                                                 <input id="tgl_rencana_selesai_<?=$lk['key']?>" type="text" name="tgl_rencana_selesai[<?=$lk_index?>]" value="" class="d-none">
                                             </td>
                                             <td>
@@ -182,7 +183,7 @@
 
                 <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-info waves-effect waves-light">Simpan</button>
-                    <button type="reset" class="btn btn-secondary waves-effect waves-light">Clear</button>
+                    <button type="reset" class="btn btn-secondary waves-effect waves-light" onclick="clearForm()">Clear</button>
                     <button type="button" class="btn btn-dark waves-effect waves-light" data-bs-dismiss="modal">Batal</button>
                 </div>
             </form>
@@ -191,9 +192,54 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        
-    })
+    let autoSync = true;
+
+    function changeAutoSync() {
+        if ($('#autoSync').is(':checked')) {
+            autoSync = true
+        } else {
+            autoSync = false
+        }
+
+        console.log(autoSync);
+    }
+
+    function clearForm() {
+        $('.switch').prop('checked', true).trigger('change')
+        $('.kecepatan').text('')
+        $('.offDays').text('')
+        $('.endDate').text('')
+    }
+
+    function getNaskahLevelKerja(idNaskah) {
+        $.ajax({
+            method: 'GET',
+            url: "<?=site_url(uriSegment(1) . '/getNaskahLevelKerja')?>?id_naskah=" + idNaskah
+        }).then((res) => {
+            res = JSON.parse(res)
+
+            clearForm()
+            
+            if (res.length) {
+                res.forEach(lk => {
+                    if (lk.is_disabled == '1') {
+                        $('#switch_' + lk.key).prop('checked', false).trigger('change')
+                        // switchLevelToOff(lk.key)
+                    } else {
+                        $('#duration_' + lk.key).val(lk.durasi)
+                        $('#kecepatan_' + lk.key).text(lk.kecepatan)
+                        $('#kecepatanInput_' + lk.key).val(lk.kecepatan)
+                        $('#startDate_' + lk.key).val(lk.tgl_rencana_mulai)
+                        $('#offDays_' + lk.key).text(lk.total_libur)
+                        $('#endDate_' + lk.key).text(lk.tgl_rencana_selesai)
+                        if (lk.id_pic_aktif != null) {
+                            $('#pic_' + lk.key).val(lk.id_pic_aktif)
+                        }
+                    }
+                })
+            }
+        })
+    }
 
     function generateKecepatan(key) {
         const naskahPage = $('input[name=halaman]').val()
@@ -201,6 +247,7 @@
         const kecepatan = (naskahPage/parseInt(duration)).toFixed(2).replace('.00', '')
 
         $('#kecepatan_' + key).text(kecepatan);
+        $('#kecepatanInput_' + key).val(kecepatan);
 
         if ($('#startDate_' + key).val() != '') {
             startDateChanged(key)
@@ -224,6 +271,7 @@
             
             $('#key_' + key).prop('disabled', false)
             $('#libur_' + key).prop('disabled', false)
+            $('#kecepatanInput_' + key).prop('disabled', false)
             $('#duration_' + key).prop('disabled', false)
             $('#startDate_' + key).prop('disabled', false)
             $('#tgl_rencana_selesai_' + key).prop('disabled', false)
@@ -234,6 +282,7 @@
             
             $('#key_' + key).prop('disabled', true)
             $('#libur_' + key).prop('disabled', true)
+            $('#kecepatanInput_' + key).prop('disabled', true)
             $('#duration_' + key).prop('disabled', true)
             $('#startDate_' + key).prop('disabled', true)
             $('#tgl_rencana_selesai_' + key).prop('disabled', true)
@@ -262,16 +311,20 @@
                 $('#tgl_rencana_selesai_' + key).val(res.endDate)
                 
                 let nextLevelKerja = $('#nextLevel_' + key).text()
-                if (nextLevelKerja && nextLevelKerja != 'null' && nextLevelKerja != null) {
-                    if (disabledLevels.includes(nextLevelKerja)) {
-                        nextLevelKerja = disabledLevelsDetail[nextLevelKerja]
-                    }
+                if (autoSync) {
+                    if (nextLevelKerja && nextLevelKerja != 'null' && nextLevelKerja != null) {
+                        if (disabledLevels.includes(nextLevelKerja)) {
+                            nextLevelKerja = disabledLevelsDetail[nextLevelKerja]
+                        }
 
-                    const nextDay = addOneDay(res.endDate)
-                    $('#startDate_' + nextLevelKerja).val(nextDay)
+                        const nextDay = addOneDay(res.endDate)
+                        if (nextDay != 'NaN/NaN/NaN') {
+                            $('#startDate_' + nextLevelKerja).val(nextDay)
+                        }
 
-                    if (nextLevelKerja != null) {
-                        startDateChanged(nextLevelKerja)
+                        if (nextLevelKerja != null) {
+                            startDateChanged(nextLevelKerja)
+                        }
                     }
                 }
             }
@@ -286,11 +339,11 @@
 
         const transformedData = [];
 
-        for (let i = 0; i < data.length / 7; i++) {
-            const startIndex = i * 7;
+        for (let i = 0; i < data.length / 8; i++) {
+            const startIndex = i * 8;
             const newObj = {};
 
-            for (let j = startIndex; j < startIndex + 7; j++) {
+            for (let j = startIndex; j < startIndex + 8; j++) {
                 const key = data[j].name.replace(/\[\d+\]/, '');
                 newObj[key] = data[j].value;
             }
@@ -324,6 +377,7 @@
                         key: levelKerja[key].key,
                         id_naskah: idNaskah,
                         durasi: dataWithKey[key]['duration'],
+                        kecepatan: dataWithKey[key]['kecepatanInput'],
                         tgl_rencana_mulai: dataWithKey[key]['tgl_rencana_mulai'],
                         libur: dataWithKey[key]['total_libur'],
                         tgl_rencana_selesai: dataWithKey[key]['tgl_rencana_selesai'],
