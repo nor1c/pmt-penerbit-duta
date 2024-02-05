@@ -85,7 +85,7 @@
 							<span class="icon-holder">
 								<i class="c-brown-500 ti-calendar"></i>
 							</span>
-							<span class="title">Rekap Absensi</span>
+							<span class="title">Riwayat Kehadiran</span>
 						</a>
 					</li>
 					<li class="nav-item">
@@ -415,6 +415,22 @@
 	<script type="text/javascript">
 		const base_url = '<?php echo base_url(); ?>'
 
+		$.fn.serializeObject = function () {
+			var o = {};
+			var a = this.serializeArray();
+			$.each(a, function () {
+				if (o[this.name] !== undefined) {
+					if (!o[this.name].push) {
+						o[this.name] = [o[this.name]];
+					}      
+					o[this.name].push(this.value || '');
+				} else {
+					o[this.name] = this.value || '';
+				}
+			});
+			return o;
+		};
+
 		let table
 		refreshTable = function() {
             table.ajax.reload(null, false)
@@ -424,7 +440,8 @@
 		$('#filter').submit(function (e) {
 			e.preventDefault()
 
-			filters.filters = $('form').serialize()
+			filters.filters = $('#filter :input').serialize()
+			
 			refreshTable()
 		})
 

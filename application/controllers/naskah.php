@@ -2,80 +2,6 @@
 
 class Naskah extends DUTA_Controller {
     private $searchableFields = ['no_job', 'kode', 'judul', 'penulis'];
-    private $keyMap = array(
-        'penulisan' => array(
-            'order' => 1,
-            'key' => 'penulisan',
-            'text' => 'Penulisan',
-            'next_level' => 'editing',
-            'is_off' => "0",
-            'pic' => 'editor'
-        ),
-        'editing' => array(
-            'order' => 2,
-            'key' => 'editing',
-            'text' => 'Editing',
-            'next_level' => 'setting_1',
-            'is_off' => "0",
-            'pic' => 'editor'
-        ),
-        'setting_1' => array(
-            'order' => 3,
-            'key' => 'setting_1',
-            'text' => 'Setting 1',
-            'next_level' => 'koreksi_1',
-            'is_off' => "0",
-            'pic' => 'setter'
-        ),
-        'koreksi_1' => array(
-            'order' => 4,
-            'key' => 'koreksi_1',
-            'text' => 'Koreksi 1',
-            'next_level' => 'setting_2',
-            'is_off' => "0",
-            'pic' => 'editor'
-        ),
-        'setting_2' => array(
-            'order' => 5,
-            'key' => 'setting_2',
-            'text' => 'Setting 2',
-            'next_level' => 'koreksi_2',
-            'is_off' => "0",
-            'pic' => 'setter'
-        ),
-        'koreksi_2' => array(
-            'order' => 6,
-            'key' => 'koreksi_2',
-            'text' => 'Koreksi 2',
-            'next_level' => 'setting_3',
-            'is_off' => "0",
-            'pic' => 'editor'
-        ),
-        'setting_3' => array(
-            'order' => 7,
-            'key' => 'setting_3',
-            'text' => 'Setting 3',
-            'next_level' => 'koreksi_3',
-            'is_off' => "0",
-            'pic' => 'setter'
-        ),
-        'koreksi_3' => array(
-            'order' => 8,
-            'key' => 'koreksi_3',
-            'text' => 'Koreksi 3',
-            'next_level' => 'pdf',
-            'is_off' => "0",
-            'pic' => 'editor'
-        ),
-        'pdf' => array(
-            'order' => 9,
-            'key' => 'pdf',
-            'text' => 'PDF',
-            'next_level' => null,
-            'is_off' => "0",
-            'pic' => 'setter'
-        ),
-    );
 
     public function __construct() {
         parent::__construct();
@@ -137,7 +63,7 @@ class Naskah extends DUTA_Controller {
         $naskah = $this->Naskah_model->getAll($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['no_job'], $item['kode'], $item['judul'], $item['jilid'], $item['penulis']];
+            return ['', $item['no_job'], $item['kode'], $item['judul'], $item['jilid'], $item['penulis'], $item['level_kerja']];
         }, $naskah['data']);
 
         $data = [
@@ -237,6 +163,8 @@ class Naskah extends DUTA_Controller {
     public function saveLevelKerja() {
         $idNaskah = inputGet('id_naskah');
         $data = inputPost('data');
+
+        $this->deleteLevelKerja($idNaskah);
         
         foreach ($data as $index => $lk) {
             foreach ($lk as $i => $key) {
@@ -253,5 +181,9 @@ class Naskah extends DUTA_Controller {
         $insertLevelKerja = $this->Naskah_model->saveLevelKerja($data);
         
         echo json_encode($insertLevelKerja);
+    }
+
+    public function deleteLevelKerja($naskahId) {
+        return $this->Naskah_model->deleteLevelKerja($naskahId);
     }
 }

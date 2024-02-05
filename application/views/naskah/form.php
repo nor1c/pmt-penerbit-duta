@@ -101,6 +101,7 @@
                     <hr>
 
                     <div id="naskahId" class="d-none"></div>
+                    <div id="isEdit" class="d-none"></div>
 
                     <div class="modal-body">
                         <div>
@@ -109,7 +110,7 @@
                             </div>
                             
                             <div class="mB-10" style="float:right">
-                                Auto-sync Tanggal Mulai <input id="autoSync" type="checkbox" checked data-toggle="toggle" onchange="changeAutoSync()">
+                                Auto-sync Tanggal Mulai <input id="autoSync" type="checkbox" checked data-toggle="toggle">
                             </div>
                         </div>
 
@@ -126,7 +127,7 @@
                                     <th>PIC</th>
                                     <!-- <th></th> -->
                                 </thead>
-                                <tbody>
+                                <tbody id="perencanaanProduksiTbody">
                                     <?php 
                                         $no = 1;
                                         foreach ($default_level_kerja as $lk_index => $lk) { 
@@ -141,7 +142,7 @@
                                             </td>
                                             <td><?=$level_kerja_key_map[$lk['key']]['text']?></td>
                                             <td>
-                                                <input id="duration_<?=$lk['key']?>" type="text" name="duration[<?=$lk_index?>]" class="form-control" onchange="generateKecepatan('<?=$lk['key']?>')">
+                                                <input id="duration_<?=$lk['key']?>" type="text" name="duration[<?=$lk_index?>]" class="form-control" onchange="generateKecepatan('<?=$lk['key']?>')" autocomplete="off">
                                             </td>
                                             <td>
                                                 <span id="kecepatan_<?=$lk['key']?>" class="kecepatan"></span>
@@ -192,20 +193,19 @@
 </div>
 
 <script>
+    const isEdit = $('#isEdit').text() == 'true' ? true : false
     let autoSync = true;
 
-    function changeAutoSync() {
-        if ($('#autoSync').is(':checked')) {
+    $('#autoSync').change(function() {
+        if ($(this).is(':checked')) {
             autoSync = true
         } else {
             autoSync = false
         }
-
-        console.log(autoSync);
-    }
+    })
 
     function clearForm() {
-        $('.switch').prop('checked', true).trigger('change')
+        // $('.switch').prop('checked', true).trigger('change')
         $('.kecepatan').text('')
         $('.offDays').text('')
         $('.endDate').text('')
@@ -216,11 +216,13 @@
             method: 'GET',
             url: "<?=site_url(uriSegment(1) . '/getNaskahLevelKerja')?>?id_naskah=" + idNaskah
         }).then((res) => {
-            res = JSON.parse(res)
-
             clearForm()
             
+            res = JSON.parse(res)
+            
             if (res.length) {
+                $('#autoSync').prop('checked', false).trigger('change')
+
                 res.forEach(lk => {
                     if (lk.is_disabled == '1') {
                         $('#switch_' + lk.key).prop('checked', false).trigger('change')
@@ -229,14 +231,32 @@
                         $('#duration_' + lk.key).val(lk.durasi)
                         $('#kecepatan_' + lk.key).text(lk.kecepatan)
                         $('#kecepatanInput_' + lk.key).val(lk.kecepatan)
-                        $('#startDate_' + lk.key).val(lk.tgl_rencana_mulai)
                         $('#offDays_' + lk.key).text(lk.total_libur)
-                        $('#endDate_' + lk.key).text(lk.tgl_rencana_selesai)
+                        $('#libur_' + lk.key).val(lk.total_libur)
+
+                        const startDate = new Date(lk.tgl_rencana_mulai)
+                        const startDay = startDate.getDate().toString().padStart(2, '0')
+                        const startMonth = (startDate.getMonth() + 1).toString().padStart(2, '0')
+                        const startYear = startDate.getFullYear();
+                        const tglRencanaMulai = `${startDay}/${startMonth}/${startYear}`;
+                        $('#startDate_' + lk.key).val(tglRencanaMulai)
+
+                        const endDate = new Date(lk.tgl_rencana_selesai)
+                        const endDay = endDate.getDate().toString().padStart(2, '0')
+                        const endMonth = (endDate.getMonth() + 1).toString().padStart(2, '0')
+                        const endYear = endDate.getFullYear();
+                        const tglRencanaSelesai = `${endDay}/${endMonth}/${endYear}`;
+                        $('#endDate_' + lk.key).text(tglRencanaSelesai)
+                        $('#tgl_rencana_selesai_' + lk.key).val(lk.tgl_rencana_selesai)
+
                         if (lk.id_pic_aktif != null) {
                             $('#pic_' + lk.key).val(lk.id_pic_aktif)
                         }
                     }
                 })
+            } else {
+                $('#autoSync').prop('checked', true).trigger('change')
+                $('.switch').prop('checked', true).trigger('change')
             }
         })
     }
@@ -277,7 +297,9 @@
             $('#tgl_rencana_selesai_' + key).prop('disabled', false)
             $('#pic_' + key).prop('disabled', false)
         } else {
-            disabledLevels.push(key)
+            if (!disabledLevels.includes(key)) {
+                disabledLevels.push(key)
+            }
             disabledLevelsDetail[key] = nextLevelKerja
             
             $('#key_' + key).prop('disabled', true)
@@ -307,10 +329,18 @@
 
                 $('#offDays_' + key).text(res.offDays)
                 $('#libur_' + key).val(res.offDays)
-                $('#endDate_' + key).text(res.endDate)
-                $('#tgl_rencana_selesai_' + key).val(res.endDate)
                 
                 let nextLevelKerja = $('#nextLevel_' + key).text()
+                const endDate = new Date(res.endDate)
+                const day = endDate.getDate().toString().padStart(2, '0')
+                const month = (endDate.getMonth() + 1).toString().padStart(2, '0')
+                const year = endDate.getFullYear();
+                const tglRencanaSelesai = `${day}/${month}/${year}`;
+                if (tglRencanaSelesai != 'NaN/NaN/NaN') {
+                    $('#endDate_' + key).text(tglRencanaSelesai)
+                }
+                $('#tgl_rencana_selesai_' + key).val(res.endDate)
+                
                 if (autoSync) {
                     if (nextLevelKerja && nextLevelKerja != 'null' && nextLevelKerja != null) {
                         if (disabledLevels.includes(nextLevelKerja)) {
@@ -331,90 +361,8 @@
         })
     }
 
-    $('#formNaskah').submit(function(e) {
-        e.preventDefault()// Serialize the form data
-        var data = $(this).serializeArray();
-
-        const idNaskah = $('#naskahId').text()
-
-        const transformedData = [];
-
-        for (let i = 0; i < data.length / 8; i++) {
-            const startIndex = i * 8;
-            const newObj = {};
-
-            for (let j = startIndex; j < startIndex + 8; j++) {
-                const key = data[j].name.replace(/\[\d+\]/, '');
-                newObj[key] = data[j].value;
-            }
-
-            transformedData.push(newObj);
-        }
-
-        const dataWithKey = {};
-        for (const key in transformedData) {
-            if (transformedData.hasOwnProperty(key)) {
-                const entry = transformedData[key];
-                dataWithKey[entry.key] = entry;
-            }
-        }
-
-        const totalLevelKerja = parseInt("<?=count($default_level_kerja)?>")
-
-        // get level kerja mapping
-        $.ajax({
-            method: 'GET',
-            url: "<?=site_url(uriSegment(1) . '/getLevelKerjaKeyMapJson')?>",
-        }).then((levelKerjaMap) => {
-            const levelKerja = JSON.parse(levelKerjaMap)
-
-            // transform all data as final data
-            let finalData = []
-            for (const key in levelKerja) {
-                if (dataWithKey[key] !== undefined) {
-                    finalData.push({
-                        order: levelKerja[key].order,
-                        key: levelKerja[key].key,
-                        id_naskah: idNaskah,
-                        durasi: dataWithKey[key]['duration'],
-                        kecepatan: dataWithKey[key]['kecepatanInput'],
-                        tgl_rencana_mulai: dataWithKey[key]['tgl_rencana_mulai'],
-                        libur: dataWithKey[key]['total_libur'],
-                        tgl_rencana_selesai: dataWithKey[key]['tgl_rencana_selesai'],
-                        total_libur: dataWithKey[key]['libur'],
-                        is_disabled: 0,
-                        id_pic_aktif: dataWithKey[key]['pic_aktif'] == 'tentatif' ? 0 : dataWithKey[key]['pic_aktif'],
-                    })
-                } else {
-                    finalData.push({
-                        order: levelKerja[key].order,
-                        key: levelKerja[key].key,
-                        id_naskah: idNaskah,
-                    })
-                }
-            }
-
-            // save personalized level kerja to database
-            $.ajax({
-                method: 'POST',
-                url: "<?=site_url(uriSegment(1) . '/saveLevelKerja')?>?id_naskah=" + idNaskah,
-                data: {
-                    data: finalData
-                }
-            }).then((res) => {
-                res = JSON.parse(res)
-
-                if (res == true) {
-                    Swal.fire(
-                        'Berhasil mengatur level naskah!',
-                        'Data Level Naskah telah tersimpan.',
-                        'success'
-                    ).then(function() {
-                        $("[data-bs-dismiss=modal]").trigger({ type: "click" })
-                        refreshTable()
-                    })
-                }
-            })
-        })
-    })
+    // $('#formNaskah').submit(function(e) {
+    //     e.preventDefault()// Serialize the form data
+        
+    // })
 </script>

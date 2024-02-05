@@ -30,9 +30,7 @@ class Holiday_model extends CI_Model {
 		$recordsTotal = $tempdb->count_all_results('', FALSE);
 
 		$this->db->limit($pagination['length'], $pagination['start']);
-
         $mapel = $this->db->get();
-
         $data = $mapel->result_array();
 
         return [

@@ -60,7 +60,7 @@
                     </form>
                 </div>
 
-                <table id="naskahTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                <table id="naskahTable" class="table table-bordered table-hover" cellspacing="0" width="100%">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -135,13 +135,10 @@
                     "orderable": false,
                     "searchable": false,
                 },
-                {
-                    "orderable": false,
-                    "searchable": false,
-                },
             ],
             "columnDefs": [
                 {
+                    "targets": 6,
                     "render": function(data, type, row) {
                         return '<div class="peers mR-15">' +
                             '<div class="peer">' +
@@ -161,9 +158,13 @@
                             '</div>' +
                             '</div>';
                     },
-                    "targets": 6,
                 },
             ],
+            "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                if (aData[6] == null) {
+                    $('td', nRow).css('background-color', '#ffd5d1');
+                }
+            },
             'select': {
                 'style': 'multi'
             },
@@ -182,43 +183,26 @@
             $('#perencanaanProduksiDiv').hide()
             isEdit = false
 
+            // disable all level kerja inputs
+            if (isEdit == false) {
+                const levelKerjaInputs = document.getElementById('perencanaanProduksiTbody').getElementsByTagName('input')
+                for (var i = 0; i < levelKerjaInputs.length; i++) {
+                    levelKerjaInputs[i].disabled = true;
+                }
+                const levelKerjaSelects = document.getElementById('perencanaanProduksiTbody').getElementsByTagName('select')
+                for (var i = 0; i < levelKerjaSelects.length; i++) {
+                    var options = levelKerjaSelects[i].getElementsByTagName('option');
+                    for (var j = 0; j < options.length; j++) {
+                        options[j].disabled = true;
+                    }
+                }
+            }
+
             $.ajax({
                 url: '<?=site_url($this->uri->segment(1))?>/next_new_no_job',
                 type: 'GET',
             }).then((res) => {
-                console.log(res)
                 $('#formNaskah input[name=no_job]').val(res)
-            })
-        })
-
-        $('#formNaskah').submit(function(e) {
-            e.preventDefault()
-            $('#naskahError').hide()
-
-            $.ajax({
-                url: '<?= site_url($this->uri->segment(1)) ?>/' + (isEdit ? 'update' : 'create'),
-                type: 'POST',
-                data: new FormData($(this)[0]),
-                contentType: false,
-                processData: false,
-                cache: false,
-            }).then((res) => {
-                res = JSON.parse(res)
-
-                if (res.error) {
-                    $('#naskahError').show()
-                    $('#naskahError').text(res.message)
-                } else {
-                    refreshTable()
-                    $('#closeNaskahFormModalButton').trigger('click')
-                    Swal.fire(
-                        'Berhasil disimpan!',
-                        'Data naskah berhasil disimpan.',
-                        'success'
-                    )
-                }
-            }).fail(() => {
-                alert('Something went wrong, please try again!')
             })
         })
 
@@ -242,6 +226,7 @@
 
                 $('#naskahFormTitle').html('Edit Naskah ' + data['no_job'])
                 $('#naskahId').html(data['id'])
+                $('#isEdit').html(true)
 
                 for (let column in data) {
                     if (data.hasOwnProperty(column)) {
@@ -258,6 +243,124 @@
                 getNaskahLevelKerja(data['id'])
             })
         }
+
+        $('#formNaskah').submit(function(e) {
+            e.preventDefault()
+
+            if (isEdit) {
+                var data = $(this).serializeArray();
+
+                const idNaskah = $('#naskahId').text()
+
+                const transformedData = [];
+
+                for (let i = 0; i < data.length / 8; i++) {
+                    const startIndex = i * 8;
+                    const newObj = {};
+
+                    for (let j = startIndex; j < startIndex + 8; j++) {
+                        const key = data[j].name.replace(/\[\d+\]/, '');
+                        newObj[key] = data[j].value;
+                    }
+
+                    transformedData.push(newObj);
+                }
+
+                const dataWithKey = {};
+                for (const key in transformedData) {
+                    if (transformedData.hasOwnProperty(key)) {
+                        const entry = transformedData[key];
+                        dataWithKey[entry.key] = entry;
+                    }
+                }
+
+                const totalLevelKerja = parseInt("<?=count($default_level_kerja)?>")
+
+                // get level kerja mapping
+                $.ajax({
+                    method: 'GET',
+                    url: "<?=site_url(uriSegment(1) . '/getLevelKerjaKeyMapJson')?>",
+                }).then((levelKerjaMap) => {
+                    const levelKerja = JSON.parse(levelKerjaMap)
+
+                    // transform all data as final data
+                    let finalData = []
+                    for (const key in levelKerja) {
+                        if (dataWithKey[key] !== undefined) {
+                            finalData.push({
+                                order: levelKerja[key].order,
+                                key: levelKerja[key].key,
+                                id_naskah: idNaskah,
+                                durasi: dataWithKey[key]['duration'],
+                                kecepatan: dataWithKey[key]['kecepatanInput'],
+                                tgl_rencana_mulai: dataWithKey[key]['tgl_rencana_mulai'],
+                                libur: dataWithKey[key]['total_libur'],
+                                tgl_rencana_selesai: dataWithKey[key]['tgl_rencana_selesai'],
+                                total_libur: dataWithKey[key]['libur'],
+                                is_disabled: 0,
+                                id_pic_aktif: dataWithKey[key]['pic_aktif'] == 'tentatif' ? 0 : dataWithKey[key]['pic_aktif'],
+                            })
+                        } else {
+                            finalData.push({
+                                order: levelKerja[key].order,
+                                key: levelKerja[key].key,
+                                id_naskah: idNaskah,
+                            })
+                        }
+                    }
+
+                    // save personalized level kerja to database
+                    $.ajax({
+                        method: 'POST',
+                        url: "<?=site_url(uriSegment(1) . '/saveLevelKerja')?>?id_naskah=" + idNaskah,
+                        data: {
+                            data: finalData
+                        }
+                    }).then((res) => {
+                        res = JSON.parse(res)
+
+                        if (res == true) {
+                            Swal.fire(
+                                'Berhasil mengatur level naskah!',
+                                'Data Level Naskah telah tersimpan.',
+                                'success'
+                            ).then(function() {
+                                $("[data-bs-dismiss=modal]").trigger({ type: "click" })
+                                refreshTable()
+                            })
+                        }
+                    })
+                })
+            } else {
+                $('#naskahError').hide()
+
+                $.ajax({
+                    url: '<?= site_url($this->uri->segment(1)) ?>/' + (isEdit ? 'update' : 'create'),
+                    type: 'POST',
+                    data: new FormData($(this)[0]),
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                }).then((res) => {
+                    res = JSON.parse(res)
+
+                    if (res.error) {
+                        $('#naskahError').show()
+                        $('#naskahError').text(res.message)
+                    } else {
+                        refreshTable()
+                        $('#closeNaskahFormModalButton').trigger('click')
+                        Swal.fire(
+                            'Berhasil disimpan!',
+                            'Data naskah berhasil disimpan.',
+                            'success'
+                        )
+                    }
+                }).fail(() => {
+                    alert('Something went wrong, please try again!')
+                })
+            }
+        })
 
         deleteNaskah = function(noJob) {
             Swal.fire({

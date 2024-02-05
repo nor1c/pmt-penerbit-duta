@@ -10,6 +10,39 @@ class Naskah_model extends CI_Model {
     }
 
     public function getAll($searchableFields, $search, $filters, $pagination) {
+        DBS()->select("$this->table.*, naskah_level_kerja.id_naskah as level_kerja");
+        DBS()->from($this->table);
+        DBS()->join('naskah_level_kerja', "naskah_level_kerja.id_naskah=$this->table.id", 'left');
+
+        if ($search) {
+            foreach($searchableFields as $field) {
+                $this->db->or_like($field, $search);
+            }
+        }
+
+        if (isset($filters) && $filters != [""] && count($filters)) {
+            foreach ($filters as $filter) {
+                $filter = explode('=', $filter);
+    
+                if ($filter[1] != '') {
+                    if (in_array($filter[0], $this->likeCols)) {
+                        DBS()->like($filter[0], $filter[1]);
+                    } else {
+                        DBS()->where($filter[0], $filter[1]);
+                    }
+                }
+            }
+        }
+
+        DBS()->group_by("$this->table.id");
+
+		DBS()->limit($pagination['length'], $pagination['start']);
+
+        $naskah = DBS()->get();
+        
+        $data = $naskah->result_array();
+
+        // count all records
         DBS()->from($this->table);
 
         if ($search) {
@@ -35,16 +68,25 @@ class Naskah_model extends CI_Model {
         $tempdb = clone DBS();
 		$recordsTotal = $tempdb->count_all_results('', FALSE);
 
-		DBS()->limit($pagination['length'], $pagination['start']);
-
-        $mapel = DBS()->get();
-
-        $data = $mapel->result_array();
-
         return [
             'data' => $data,
             'recordsTotal' => $recordsTotal
         ];
+    }
+
+    public function findById($id) {
+        $naskah = DBS()->select("$this->table.*, master_jenjang.nama_jenjang, master_mapel.nama_mapel, master_kategori.nama_kategori, master_ukuran.nama_ukuran")
+                ->from($this->table)
+                ->join('master_jenjang', "master_jenjang.id=$this->table.id_jenjang", 'left')
+                ->join('master_mapel', "master_mapel.id=$this->table.id_mapel", 'left')
+                ->join('master_kategori', "master_kategori.id=$this->table.id_kategori", 'left')
+                ->join('master_ukuran', "master_ukuran.id=$this->table.id_ukuran", 'left')
+                ->where("$this->table.id", $id)
+                ->limit(1)
+                ->get()
+                ->row();
+
+        return $naskah;
     }
 
     public function findByNoJob($no_job) {
@@ -155,9 +197,24 @@ class Naskah_model extends CI_Model {
         return true;
     }
 
+    public function deleteLevelKerja($naskahId) {
+        return DBS()->where('id_naskah', $naskahId)->delete('naskah_level_kerja');
+    }
+
     public function getNaskahLevelKerja($idNaskah) {
         $level_kerja = DBS()->where('id_naskah', $idNaskah)
                             ->from('naskah_level_kerja')
+                            ->get()
+                            ->result_array();
+
+        return $level_kerja;
+    }
+
+    public function getNaskahLevelKerjaFull($idNaskah) {
+        $level_kerja = DBS()->select('naskah_level_kerja.*, t_karyawan.nama')
+                            ->where('id_naskah', $idNaskah)
+                            ->from('naskah_level_kerja')
+                            ->join('t_karyawan', 't_karyawan.id_karyawan=naskah_level_kerja.id_pic_aktif', 'left')
                             ->get()
                             ->result_array();
 
