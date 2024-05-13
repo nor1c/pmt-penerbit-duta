@@ -1,15 +1,15 @@
 <?php
 
 class Jobs extends DUTA_Controller {
-    protected $userId;
-    private $searchableFields = ['no_job', 'kode', 'judul'];
+    private $userId;
+    private $searchableFields = array('no_job', 'kode', 'judul');
 
     public function __construct() {
         parent::__construct();
         
         $this->load->model(array('Job_model', 'Naskah_model', 'Naskah_role_model'));
         $this->load->library('template');
-        $this->userId = $userId = sessionData('user_id');
+        $this->userId = sessionData('user_id');
     }
 
     public function my_job() {
@@ -24,7 +24,7 @@ class Jobs extends DUTA_Controller {
         $naskah = $this->Job_model->getMyJob($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['kode'], $item['no_job'], $item['judul'], $item['halaman'], $item['key'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['status']];
+            return ['', $item['kode'], $item['no_job'], $item['judul'], $item['halaman'], $item['key'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['status'], $item['catatan_cicil']];
         }, $naskah['data']);
 
         $data = array(
@@ -47,6 +47,13 @@ class Jobs extends DUTA_Controller {
         $activeLevelKerja = $this->Job_model->getActiveLevelKerjaInTheSameNaskah($naskahDetail->id);
         if ($activeLevelKerja != null && $activeLevelKerja->key != $levelKerja) {
             echo json_encode(errorResponse('Tidak dapat memulai level kerja ini dikarenakan level kerja ' . $this->keyMap[$activeLevelKerja->key]['text'] . ' sedang berjalan.'));
+            die;
+        }
+
+        // cek apakah level kerja sebelumnya sudah selesai (berstatus finished)
+        $previousLevelKerjaStatus = $this->Job_model->getPreviousLevelKerjaStatus($naskahDetail->id, $levelKerja);
+        if ($previousLevelKerjaStatus != null && ($previousLevelKerjaStatus != 'finished' || $previousLevelKerjaStatus != 'cicil')) {
+            echo json_encode(errorResponse('Tidak dapat memulai level kerja ini dikarenakan level kerja sebelumnya belum selesai.'));
             die;
         }
 
@@ -136,7 +143,7 @@ class Jobs extends DUTA_Controller {
         $reports = $this->Job_model->getDailyJobReport($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['tanggal'], $item['nama'], $this->keyMap[$item['level_kerja_key']]['text'], $item['judul'], $item['catatan'] ?? '-', $item['kode'], $item['no_job'], $item['halaman'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['durasi'], $item['total_libur']];
+            return ['', $item['tanggal'], $item['nama'], $this->keyMap[$item['level_kerja_key']]['text'], $item['judul'], $item['catatan'], $item['kode'], $item['no_job'], $item['halaman'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['durasi'], $item['total_libur']];
         }, $reports['data']);
 
         $data = array(
@@ -146,5 +153,30 @@ class Jobs extends DUTA_Controller {
         );
 
         echo json_encode($data);
+    }
+
+    public function kirimJob() {
+        $data = inputPost('data');
+        $data['tgl_cicil'] = date('Y-m-d H:i:s', time());
+        $data['id_pic_penyicil'] = $this->userId;
+
+        $naskahDetail = $this->Naskah_model->findByNoJob($data['noJob']);
+        $data['naskahId'] = $naskahDetail->id;
+
+        $result = $this->Job_model->kirimJob($data);
+
+        echo json_encode($result);
+    }
+
+    public function finishJob() {
+        $data = inputPost('data');
+        $data['tgl_selesai'] = date('Y-m-d', time());
+
+        $naskahDetail = $this->Naskah_model->findByNoJob($data['noJob']);
+        $data['naskahId'] = $naskahDetail->id;
+
+        $result = $this->Job_model->finishJob($data);
+
+        echo json_encode($result);
     }
 }

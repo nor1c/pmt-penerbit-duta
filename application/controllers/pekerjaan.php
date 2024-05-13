@@ -4,14 +4,14 @@ class Pekerjaan extends CI_Controller {
     public function __construct() {
         parent::__construct();
         
-        $this->load->model(array('Naskah_model', 'master/jenjang_m', 'master/kategori_m', 'master/mapel_m', 'Pekerjaan_m'));
+        $this->load->model(array('Naskah_model', 'master/jenjang_model', 'master/kategori_model', 'master/mapel_model', 'Pekerjaan_m'));
         $this->load->library('template');
     }
 
     public function index() {
-        $data['jenjangs'] = $this->jenjang_m->getAll();
-        $data['mapels'] = $this->mapel_m->getAll();
-        $data['kategoris'] = $this->kategori_m->getAll();
+        $data['jenjangs'] = $this->jenjang_model->getDropdown();
+        $data['mapels'] = $this->mapel_model->getDropdown();
+        $data['kategoris'] = $this->kategori_model->getDropdown();
 
         $this->template->display('pekerjaan/index.php', $data);
     }

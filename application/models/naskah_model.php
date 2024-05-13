@@ -6,10 +6,10 @@ class Naskah_model extends CI_Model {
 
     public function __construct() {
         parent::__construct();
-        loadModel(array('Holiday_model'));
+        $this->load->model(array('Holiday_model'));
     }
 
-    public function getAll($searchableFields, $search, $filters, $pagination) {
+    public function getAll($searchableFields, $search, $filters, $pagination, $isPengajuan) {
         DBS()->select("$this->table.*, naskah_level_kerja.id_naskah as level_kerja");
         DBS()->from($this->table);
         DBS()->join('naskah_level_kerja', "naskah_level_kerja.id_naskah=$this->table.id", 'left');
@@ -34,12 +34,17 @@ class Naskah_model extends CI_Model {
             }
         }
 
-        DBS()->group_by("$this->table.id");
-
-		DBS()->limit($pagination['length'], $pagination['start']);
-
-        $naskah = DBS()->get();
+        if ($isPengajuan == 'true') {
+            if (sessionData('id_jabatan') == 1) {
+                DBS()->where('id_pengaju IS NOT NULL')->where('tgl_pengajuan IS NOT NULL')->where('is_pengajuan_processed', '0');
+            } else {
+                DBS()->where('id_pengaju IS NOT NULL')->where('tgl_pengajuan IS NOT NULL');
+            }
+        }
         
+        DBS()->group_by("$this->table.id");
+		DBS()->limit($pagination['length'], $pagination['start']);
+        $naskah = DBS()->get();
         $data = $naskah->result_array();
 
         // count all records
@@ -219,5 +224,96 @@ class Naskah_model extends CI_Model {
                             ->result_array();
 
         return $level_kerja;
+    }
+
+    public function getProgressWithRealizationDate($idNaskah) {
+        $query = "SELECT 
+                nlk.`key`, nlk.tgl_rencana_mulai, nlk.tgl_rencana_selesai, npm.waktu_mulai, IF(nlk.status='finished', nlk.tgl_selesai, '') AS waktu_selesai, nlk.catatan_selesai as catatan
+                FROM naskah_level_kerja nlk
+                LEFT JOIN (
+                    SELECT id_naskah, waktu_mulai, level_kerja_key
+                    FROM naskah_progress
+                    ORDER BY created_at ASC
+                    LIMIT 1
+                ) npm ON npm.id_naskah=nlk.id_naskah AND npm.level_kerja_key=nlk.`key`
+                WHERE nlk.id_naskah=$idNaskah
+                GROUP BY nlk.`key`";
+
+        $progress = $this->db->query($query)->result_array();
+
+        return $progress;
+    }
+
+    public function setAsProcessed($idNaskah) {
+        return DBS()->where('id', $idNaskah)->update($this->table, array(
+            'is_pengajuan_processed' => '1'
+        ));
+    }
+
+    public function countPengajuan() {
+        $activePengajuan = $this->db->select('COUNT(*) as total')->where('is_pengajuan', '1')->where('is_pengajuan_processed', '0')->from($this->table)->get()->row()->total;
+        return $activePengajuan;
+    }
+
+    public function sop_editing($idNaskah) {
+        DBS()->select('sop_editing.*, tpic.nama as nama_pic, ta.nama as nama_approver');
+        DBS()->where('id_naskah', $idNaskah);
+        DBS()->from('sop_editing');
+        DBS()->join('t_karyawan as tpic', 'tpic.id_karyawan=sop_editing.pic_signed_by', 'left');
+        DBS()->join('t_karyawan as ta', 'ta.id_karyawan=sop_editing.approver_signed_by', 'left');
+        $data = DBS()->get()->row();
+
+        return $data;
+    }
+
+    public function save_sop_editing($data) {
+        // check if record based on naskah ID is exists
+        $foundRows = DBS()->where('id_naskah', $data['id_naskah'])->from('sop_editing')->get()->num_rows();
+        
+        if ($foundRows > 0) {
+            $idNaskah = $data['id_naskah'];
+            unset($data['id_naskah']);
+            DBS()->where('id_naskah', $idNaskah)->update('sop_editing', $data);
+        } else {
+            DBS()->insert('sop_editing', $data);
+        }
+        
+        return catchQueryResult(DBS()->_error_message());
+    }
+
+    public function sop_koreksi_1($idNaskah) {
+        DBS()->from('sop_koreksi_1');
+        DBS()->where('id_naskah', $idNaskah);
+        DBS()->get();
+        $data = DBS()->row();
+
+        return $data;
+    }
+
+    public function sop_koreksi_2($idNaskah) {
+        DBS()->from('sop_koreksi_2');
+        DBS()->where('id_naskah', $idNaskah);
+        DBS()->get();
+        $data = DBS()->row();
+
+        return $data;
+    }
+
+    public function sop_koreksi_3($idNaskah) {
+        DBS()->from('sop_koreksi_3');
+        DBS()->where('id_naskah', $idNaskah);
+        DBS()->get();
+        $data = DBS()->row();
+
+        return $data;
+    }
+
+    public function sop_pdf($idNaskah) {
+        DBS()->from('sop_pdf');
+        DBS()->where('id_naskah', $idNaskah);
+        DBS()->get();
+        $data = DBS()->row();
+
+        return $data;
     }
 }

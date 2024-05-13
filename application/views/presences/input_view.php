@@ -311,7 +311,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Halaman</label>
-                        <input type="number" min="1" max="999" name="halaman" class="form-control" placeholder="Progress Jumlah Halaman Hari Ini" required>
+                        <input type="number" min="0" max="999" value="0" name="halaman" class="form-control" placeholder="Progress Jumlah Halaman Hari Ini" required>
                     </div>
                 </div>
 
@@ -319,6 +319,75 @@
                     <button type="submit" class="btn btn-info waves-effect waves-light">Simpan</button>
                     <button type="reset" class="btn btn-secondary waves-effect waves-light">Clear</button>
                     <button type="button" class="btn btn-dark waves-effect waves-light" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- modal untuk kirim level kerja -->
+<div class="modal fade bd-example-modal-md" id="kirimJobModal" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <form id="formKirimJob">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">Form Catatan Kirim Job</h5>
+                    <span type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="ti-close"></i>
+                    </span>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="kirimDateInput">Tanggal</label>
+                        <input type="text" name="tanggal" class="form-control" readonly disabled value="<?=date('d/m/Y', time())?>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea type="text" name="catatan_cicil" class="form-control" rows="8" placeholder="Catatan" required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn btn-info waves-effect waves-light">Kirim</button>
+                    <button type="reset" class="btn btn-secondary waves-effect waves-light">Clear</button>
+                    <button type="button" class="btn btn-dark waves-effect waves-light" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- modal untuk finish level kerja -->
+<div class="modal fade bd-example-modal-md" id="finishJobModal" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <form id="formFinishJob">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">Form Catatan Finish Level Kerja</h5>
+                    <span type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="ti-close"></i>
+                    </span>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="finishDateInput">Tanggal</label>
+                        <input type="text" name="tanggal" class="form-control" readonly disabled value="<?=date('d/m/Y', time())?>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Halaman</label>
+                        <input id="finishJobRealisasi" type="text" name="realisasi" class="form-control" readonly disabled value="" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea type="text" name="catatan_selesai" class="form-control" rows="8" placeholder="Catatan" required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn btn-danger waves-effect waves-light">Kirim</button>
+                    <button type="button" class="btn btn-secondary waves-effect waves-light" data-bs-dismiss="modal">Batal</button>
                 </div>
             </form>
         </div>
@@ -343,6 +412,12 @@
     let stopWorkTimer = false
 
     let getActiveJob
+
+    let activeKirimJobNoJob = null
+    let activeKirimJobLevelKerja = null
+
+    let activeFinishJobNoJob = null
+    let activeFinishJobLevelKerja = null
 
     const levelKerjaMap = {
         'penulisan': 'Penulisan',
@@ -417,10 +492,10 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 50, 200, 30, 30, 50, 50, 30, 30, 30],
-                [5, 50, 200, 30, 30, 50, 50, 30, 30, 30],
+                [5, 10, 15, 20],
+                [5, 10, 15, 20],
             ],
-            "pageLength": 10,
+            "pageLength": 5,
             "processing": true,
             "serverSide": true,
             "searching": true,
@@ -456,7 +531,7 @@
                 {
                     "targets": 6,
                     "render": function(data, type, row) {
-                        return '<div style="'+(new Date(row[6]) > new Date() ? 'color:red;font-weight:bold;' : '')+'">'+(new Date(row[6]) > new Date() ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[6]).toLocaleDateString('id-ID')+'</div>'
+                        return '<div style="'+(new Date() > new Date(row[6]) ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[6]) ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[6]).toLocaleDateString('id-ID')+'</div>'
                     }
                 },
                 {
@@ -475,23 +550,27 @@
                     "targets": 9,
                     "render": function(data, type, row) {
                         return '<div class="peers mR-15">' +
+                            '<div class="peer mR-5">' +
+                                '<button onclick="viewJob('+false+', \''+row[2]+'\', \''+row[5]+'\')" class="btn btn-info">View</button>' +
+                            '</div>' +
                             ((row[8] == 'open' || row[8] == 'paused') ? 
                                 '<div class="peer mR-5">' +
-                                '<button onclick="mulaiJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-success" '+(row[8]=='on_progress'?'disabled':'')+'>'+(row[8] == 'paused' ? 'Lanjut' : 'Mulai')+'</button>' +
+                                '<button onclick="mulaiJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-success" '+(row[8]=='on_progress' || row[8]=='cicil'?'disabled':'')+'>'+(row[8] == 'paused' ? 'Lanjut' : 'Mulai')+'</button>' +
                                 '</div>' 
                                 :
                                 '<div class="peer mR-5">' +
-                                '<button onclick="tundaJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-warning">Tunda</button>' +
+                                '<button onclick="tundaJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-warning '+(row[8]!='on_progress' || row[8]=='cicil'?'disabled':'')+'">Tunda</button>' +
                                 '</div>'
                             ) +
                             '<div class="peer mR-5">' +
-                            '<button onclick="sendJob(\''+row[2]+'\')" class="btn btn-primary"'+(row[8]=='on_progress'?'disabled':'')+'>Kirim</button>' +
+                                // '<button onclick="kirimJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-primary"'+(row[8]=='on_progress'?'disabled':'')+'>Kirim</button>' +
+                                '<button id="kirim-job-button" onClick="kirimJobTrigger(\''+row[2]+'\', \''+row[5]+'\')" type="button" class="form-control btn btn-primary" data-bs-toggle="modal" data-bs-target="#kirimJobModal" class="btn btn-primary"'+((row[8]=='finished' || row[8]=='open' || row[9] != null)?'disabled':'')+'>Kirim</button>' +
                             '</div>' +
                             '<div class="peer mR-5">' +
-                            '<button onclick="finishJob(\''+row[2]+'\')" class="btn btn-danger" '+(row[8]=='on_progress'?'disabled':'')+'>Selesai</button>' +
+                                '<button id="finish-job-button" onClick="finishJobTrigger(\''+row[2]+'\', \''+row[5]+'\', \''+row[4]+'\')" type="button" class="form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#finishJobModal" class="btn btn-danger" '+(row[8]=='finished' || row[8]=='open' ?'disabled':'')+'>Selesai</button>' +
                             '</div>' +
                             '<div class="peer mR-5">' +
-                            '<button onclick="viewJob('+false+', \''+row[2]+'\', \''+row[5]+'\')" class="btn btn-info">Detail</button>' +
+                                '<a href="<?=site_url('naskah/detail')?>/'+row[2]+'" class="btn btn-primary">Detail</a>' +
                             '</div>' +
                             '</div>';
                     },
@@ -983,6 +1062,79 @@
         })
     }
 
+    // kirim job
+    function kirimJobTrigger(noJob, levelKerja) {
+        activeKirimJobNoJob = noJob
+        activeKirimJobLevelKerja = levelKerja
+    }
+
+    function kirimJob(noJob, levelKerja) {
+        $.ajax({
+            url: "<?=site_url('jobs/kirim')?>?noJob=" + noJob + "&levelKerja=" + levelKerja,
+            method: "POST",
+            data: {
+                noJob,
+                levelKerja
+            }
+        }).then(res => {
+            res = JSON.parse(res)
+
+            if (res.success) {
+                refreshTable()
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal mengirim level kerja!',
+                    text: res.message
+                })
+            }
+        })
+    }
+
+    // finish job
+    function finishJobTrigger(noJob, levelKerja, hal) {
+        activeFinishJobNoJob = noJob
+        activeFinishJobLevelKerja = levelKerja
+        $('#finishJobRealisasi').val(hal)
+    }
+
+    $('#formFinishJob').submit(function(e) {
+        e.preventDefault()
+
+        const formData = $('form').serializeObject()
+
+        $.ajax({
+            url: "<?=site_url('jobs/finishJob')?>",
+            method: "POST",
+            data: {
+                data: {
+                    noJob: activeFinishJobNoJob,
+                    levelKerja: activeFinishJobLevelKerja,
+                    ...formData
+                }
+            },
+        }).then(res => {
+            res = JSON.parse(res)
+            refreshTable();
+
+            if (res.success != true) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal menyimpan status pekerjaan!',
+                    text: res.message,
+                })
+            } else {
+                Swal.fire(
+                    'Pekerjaan telah dinyatakan selesai dan diteruskan ke Administrator.',
+                    '',
+                    'success'
+                ).then(function() {
+                    $("#finishJobModal .close").click();
+                })
+            }
+        })
+    })
+
     let runningJob = {}
     function viewJob(isRunningJob = false, noJob, levelKerja) {
         $.ajax({
@@ -991,7 +1143,7 @@
         }).success(res => {
             res = JSON.parse(res)
 
-            if (res.chart.status != 'on_progress') {
+            if (res.chart.status != 'on_progress' && res.chart.status != 'cicil') {
                 $('#start-naskah-button').attr('disabled', true)
                 $('#pause-naskah-button').attr('disabled', true)
             } else {
@@ -1136,6 +1288,44 @@
                     'Terima kasih atas kerja kerasnya 😀',
                     'success'
                 )
+            }
+        })
+    })
+
+    // kirim pekerjaan ke level berikutnya
+    $('#formKirimJob').submit(function(e) {
+        e.preventDefault()
+
+        const formData = $('form').serializeObject()
+
+        $.ajax({
+            url: "<?=site_url('jobs/kirimJob')?>",
+            method: "POST",
+            data: {
+                data: {
+                    noJob: activeKirimJobNoJob,
+                    levelKerja: activeKirimJobLevelKerja,
+                    ...formData
+                }
+            },
+        }).then(res => {
+            res = JSON.parse(res)
+            refreshTable()
+
+            if (res.success != true) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal mengirim pekerjaan!',
+                    text: res.message,
+                })
+            } else {
+                Swal.fire(
+                    'Pekerjaan telah terkirim dan diteruskan ke level kerja selanjutnya jika ada.',
+                    '',
+                    'success'
+                ).then(function() {
+                    $("#kirimJobModal .close").click();
+                })
             }
         })
     })

@@ -6,7 +6,7 @@ class Job_model extends CI_Model {
     }
 
     public function getMyJob($searchableFields, $search, $filters, $pagination) {
-        DBS()->select("naskah.no_job, naskah.kode, naskah.judul, naskah.halaman, naskah_level_kerja.key, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.status");
+        DBS()->select("naskah.no_job, naskah.kode, naskah.judul, naskah.halaman, naskah_level_kerja.key, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.status, naskah_level_kerja.catatan_cicil");
         DBS()->from("naskah_level_kerja");
         DBS()->join("naskah", "naskah.id=naskah_level_kerja.id_naskah", "left");
 
@@ -36,7 +36,25 @@ class Job_model extends CI_Model {
                                 ->get('naskah_level_kerja')
                                 ->row();
 
-        return $activeLevelKerja ?? null;
+        return $activeLevelKerja ? $activeLevelKerja : null;
+    }
+
+    public function getPreviousLevelKerjaStatus($naskahId, $levelKerja) {
+        // get level kerja order
+        $order = DBS()->select('order')->where('id_naskah', $naskahId)->where('key', $levelKerja)->limit(1)->get('naskah_level_kerja')->row()->order;
+
+        // get previous level kerja status
+        $activeLevelKerja = DBS()->select('status')
+                                ->where('id_naskah', $naskahId)
+                                ->where_not_in('status', array('finished', 'cicil'))
+                                ->where('tgl_rencana_mulai IS NOT NULL')
+                                ->where('key !=', $levelKerja)
+                                ->where('order <', $order)
+                                ->limit(1)
+                                ->get('naskah_level_kerja')
+                                ->row();
+
+        return $activeLevelKerja ? $activeLevelKerja : null;
     }
 
     public function viewJob($noJob, $levelKerja) {
@@ -49,9 +67,12 @@ class Job_model extends CI_Model {
         DBS()->where('key', $levelKerja);
         DBS()->from('naskah_level_kerja');
 
-        $detail = DBS()->get()->row();
-
-        return $detail;
+        if (DBS()->_error_message()) {
+            return catchQueryResult(DBS()->_error_message());
+        } else {
+            $detail = DBS()->get()->row();
+            return $detail;
+        }
     }
 
     public function getProgressEachLevelKerja($naskahId) {
@@ -64,7 +85,8 @@ class Job_model extends CI_Model {
                 WHERE id_naskah='$naskahId'
             ) p ON (p.id_naskah=lk.id_naskah AND p.level_kerja_key=lk.key)
             LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=lk.id_pic_aktif)
-            WHERE lk.id_naskah='$naskahId'";
+            WHERE lk.id_naskah='$naskahId'
+            AND tgl_rencana_mulai IS NOT NULL AND tgl_rencana_selesai IS NOT NULL";
 
         return DBS()->query($query)->result();
     }
@@ -141,13 +163,28 @@ class Job_model extends CI_Model {
         if (DBS()->_error_message()) {
             return catchQueryResult(DBS()->_error_message());
         } else {
-            // change status to on_progress
-            $changeStatus = $this->changeLevelKerjaStatus($naskahId, $levelKerja, 'on_progress');
-            if ($changeStatus['success'] == true) {
-                return catchQueryResult('');
-            } else {
-                return catchQueryResult($changeStatus['message']);
+            // get current status
+            $status = DBS()
+                        ->select('status')
+                        ->from('naskah_level_kerja')
+                        ->where('id_naskah', $naskahId)->where('key', $levelKerja)
+                        ->get()->row();
+
+            $currentJobStatus = $status->status;
+
+            // if current status is not cicil
+            if ($currentJobStatus != 'cicil') {
+                // change status to on_progress
+                $changeStatus = $this->changeLevelKerjaStatus($naskahId, $levelKerja, 'on_progress');
+                
+                if ($changeStatus['success'] == true) {
+                    return catchQueryResult('');
+                } else {
+                    return catchQueryResult($changeStatus['message']);
+                }
             }
+
+            return catchQueryResult('');
         }
     }
 
@@ -176,6 +213,10 @@ class Job_model extends CI_Model {
         }
     }
 
+    private function getLevelKerjaStatus($naskahId, $levelKerja) {
+        return DBS()->select('status')->where('key', $levelKerja)->where('id_naskah', $naskahId)->limit(1)->get('naskah_level_kerja')->row()->status;
+    }
+
     public function saveDailyReport($picId, $data) {
         $exists = DBS()->where('id_pic', $picId)
                     ->where('waktu_selesai', NULL)
@@ -185,22 +226,29 @@ class Job_model extends CI_Model {
         if (!$exists) {
             return catchQueryResult('Pekerjaan belum dimulai!');
         }
+
+        // check current status
+        $currentLevelKerjaStatus = $this->getLevelKerjaStatus($data['naskahId'], $data['levelKerja']);
         
-        // change status to on_progress
-        $changeStatus = $this->changeLevelKerjaStatus($data['naskahId'], $data['levelKerja'], 'open');
-        if ($changeStatus['success'] == true) {
-            // update progress
-            DBS()->where('id_pic', $picId)
-                ->where('waktu_selesai', NULL)
-                ->where('halaman', NULL)
-                ->update('naskah_progress', array(
-                    'waktu_selesai' => $data['waktu_selesai'],
-                    'halaman' => $data['halaman'],
-                ));
-    
-            return catchQueryResult(DBS()->_error_message());
+        if ($currentLevelKerjaStatus != 'cicil' && $currentLevelKerjaStatus != 'finished') {
+            // change status to on_progress
+            $changeStatus = $this->changeLevelKerjaStatus($data['naskahId'], $data['levelKerja'], 'open');
+            if ($changeStatus['success'] == true) {
+                // update progress
+                DBS()->where('id_pic', $picId)
+                    ->where('waktu_selesai', NULL)
+                    ->where('halaman', NULL)
+                    ->update('naskah_progress', array(
+                        'waktu_selesai' => $data['waktu_selesai'],
+                        'halaman' => $data['halaman'],
+                    ));
+        
+                return catchQueryResult(DBS()->_error_message());
+            } else {
+                return catchQueryResult($changeStatus['message']);
+            }
         } else {
-            return catchQueryResult($changeStatus['message']);
+            return catchQueryResult('');
         }
     }
 
@@ -228,5 +276,69 @@ class Job_model extends CI_Model {
             'data' => $data,
             'recordsTotal' => $recordsTotal
         );
+    }
+
+    public function kirimJob($data) {
+        $data['status'] = 'cicil';
+
+        $levelKerja = $data['levelKerja'];
+        $naskahId = $data['naskahId'];
+
+        // unset unecessary key from array
+        unset($data['naskahId']);
+        unset($data['noJob']);
+        unset($data['levelKerja']);
+        unset($data['halaman']);
+
+        $updated = DBS()->where('id_naskah', $naskahId)
+            ->where('key', $levelKerja)
+            ->update('naskah_level_kerja', $data);
+        
+        if (!$updated) {
+            return catchQueryResult(DBS()->_error_message());
+        }
+
+        if (DBS()->_error_message()) {
+            return array(
+                'success' => false,
+                'message' => DBS()->_error_message(),
+            );
+        } else {
+            return array(
+                'success' => true
+            );
+        }
+    }
+
+    public function finishJob($data) {
+        $data['status'] = 'finished';
+
+        $levelKerja = $data['levelKerja'];
+        $naskahId = $data['naskahId'];
+
+        // unset unecessary key from array
+        unset($data['naskahId']);
+        unset($data['noJob']);
+        unset($data['levelKerja']);
+        unset($data['halaman']);
+
+        $updated = DBS()->where('id_naskah', $naskahId)
+            ->where('key', $levelKerja)
+            ->update('naskah_level_kerja', $data);
+        
+        if (!$updated) {
+            return catchQueryResult(DBS()->_error_message());
+        }
+
+        if (DBS()->_error_message()) {
+            return array(
+                'success' => false,
+                'message' => DBS()->_error_message(),
+            );
+        } else {
+            return array(
+                'success' => true
+            );
+        }
     }
 }

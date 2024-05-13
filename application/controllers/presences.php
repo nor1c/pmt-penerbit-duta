@@ -5,7 +5,7 @@ class Presences extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->model(array('User_model', 'master/Jam_kerja_m', 'Presences_m', 'Buku_model', 'Workday_plan_model'));
+        $this->load->model(array('User_model', 'master/Jam_kerja_m', 'Presences_m', 'Buku_model', 'Workday_plan_model', 'Naskah_model'));
         $this->load->library('template');
 
         if (!$this->session->userdata('logged_in')) {
@@ -200,6 +200,7 @@ class Presences extends CI_Controller {
 
         if ($this->form_validation->run() == false) {
             $data['special_users'] = $this->special_users;
+            $data['totalPengajuan'] = $this->Naskah_model->countPengajuan();
 
             $this->template->display('presences/input_view', $data);
         } else {

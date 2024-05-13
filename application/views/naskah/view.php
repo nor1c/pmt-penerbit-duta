@@ -11,7 +11,6 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px;
         /* Optional padding */
     }
 
@@ -181,11 +180,11 @@
         <h5><b>Standar Operasional Prosedur (SOP) Editor</b></h5>
 
         <div class="container-bawah">
-            <div class="clickable-rectangle">EDITING</div>
-            <div class="clickable-rectangle">KOREKSI 1</div>
-            <div class="clickable-rectangle">KOREKSI 2</div>
-            <div class="clickable-rectangle">KOREKSI 3</div>
-            <div class="clickable-rectangle">PDF</div>
+            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_editing') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>EDITING</div></a>
+            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_koreksi_1') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 1</div></a>
+            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_koreksi_2') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 2</div></a>
+            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_koreksi_3') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 3</div></a>
+            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_pdf') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>PDF</div></a>
         </div>
     </div>
 </div>

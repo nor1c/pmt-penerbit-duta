@@ -1,6 +1,7 @@
 <?php
 
 class Naskah extends DUTA_Controller {
+    private $userId;
     private $searchableFields = ['no_job', 'kode', 'judul', 'penulis'];
 
     public function __construct() {
@@ -8,6 +9,7 @@ class Naskah extends DUTA_Controller {
         
         $this->load->model(array('Naskah_model', 'Naskah_role_model'));
         $this->load->library('template');
+        $this->userId = sessionData('user_id');
     }
 
     public function index() {
@@ -35,6 +37,36 @@ class Naskah extends DUTA_Controller {
         $this->template->display('naskah/index.php', $data);
     }
 
+    public function data() {
+        $pagination = array(
+            'start' => $this->input->post('start'),
+            'length' => $this->input->post('length')
+        );
+
+        $search = inputPost('search')['value'];
+        $filters = explode('&', $this->input->post('filters'));
+
+        $isPengajuan = inputGet('isPengajuan');
+        $naskah = $this->Naskah_model->getAll($this->searchableFields, $search, $filters, $pagination, $isPengajuan);
+
+        $formattedData = array_map(function ($item) {
+            $isPengajuan = inputGet('isPengajuan');
+            if ($isPengajuan === 'true') {
+                return ['', $item['no_job'], $item['kode'], $item['judul'], $item['id_pengaju'], $item['tgl_pengajuan'], $item['jilid'], $item['penulis'], $item['level_kerja'], ($item['is_pengajuan_processed'] == 1 ? true : false)];
+            } else {
+                return ['', $item['no_job'], $item['kode'], $item['judul'], $item['jilid'], $item['penulis'], $item['level_kerja']];
+            }
+        }, $naskah['data']);
+
+        $data = [
+            'recordsTotal' => $naskah['recordsTotal'],
+            'recordsFiltered' => $naskah['recordsTotal'],
+            'data' => $formattedData
+        ];
+
+        echo json_encode($data);
+    }
+
     public function getLevelKerjaKeyMapJson() {
         echo json_encode($this->keyMap);
     }
@@ -51,32 +83,15 @@ class Naskah extends DUTA_Controller {
         echo json_encode($level_kerja);
     }
 
-    public function data() {
-        $pagination = array(
-            'start' => $this->input->post('start'),
-            'length' => $this->input->post('length')
-        );
-
-        $search = inputPost('search')['value'];
-        $filters = explode('&', $this->input->post('filters'));
-
-        $naskah = $this->Naskah_model->getAll($this->searchableFields, $search, $filters, $pagination);
-
-        $formattedData = array_map(function ($item) {
-            return ['', $item['no_job'], $item['kode'], $item['judul'], $item['jilid'], $item['penulis'], $item['level_kerja']];
-        }, $naskah['data']);
-
-        $data = [
-            'recordsTotal' => $naskah['recordsTotal'],
-            'recordsFiltered' => $naskah['recordsTotal'],
-            'data' => $formattedData
-        ];
-
-        echo json_encode($data);
-    }
-
     public function create() {
         $post_data = $this->input->post();
+        
+        $isPengajuan = inputGet('isPengajuan');
+        if ($isPengajuan == 'true') {
+            $post_data['is_pengajuan'] = '1';
+            $post_data['id_pengaju'] = $this->userId;
+            $post_data['tgl_pengajuan'] = date('Y-m-d H:i:s', time());
+        }
         
         $created = $this->Naskah_model->save($post_data);
 
@@ -117,6 +132,15 @@ class Naskah extends DUTA_Controller {
         $data['ukurans'] = $this->Ukuran_model->getDropdown();
 
         $this->template->display('naskah/view.php', $data);
+    }
+
+    public function detail() {
+        $data['no_job'] = $this->uri->segment(3);
+
+        $data['naskah'] = $this->Naskah_model->findByNoJob($data['no_job']);
+        $data['progress'] = $this->Naskah_model->getProgressWithRealizationDate($data['naskah']->id);
+
+        $this->template->display('naskah/detail.php', $data);
     }
 
     public function changeCover() {
@@ -179,11 +203,136 @@ class Naskah extends DUTA_Controller {
         }
 
         $insertLevelKerja = $this->Naskah_model->saveLevelKerja($data);
+
+        if ($insertLevelKerja) {
+            // update status is_processed to 1
+            $this->Naskah_model->setAsProcessed($idNaskah);
+        }
         
         echo json_encode($insertLevelKerja);
     }
 
     public function deleteLevelKerja($naskahId) {
         return $this->Naskah_model->deleteLevelKerja($naskahId);
+    }
+
+    public function sop_editing() {
+        $idNaskah = inputGet('id_naskah');
+        $data['id_naskah'] = $idNaskah;
+
+        $data['data'] = $this->Naskah_model->sop_editing($idNaskah);
+        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
+
+        $this->template->display('naskah/sop/editing', $data);
+    }
+
+    public function save_sop_editing() {
+        $naskahId = inputPost('naskahId');
+        $catatan = inputPost('catatan');
+        $checkList = inputPost('checklist');
+        $picSignature = inputPost('picSignature');
+        $approverId = inputPost('approverId');
+        $approverSignature = inputPost('approverSignature');
+        $isSend = inputPost('isSend');
+        
+        $picSignFileName = "editing_editor_$naskahId.jpg";
+        $approverSignFileName = "editing_koor_editor_$naskahId.jpg";
+
+        if ($picSignature) {
+            $savePICSign = $this->save_signature($picSignature, $picSignFileName);
+        }
+        if ($approverSignature) {
+            $saveApproverSign = $this->save_signature($approverSignature, $approverSignFileName);
+        }
+
+        // save to database
+        $data = array(
+            'id_naskah' => $naskahId,
+            'catatan' => $catatan,
+            'checklist' => $checkList,
+            'is_send' => $isSend,
+        );
+
+        if ($picSignature) {
+            $pic_sign_data = array(
+                'approver_id' => $approverId,
+                'pic_signature' => $picSignFileName,
+                'pic_signed_by' => sessionData('user_id'),
+                'pic_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $pic_sign_data);
+        }
+
+        if ($approverSignature) {
+            $approver_sign_data = array(
+                'approver_signature' => $approverSignFileName,
+                'approver_signed_by' => sessionData('user_id'),
+                'approver_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $approver_sign_data);
+        }
+
+        $result = $this->Naskah_model->save_sop_editing($data);
+
+        echo json_encode($result);
+    }
+
+    public function save_signature($signature, $fileName) {
+        $encodedSignature = explode(',', $signature)[1];
+        $decodedSignature = base64_decode($encodedSignature);
+
+        $rootDir = dirname(dirname(__DIR__));
+        
+        $uploadDir = $rootDir . '/signatures/sop';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $filePath = $uploadDir . '/' . $fileName;
+
+        if (file_put_contents($filePath, $decodedSignature) !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function sop_koreksi_1() {
+        $idNaskah = inputGet('id_naskah');
+        $data['id_naskah'] = $idNaskah;
+
+        $data['data'] = $this->Naskah_model->sop_koreksi_1($idNaskah);
+
+        $this->template->display('naskah/sop/koreksi_1', $data);
+    }
+
+    public function sop_koreksi_2() {
+        $idNaskah = inputGet('id_naskah');
+        $data['id_naskah'] = $idNaskah;
+
+        $data['data'] = $this->Naskah_model->sop_koreksi_2($idNaskah);
+
+        $this->template->display('naskah/sop/koreksi_2', $data);
+    }
+
+    public function sop_koreksi_3() {
+        $idNaskah = inputGet('id_naskah');
+        $data['id_naskah'] = $idNaskah;
+
+        $data['data'] = $this->Naskah_model->sop_koreksi_3($idNaskah);
+
+        $this->template->display('naskah/sop/koreksi_3', $data);
+    }
+
+    public function sop_pdf() {
+        $idNaskah = inputGet('id_naskah');
+        $data['id_naskah'] = $idNaskah;
+
+        $data['data'] = $this->Naskah_model->sop_pdf($idNaskah);
+
+        $this->template->display('naskah/sop/pdf', $data);
     }
 }

@@ -48,6 +48,13 @@ $route['naskah/roles/index'] = 'naskah_roles/index';
 $route['naskah/roles/getAll'] = 'naskah_roles/getAll';
 $route['naskah/roles/getMappedKaryawans'] = 'naskah_roles/getMappedKaryawans';
 $route['naskah/roles/saveMapping'] = 'naskah_roles/saveMapping';
+$route['naskah/pengajuan'] = 'naskah/index';
+
+$route['proses_job'] = 'proses_job/index';
+
+$route['report/daily'] = 'report/daily';
+$route['report/naskah'] = 'report/naskah';
+$route['report/naskah/(:any)'] = 'report/naskahView/$1';
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

@@ -47,7 +47,7 @@
 				<div class="sidebar-logo">
 					<div class="peers ai-c fxw-nw">
 						<div class="peer peer-greed">
-							<a class="sidebar-link td-n" href="index.html">
+							<a class="sidebar-link td-n" href="<?=site_url('/dashboard')?>">
 								<div class="peers ai-c fxw-nw">
 									<div class="peer">
 										<div class="logo">
@@ -88,15 +88,27 @@
 							<span class="title">Riwayat Kehadiran</span>
 						</a>
 					</li>
-					<li class="nav-item">
+					<!-- <li class="nav-item">
 						<a class="sidebar-link" href="<?=site_url('pekerjaan')?>">
 							<span class="icon-holder">
 								<i class="c-brown-500 ti-files"></i>
 							</span>
 							<span class="title">Input Pekerjaan</span>
 						</a>
-					</li>
+					</li> -->
 					
+					<li class="nav-item">
+						<a class="sidebar-link" href="<?=site_url('naskah/pengajuan')?>">
+							<span class="icon-holder">
+								<i class="c-deep-orange-500 ti-file"></i>
+							</span>
+							<?php
+								$this->load->model('Naskah_model');
+								$totalPengajuan = $this->Naskah_model->countPengajuan();
+							?>
+							<span class="title">Pengajuan No. Job <span class="mL-5" style="background:green;color:white;border-radius:3px;padding: 0px 5px;<?=$totalPengajuan == 0 ? 'display:none' : ''?>"><?=$totalPengajuan?></span></span>
+						</a>
+					</li>
 					<li class="nav-item dropdown">
 						<a class="dropdown-toggle" href="javascript:void(0);">
 							<span class="icon-holder">
@@ -116,16 +128,16 @@
 							</li>
 						</ul>
 					</li>
-					<li class="nav-item">
+					<!-- <li class="nav-item">
 						<a class="sidebar-link" href="calendar.html">
 							<span class="icon-holder">
 								<i class="c-deep-orange-500 ti-calendar"></i>
 							</span>
 							<span class="title">Perencanaan Produksi</span>
 						</a>
-					</li>
+					</li> -->
 					<li class="nav-item">
-						<a class="sidebar-link" href="chat.html">
+						<a class="sidebar-link" href="<?=site_url('proses_job')?>">
 							<span class="icon-holder">
 								<i class="c-deep-purple-500 ti-loop"></i>
 							</span>
@@ -138,6 +150,14 @@
 								<i class="c-blue-500 ti-book"></i>
 							</span>
 							<span class="title">Buku</span>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="sidebar-link" href="<?=site_url('report/daily')?>">
+							<span class="icon-holder">
+								<i class="c-orange-500 ti-agenda"></i>
+							</span>
+							<span class="title">Laporan Harian</span>
 						</a>
 					</li>
 					<li class="nav-item dropdown">
@@ -440,7 +460,7 @@
 		$('#filter').submit(function (e) {
 			e.preventDefault()
 
-			filters.filters = $('#filter :input').serialize()
+			filters.filters = $('#filter :input').serialize().replace(/\+/g, '%20');
 			
 			refreshTable()
 		})

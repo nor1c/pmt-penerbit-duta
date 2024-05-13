@@ -9,6 +9,10 @@ function convertDateFormat($date) {
     return $date;
 }
 
+function getIndoDate($date) {
+    return $date != '' ? date('d/m/Y', strtotime($date)) : '-';
+}
+
 function catchQueryResult($errorMessage) {
     if (!$errorMessage && $errorMessage == '') {
         return array(

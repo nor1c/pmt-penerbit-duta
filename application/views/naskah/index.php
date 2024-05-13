@@ -8,7 +8,7 @@
                         <i class="ti-reload"></i>
                     </button>
                     <button id="addNaskahButton" type="button" class="btn btn-primary btn-color" data-bs-toggle="modal" data-bs-target="#naskahFormModal">
-                        <i class="ti-plus"></i> Naskah Baru
+                        <i class="ti-plus"></i> &nbsp; <?=uriSegment(2) == 'pengajuan' ? 'Ajukan' : ''?> Naskah Baru
                     </button>
                 </div>
 
@@ -67,9 +67,13 @@
                             <th>No. Job</th>
                             <th>Kode Buku</th>
                             <th>Judul Buku</th>
+                            <?php if (uriSegment(2) == 'pengajuan') { ?>
+                                <th>Pengaju</th>
+                                <th>Tgl Pengajuan</th>
+                            <?php } ?>
                             <th>Jilid</th>
                             <th>Penulis</th>
-                            <th>Rencana Produksi</th>
+                            <th><?=uriSegment(2) == 'pengajuan' ? 'Status' : 'Aksi'?></th>
                             <!-- <th>Spek</th>
                             <th>Rencana Produksi</th> -->
                         </tr>
@@ -88,15 +92,15 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 10, 10, 150, 50, 100, 5],
-                [5, 10, 10, 150, 50, 100, 5],
+                [5, 10, 10, 150, <?=uriSegment(2) == 'pengajuan' ? '50, 50,' : ''?> 50, 100, 5],
+                [5, 10, 10, 150, <?=uriSegment(2) == 'pengajuan' ? '50, 50,' : ''?> 50, 100, 5],
             ],
             "pageLength": 10,
             "processing": true,
             "serverSide": true,
             "searching": true,
             "ajax": {
-                "url": "<?= site_url($this->uri->segment(1) . '/data') ?>",
+                "url": "<?=site_url($this->uri->segment(1) . '/data?isPengajuan=' . (uriSegment(2) == 'pengajuan' ? 'true' : 'false')) ?>",
                 'method': 'POST',
                 'data': function(d) {
                     d.draw = d.draw || 1
@@ -138,25 +142,42 @@
             ],
             "columnDefs": [
                 {
-                    "targets": 6,
+                    "targets": <?=uriSegment(2) == 'pengajuan' ? '8' : '6'?>,
                     "render": function(data, type, row) {
-                        return '<div class="peers mR-15">' +
-                            '<div class="peer">' +
-                            '<a href="<?=site_url('/naskah/view')?>/'+ row[1] +'" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                            '<i class="c-green-500 ti-eye"></i>' +
-                            '</a>' +
-                            '</div>' +
-                            '<div class="peer">' +
-                            '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
-                            '<i class="c-blue-500 ti-pencil"></i>' +
-                            '</a>' +
-                            '</div>' +
-                            '<div class="peer">' +
-                            '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                            '<i class="c-red-500 ti-trash"></i>' +
-                            '</a>' +
-                            '</div>' +
-                            '</div>';
+                        const withButtons = '<div class="peers mR-15">' +
+                                '<div class="peer">' +
+                                '<a href="<?=site_url('/naskah/view')?>/'+ row[1] +'" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                                '<i class="c-green-500 ti-eye"></i>' +
+                                '</a>' +
+                                '</div>' +
+                                '<div class="peer">' +
+                                '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
+                                '<i class="c-blue-500 ti-pencil"></i>' +
+                                '</a>' +
+                                '</div>' +
+                                '<div class="peer">' +
+                                '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                                '<i class="c-orange-500 ti-agenda"></i>' +
+                                '</a>' +
+                                '</div>' +
+                                '<div class="peer">' +
+                                '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                                '<i class="c-red-500 ti-trash"></i>' +
+                                '</a>' +
+                                '</div>' +
+                                '</div>';
+
+                        <?php if (uriSegment(2) == 'pengajuan') { ?>
+                            <?php if (sessionData('id_jabatan') != 1) { ?>
+                                return '<div>' +
+                                        (row[9] == true ? '<span style="color:green"><i class="c-green-500 ti-clip"></i> Sudah diproses</span>' : '<span style="color:red"><i class="c-red-500 ti-clip"></i> Belum diproses</span>') +
+                                    '</div>';
+                            <?php } else { ?>
+                                return withButtons
+                            <?php } ?>
+                        <?php } else { ?>
+                            return withButtons
+                        <?php } ?>
                     },
                 },
             ],
@@ -335,7 +356,7 @@
                 $('#naskahError').hide()
 
                 $.ajax({
-                    url: '<?= site_url($this->uri->segment(1)) ?>/' + (isEdit ? 'update' : 'create'),
+                    url: '<?= site_url($this->uri->segment(1)) ?>/' + (isEdit ? 'update' : 'create?isPengajuan=' + (<?=uriSegment(2) == 'pengajuan' ? 'true' : 'false'?>)),
                     type: 'POST',
                     data: new FormData($(this)[0]),
                     contentType: false,

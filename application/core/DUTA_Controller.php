@@ -75,6 +75,30 @@ class DUTA_Controller extends CI_Controller {
             'pic' => 'setter'
         ),
     );
+    public $statusMap = array(
+        'open' => array(
+            'text' => 'Open',
+            'bgColor' => '#ffffff'
+        ),
+        'on_progress' => array(
+            'text' => 'On Progress',
+            'bgColor' => '#c4f3ff'
+        ),
+        'paused' => array(
+            'text' => 'Ditunda',
+            'bgColor' => '#feffde'
+        ),
+        'cicil' => array(
+            'text' => 'Dicicil',
+            'bgColor' => '#ffd7cf'
+        ),
+        'finished' => array(
+            'text' => 'Selesai',
+            'bgColor' => '#ccffc7'
+        ),
+    );
+
+    public $special_users = [14, 23, 28];
 
     public function __construct() {
         parent::__construct();
@@ -120,6 +144,7 @@ class DUTA_Controller extends CI_Controller {
                 'master/Kategori_model',
                 'master/Ukuran_model',
                 'Karyawan_model',
+                'Naskah_model',
             )
         );
 
