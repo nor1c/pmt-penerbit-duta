@@ -137,6 +137,17 @@
 						</a>
 					</li> -->
 					<li class="nav-item">
+						<a class="sidebar-link" href="<?=site_url('naskah/sop_requests')?>">
+							<span class="icon-holder">
+								<i class="c-yellow-800 ti-bell"></i>
+							</span>
+							<?php
+							$sopRequests = $this->Naskah_model->countSOPRequests()->total_requests;
+							?>
+							<span class="title">Form SOP <span class="mL-5" style="background:green;color:white;border-radius:3px;padding: 0px 5px;<?=$sopRequests == 0 ? 'display:none' : ''?>"><?=$sopRequests?></span></span>
+						</a>
+					</li>
+					<li class="nav-item">
 						<a class="sidebar-link" href="<?=site_url('proses_job')?>">
 							<span class="icon-holder">
 								<i class="c-deep-purple-500 ti-loop"></i>

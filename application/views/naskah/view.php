@@ -25,10 +25,15 @@
         border-radius: 5px;
         margin-right: 10px;
         font-weight: bold;
+        font-size: 16px;
     }
 
     .clickable-rectangle:hover {
         border: solid 2px #ccc;
+    }
+
+    .sop-done {
+        background-color: #e3ffe3;
     }
 </style>
 
@@ -180,11 +185,12 @@
         <h5><b>Standar Operasional Prosedur (SOP) Editor</b></h5>
 
         <div class="container-bawah">
-            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_editing') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>EDITING</div></a>
-            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_koreksi_1') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 1</div></a>
-            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_koreksi_2') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 2</div></a>
-            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_koreksi_3') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 3</div></a>
-            <a class="clickable-rectangle" href="<?=site_url('naskah/sop_pdf') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>PDF</div></a>
+
+            <a class="clickable-rectangle <?=$sop_progress->editing_done ? 'sop-done' : ''?>" href="<?=site_url('naskah/sop_editing') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>EDITING</div></a>
+            <a class="clickable-rectangle <?=$sop_progress->koreksi_1_done ? 'sop-done' : ''?>" href="<?=site_url('naskah/sop_koreksi_1') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 1</div></a>
+            <a class="clickable-rectangle <?=$sop_progress->koreksi_2_done ? 'sop-done' : ''?>" href="<?=site_url('naskah/sop_koreksi_2') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 2</div></a>
+            <a class="clickable-rectangle <?=$sop_progress->koreksi_3_done ? 'sop-done' : ''?>" href="<?=site_url('naskah/sop_koreksi_3') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>KOREKSI 3</div></a>
+            <a class="clickable-rectangle <?=$sop_progress->pdf_done ? 'sop-done' : ''?>" href="<?=site_url('naskah/sop_pdf') . '?id_naskah=' . $naskah->id . '&no_job=' . $naskah->no_job?>"><div>PDF</div></a>
         </div>
     </div>
 </div>

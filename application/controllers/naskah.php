@@ -130,6 +130,7 @@ class Naskah extends DUTA_Controller {
         $data['mapels'] = $this->Mapel_model->getDropdown();
         $data['kategoris'] = $this->Kategori_model->getDropdown();
         $data['ukurans'] = $this->Ukuran_model->getDropdown();
+        $data['sop_progress'] = $this->Naskah_model->getProgressSOP($data['naskah']->id);
 
         $this->template->display('naskah/view.php', $data);
     }
@@ -216,6 +217,34 @@ class Naskah extends DUTA_Controller {
         return $this->Naskah_model->deleteLevelKerja($naskahId);
     }
 
+    public function sop_requests() {
+        $this->template->display('naskah/sop/sop_requests.php');
+    }
+
+    public function sop_requests_data() {
+        $pagination = array(
+            'start' => $this->input->post('start'),
+            'length' => $this->input->post('length')
+        );
+
+        $search = inputPost('search')['value'];
+        $filters = explode('&', $this->input->post('filters'));
+
+        $sop = $this->Naskah_model->getSOPRequestList($this->searchableFields, $search, $filters, $pagination);
+
+        $formattedData = array_map(function ($item) {
+            return ['', $item['id'], $item['no_job'], $item['judul'], $item['nama_editor'], date('d/m/Y H:i', strtotime($item['tanggal_request'])), ucfirst($item['type'])];
+        }, $sop['data']);
+
+        $data = [
+            'recordsTotal' => $sop['recordsTotal'],
+            'recordsFiltered' => $sop['recordsTotal'],
+            'data' => $formattedData
+        ];
+
+        echo json_encode($data);
+    }
+
     public function sop_editing() {
         $idNaskah = inputGet('id_naskah');
         $data['id_naskah'] = $idNaskah;
@@ -251,6 +280,7 @@ class Naskah extends DUTA_Controller {
             'catatan' => $catatan,
             'checklist' => $checkList,
             'is_send' => $isSend,
+            'send_date' => $isSend ? date('Y-m-d H:i:s', time()) : NULL,
         );
 
         if ($picSignature) {
@@ -305,8 +335,63 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_koreksi_1($idNaskah);
+        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
 
         $this->template->display('naskah/sop/koreksi_1', $data);
+    }
+
+    public function save_sop_koreksi_1() {
+        $naskahId = inputPost('naskahId');
+        $catatan = inputPost('catatan');
+        $checkList = inputPost('checklist');
+        $picSignature = inputPost('picSignature');
+        $approverId = inputPost('approverId');
+        $approverSignature = inputPost('approverSignature');
+        $isSend = inputPost('isSend');
+        
+        $picSignFileName = "koreksi_1_editor_$naskahId.jpg";
+        $approverSignFileName = "koreksi_1_koor_editor_$naskahId.jpg";
+
+        if ($picSignature) {
+            $savePICSign = $this->save_signature($picSignature, $picSignFileName);
+        }
+        if ($approverSignature) {
+            $saveApproverSign = $this->save_signature($approverSignature, $approverSignFileName);
+        }
+
+        // save to database
+        $data = array(
+            'id_naskah' => $naskahId,
+            'catatan' => $catatan,
+            'checklist' => $checkList,
+            'is_send' => $isSend,
+            'send_date' => $isSend ? date('Y-m-d H:i:s', time()) : NULL,
+        );
+
+        if ($picSignature) {
+            $pic_sign_data = array(
+                'approver_id' => $approverId,
+                'pic_signature' => $picSignFileName,
+                'pic_signed_by' => sessionData('user_id'),
+                'pic_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $pic_sign_data);
+        }
+
+        if ($approverSignature) {
+            $approver_sign_data = array(
+                'approver_signature' => $approverSignFileName,
+                'approver_signed_by' => sessionData('user_id'),
+                'approver_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $approver_sign_data);
+        }
+
+        $result = $this->Naskah_model->save_sop_koreksi_1($data);
+
+        echo json_encode($result);
     }
 
     public function sop_koreksi_2() {
@@ -314,8 +399,63 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_koreksi_2($idNaskah);
+        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
 
         $this->template->display('naskah/sop/koreksi_2', $data);
+    }
+
+    public function save_sop_koreksi_2() {
+        $naskahId = inputPost('naskahId');
+        $catatan = inputPost('catatan');
+        $checkList = inputPost('checklist');
+        $picSignature = inputPost('picSignature');
+        $approverId = inputPost('approverId');
+        $approverSignature = inputPost('approverSignature');
+        $isSend = inputPost('isSend');
+        
+        $picSignFileName = "koreksi_2_editor_$naskahId.jpg";
+        $approverSignFileName = "koreksi_2_koor_editor_$naskahId.jpg";
+
+        if ($picSignature) {
+            $savePICSign = $this->save_signature($picSignature, $picSignFileName);
+        }
+        if ($approverSignature) {
+            $saveApproverSign = $this->save_signature($approverSignature, $approverSignFileName);
+        }
+
+        // save to database
+        $data = array(
+            'id_naskah' => $naskahId,
+            'catatan' => $catatan,
+            'checklist' => $checkList,
+            'is_send' => $isSend,
+            'send_date' => $isSend ? date('Y-m-d H:i:s', time()) : NULL,
+        );
+
+        if ($picSignature) {
+            $pic_sign_data = array(
+                'approver_id' => $approverId,
+                'pic_signature' => $picSignFileName,
+                'pic_signed_by' => sessionData('user_id'),
+                'pic_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $pic_sign_data);
+        }
+
+        if ($approverSignature) {
+            $approver_sign_data = array(
+                'approver_signature' => $approverSignFileName,
+                'approver_signed_by' => sessionData('user_id'),
+                'approver_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $approver_sign_data);
+        }
+
+        $result = $this->Naskah_model->save_sop_koreksi_2($data);
+
+        echo json_encode($result);
     }
 
     public function sop_koreksi_3() {
@@ -323,8 +463,63 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_koreksi_3($idNaskah);
+        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
 
         $this->template->display('naskah/sop/koreksi_3', $data);
+    }
+
+    public function save_sop_koreksi_3() {
+        $naskahId = inputPost('naskahId');
+        $catatan = inputPost('catatan');
+        $checkList = inputPost('checklist');
+        $picSignature = inputPost('picSignature');
+        $approverId = inputPost('approverId');
+        $approverSignature = inputPost('approverSignature');
+        $isSend = inputPost('isSend');
+        
+        $picSignFileName = "koreksi_3_editor_$naskahId.jpg";
+        $approverSignFileName = "koreksi_3_koor_editor_$naskahId.jpg";
+
+        if ($picSignature) {
+            $savePICSign = $this->save_signature($picSignature, $picSignFileName);
+        }
+        if ($approverSignature) {
+            $saveApproverSign = $this->save_signature($approverSignature, $approverSignFileName);
+        }
+
+        // save to database
+        $data = array(
+            'id_naskah' => $naskahId,
+            'catatan' => $catatan,
+            'checklist' => $checkList,
+            'is_send' => $isSend,
+            'send_date' => $isSend ? date('Y-m-d H:i:s', time()) : NULL,
+        );
+
+        if ($picSignature) {
+            $pic_sign_data = array(
+                'approver_id' => $approverId,
+                'pic_signature' => $picSignFileName,
+                'pic_signed_by' => sessionData('user_id'),
+                'pic_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $pic_sign_data);
+        }
+
+        if ($approverSignature) {
+            $approver_sign_data = array(
+                'approver_signature' => $approverSignFileName,
+                'approver_signed_by' => sessionData('user_id'),
+                'approver_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $approver_sign_data);
+        }
+
+        $result = $this->Naskah_model->save_sop_koreksi_3($data);
+
+        echo json_encode($result);
     }
 
     public function sop_pdf() {
@@ -332,7 +527,62 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_pdf($idNaskah);
+        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
 
         $this->template->display('naskah/sop/pdf', $data);
+    }
+
+    public function save_sop_pdf() {
+        $naskahId = inputPost('naskahId');
+        $catatan = inputPost('catatan');
+        $checkList = inputPost('checklist');
+        $picSignature = inputPost('picSignature');
+        $approverId = inputPost('approverId');
+        $approverSignature = inputPost('approverSignature');
+        $isSend = inputPost('isSend');
+        
+        $picSignFileName = "pdf_editor_$naskahId.jpg";
+        $approverSignFileName = "pdf_koor_editor_$naskahId.jpg";
+
+        if ($picSignature) {
+            $savePICSign = $this->save_signature($picSignature, $picSignFileName);
+        }
+        if ($approverSignature) {
+            $saveApproverSign = $this->save_signature($approverSignature, $approverSignFileName);
+        }
+
+        // save to database
+        $data = array(
+            'id_naskah' => $naskahId,
+            'catatan' => $catatan,
+            'checklist' => $checkList,
+            'is_send' => $isSend,
+            'send_date' => $isSend ? date('Y-m-d H:i:s', time()) : NULL,
+        );
+
+        if ($picSignature) {
+            $pic_sign_data = array(
+                'approver_id' => $approverId,
+                'pic_signature' => $picSignFileName,
+                'pic_signed_by' => sessionData('user_id'),
+                'pic_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $pic_sign_data);
+        }
+
+        if ($approverSignature) {
+            $approver_sign_data = array(
+                'approver_signature' => $approverSignFileName,
+                'approver_signed_by' => sessionData('user_id'),
+                'approver_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $approver_sign_data);
+        }
+
+        $result = $this->Naskah_model->save_sop_pdf($data);
+
+        echo json_encode($result);
     }
 }
