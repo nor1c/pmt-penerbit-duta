@@ -6,21 +6,37 @@ class Job_model extends CI_Model {
     }
 
     public function getMyJob($searchableFields, $search, $filters, $pagination) {
-        DBS()->select("naskah.no_job, naskah.kode, naskah.judul, naskah.halaman, naskah_level_kerja.key, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.status, naskah_level_kerja.catatan_cicil");
+        $userLoginId = sessionData('user_id');
+
+        // 
+        DBS()->select("naskah.no_job, naskah.kode, naskah.judul, naskah.halaman, naskah_level_kerja.key, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.status, naskah_level_kerja.catatan_cicil, progress.realisasi");
         DBS()->from("naskah_level_kerja");
         DBS()->join("naskah", "naskah.id=naskah_level_kerja.id_naskah", "left");
+        DBS()->join(
+            '(
+                SELECT id_naskah, level_kerja_key, SUM(halaman) as realisasi
+                FROM naskah_progress
+                GROUP BY id_naskah, level_kerja_key
+            ) as progress',
+            "naskah_level_kerja.id_naskah=progress.id_naskah AND naskah_level_kerja.key=progress.level_kerja_key",
+            'left'
+        );
 
-        $userLoginId = sessionData('user_id');
         DBS()->where('naskah_level_kerja.id_pic_aktif', $userLoginId);
 
-        DBS()->group_by("naskah_level_kerja.order, naskah_level_kerja.key");
-
-        $tempdb = clone DBS();
-		$recordsTotal = $tempdb->count_all_results('', FALSE);
-        
+        DBS()->group_by("naskah_level_kerja.order, naskah_level_kerja.key, naskah_level_kerja.id_naskah");
+        DBS()->order_by("naskah_level_kerja.tgl_rencana_selesai", "ASC");
 		DBS()->limit($pagination['length'], $pagination['start']);
+
         $query = DBS()->get();
         $data = $query->result_array();
+
+        // count all records
+        DBS()->from("naskah_level_kerja");
+        DBS()->where('naskah_level_kerja.id_pic_aktif', $userLoginId);
+        DBS()->group_by("naskah_level_kerja.order, naskah_level_kerja.key, naskah_level_kerja.id_naskah");
+
+		$recordsTotal = DBS()->get()->num_rows();
 
         return array(
             'data' => $data,
@@ -68,7 +84,7 @@ class Job_model extends CI_Model {
         DBS()->from('naskah_level_kerja');
 
         if (DBS()->_error_message()) {
-            return catchQueryResult(DBS()->_error_message());
+            return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
         } else {
             $detail = DBS()->get()->row();
             return $detail;
@@ -77,23 +93,28 @@ class Job_model extends CI_Model {
 
     public function getProgressEachLevelKerja($naskahId) {
         $query = "SELECT
-            lk.*, t_karyawan.nama, p.total_hari
-            FROM naskah_level_kerja AS lk
-            LEFT JOIN (
-                SELECT id_naskah, level_kerja_key, COUNT(DISTINCT DATE(waktu_mulai)) AS total_hari
-                FROM naskah_progress
-                WHERE id_naskah='$naskahId'
-            ) p ON (p.id_naskah=lk.id_naskah AND p.level_kerja_key=lk.key)
-            LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=lk.id_pic_aktif)
-            WHERE lk.id_naskah='$naskahId'
-            AND tgl_rencana_mulai IS NOT NULL AND tgl_rencana_selesai IS NOT NULL";
+                lk.*, t_karyawan.nama, p.total_hari, SUM(naskah_progress.halaman) AS realisasi_halaman
+                FROM naskah_level_kerja AS lk
+                LEFT JOIN (
+                    SELECT id_naskah, level_kerja_key, COUNT(DISTINCT DATE(waktu_mulai)) AS total_hari
+                    FROM naskah_progress
+                    WHERE id_naskah='$naskahId'
+                    GROUP BY level_kerja_key, id_naskah
+                ) p ON (p.id_naskah=lk.id_naskah AND p.level_kerja_key=lk.key)
+                LEFT JOIN naskah_progress ON (lk.id_naskah=naskah_progress.id_naskah AND lk.`key`=naskah_progress.level_kerja_key)
+                LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=lk.id_pic_aktif)
+                WHERE lk.id_naskah='$naskahId'
+                AND tgl_rencana_mulai IS NOT NULL AND tgl_rencana_selesai IS NOT NULL
+                GROUP BY lk.id_naskah, lk.key
+                ORDER BY lk.tgl_rencana_mulai ASC";
 
         return DBS()->query($query)->result();
     }
 
-    public function getProgressHalaman($naskahId) {
+    public function getProgressHalaman($naskahId, $levelKerja) {
         $progress = DBS()->select('SUM(halaman) as halaman')
                         ->where('id_naskah', $naskahId)
+                        ->where('level_kerja_key', $levelKerja)
                         ->get('naskah_progress')
                         ->row();
                     
@@ -161,7 +182,7 @@ class Job_model extends CI_Model {
         DBS()->insert('naskah_progress', $data);
 
         if (DBS()->_error_message()) {
-            return catchQueryResult(DBS()->_error_message());
+            return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
         } else {
             // get current status
             $status = DBS()
@@ -198,7 +219,7 @@ class Job_model extends CI_Model {
             ->update('naskah_level_kerja', $data);
         
         if (!$updated) {
-            return catchQueryResult(DBS()->_error_message());
+            return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
         }
 
         if (DBS()->_error_message()) {
@@ -232,7 +253,7 @@ class Job_model extends CI_Model {
         
         if ($currentLevelKerjaStatus != 'cicil' && $currentLevelKerjaStatus != 'finished') {
             // change status to on_progress
-            $changeStatus = $this->changeLevelKerjaStatus($data['naskahId'], $data['levelKerja'], 'open');
+            $changeStatus = $this->changeLevelKerjaStatus($data['naskahId'], $data['levelKerja'], 'on_progress');
             if ($changeStatus['success'] == true) {
                 // update progress
                 DBS()->where('id_pic', $picId)
@@ -243,7 +264,7 @@ class Job_model extends CI_Model {
                         'halaman' => $data['halaman'],
                     ));
         
-                return catchQueryResult(DBS()->_error_message());
+                return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
             } else {
                 return catchQueryResult($changeStatus['message']);
             }
@@ -253,7 +274,7 @@ class Job_model extends CI_Model {
     }
 
     public function getDailyJobReport($searchableFields, $search, $filters, $pagination) {
-        DBS()->select("naskah_progress.created_at as tanggal, t_karyawan.nama, naskah_progress.level_kerja_key, naskah.judul, naskah_progress.catatan, naskah.kode, naskah.no_job, naskah_progress.halaman, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.durasi, naskah_level_kerja.total_libur");
+        DBS()->select("naskah_progress.waktu_mulai, naskah_progress.waktu_selesai, t_karyawan.nama, naskah_progress.level_kerja_key, naskah.judul, naskah_progress.catatan, naskah.kode, naskah.no_job, naskah_progress.halaman, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.durasi, naskah_level_kerja.total_libur");
         DBS()->from("naskah_progress");
         DBS()->join("naskah", "naskah.id=naskah_progress.id_naskah", "left");
         DBS()->join("t_karyawan", "naskah_progress.id_pic=t_karyawan.id_karyawan", "left");
@@ -270,6 +291,7 @@ class Job_model extends CI_Model {
         
 		DBS()->limit($pagination['length'], $pagination['start']);
         $query = DBS()->get();
+        
         $data = $query->result_array();
 
         return array(
@@ -295,7 +317,7 @@ class Job_model extends CI_Model {
             ->update('naskah_level_kerja', $data);
         
         if (!$updated) {
-            return catchQueryResult(DBS()->_error_message());
+            return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
         }
 
         if (DBS()->_error_message()) {
@@ -327,7 +349,7 @@ class Job_model extends CI_Model {
             ->update('naskah_level_kerja', $data);
         
         if (!$updated) {
-            return catchQueryResult(DBS()->_error_message());
+            return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
         }
 
         if (DBS()->_error_message()) {

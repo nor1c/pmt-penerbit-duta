@@ -1,7 +1,9 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-$allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData('user_id') || $data->approver_id == sessionData('user_id'));
+$allowed_to_save = !$data->pic_signed_by || 
+                    sessionData('id_jabatan') == 3 ||
+                    ($data->pic_signed_by == sessionData('user_id') || $data->approver_id == sessionData('user_id'));
 ?>
 
 <style>
@@ -40,7 +42,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
 <div class="container-fluid">
     <a href="<?= site_url('naskah/view/' . inputGet('no_job')) ?>">
-        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Back to Naskah Detail</button>
+        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Kembali ke Detail Naskah</button>
     </a>
 
     <div class="bd bgc-white p-30 r-10">
@@ -48,11 +50,11 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
         <div class="">
             <form action="#" id="sop-form">
-                <table id="checklist-table" class="table" style="<?=$data->approver_id == sessionData('user_id') ? 'pointer-events:none' : ''?>"></table>
+                <table id="checklist-table" class="table" style="<?=$data->approver_id == sessionData('user_id') || $allowed_to_save ? 'pointer-events:none' : ''?>"></table>
                 <div class="col-md-12 row">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label class="form-label">Catatan</label>
-                        <textarea id="catatan" name="catatan" cols="30" rows="10" class="form-control" placeholder="Catatan" <?=$data->approver_id == sessionData('user_id') ? 'readonly disabled' : ''?>><?=$data->catatan ? $data->catatan : ''?></textarea>
+                        <textarea id="catatan" name="catatan" cols="30" rows="10" class="form-control" placeholder="Catatan" <?=$data->approver_id == sessionData('user_id') || $allowed_to_save ? 'readonly disabled' : ''?>><?=$data->catatan ? $data->catatan : ''?></textarea>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Tanda tangan Editor</label>
@@ -77,24 +79,40 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Tanda tangan Koor. Editor</label>
-                            <div style="<?=$data->approver_signature ? '' : 'display:none'?>">
-                                <img src="<?=base_url('signatures/sop/'.$data->approver_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
-                                Ditanda-tangani oleh <b><?=$data->nama_approver . ' ('.date('d/m/Y', strtotime($data->pic_signed_date)).')';?></b>
+                        <div style="<?=$data->approver_signature ? '' : 'display:none'?>">
+                            <img src="<?=base_url('signatures/sop/'.$data->approver_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
+                            Ditanda-tangani oleh <b><?=$data->nama_approver . ' ('.date('d/m/Y', strtotime($data->approver_signed_date)).')';?></b>
+                        </div>
+                        
+                        <div>
+                            <div style="<?=$data->approver_id == sessionData('user_id') && !$data->approver_signature ? '' : 'display:none'?>">
+                                <canvas id="approver-signature-pad" class="signature-pad"></canvas>
+                                <button type="button" class="btn btn-info" id="clear-approver-sign">Clear Signature</button>
                             </div>
-                            
-                            <div>
-                                <div style="<?=$data->approver_id == sessionData('user_id') && !$data->approver_signature ? '' : 'display:none'?>">
-                                    <canvas id="approver-signature-pad" class="signature-pad"></canvas>
-                                    <button type="button" class="btn btn-info" id="clear-approver-sign">Clear Signature</button>
-                                </div>
-                                <div class="signature-pad disabled-canvas" style="background-color:#eee;margin-bottom:5px;<?=($data->approver_signature != '' || $data->approver_id == sessionData('user_id')) ? 'display:none' : ''?>"></div>
+                            <div class="signature-pad disabled-canvas" style="background-color:#eee;margin-bottom:5px;<?=($data->approver_signature != '' || $data->approver_id == sessionData('user_id')) ? 'display:none' : ''?>"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanda tangan Manajer Editor</label>
+                        <?=$data->manajer_signature?>
+                        <div style="<?=$data->manajer_signature ? '' : 'display:none'?>">
+                            <img src="<?=base_url('signatures/sop/'.$data->manajer_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
+                            Ditanda-tangani oleh <b><?=$data->nama_manajer . ' ('.date('d/m/Y', strtotime($data->manajer_signed_date)).')';?></b>
+                        </div>
+                        
+                        <div>
+                            <div style="<?=sessionData('id_jabatan') == 3 && !$data->manajer_signature ? '' : 'display:none'?>">
+                                <canvas id="manajer-signature-pad" class="signature-pad"></canvas>
+                                <button type="button" class="btn btn-info" id="clear-manajer-sign">Clear Signature</button>
                             </div>
+                            <div class="signature-pad disabled-canvas" style="background-color:#eee;margin-bottom:5px;<?=($data->manajer_signature != '' || sessionData('id_jabatan') == 3) ? 'display:none' : ''?>"></div>
+                        </div>
                     </div>
                 </div>
-                <?php if (!$data->approver_signature) { ?>
+                <?php if (!$data->approver_signature || !$data->manajer_signature) { ?>
                     <div class="mT-20 d-flex">
                         <button onClick="saveOrSend(false); return false;" class="btn btn-primary mR-50 <?=$allowed_to_save ? '' : 'disabled'?>">Simpan</button>
-                        <?php if ($data->approver_id != sessionData('user_id')) { ?>
+                        <?php if ($data->approver_id != sessionData('user_id') && sessionData('id_jabatan') != 3) { ?>
                             <select id="approver_id" name="approver_id" class="form-control mR-10" style="width:300px;" required>
                                 <option disabled readonly selected>Pilih Koor. Editor</option>
                                 <?php foreach ($pics as $pic) { ?>
@@ -122,133 +140,19 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
     let baseOptions = [
         {
             "label": 1,
-            "title": "Cek ulang materi sesuai kurikulum dengan cermat dan sedetil-detilnya",
+            "title": "Cek koreksi sebelumnya (mengacu pada koreksi 3)",
             "checked": false,
             "striked": false,
         },
         {
             "label": 2,
-            "title": "Konsep dan isi",
+            "title": "Cek hal-hal yang sensitif",
             "checked": false,
             "striked": false,
-            "child": [
-                {
-                    "label": "a.",
-                    "title": "Materi sesuai teori",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "b.",
-                    "title": "Ejaan dan efektivitas bahasa",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "c.",
-                    "title": "Persamaan/formulasi/ayat/hadis benar dan tepat",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "d.",
-                    "title": "Tata nama dan istilah seragam, baku, dan konsisten",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "e.",
-                    "title": "Evaluasi",
-                    "checked": false,
-                    "striked": false,
-                    "child": [
-                        {
-                            "label": "1)",
-                            "title": "Keseragaman perintah soal",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "2)",
-                            "title": "Keseragaman tipe soal",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "3)",
-                            "title": "Banyaknya soal (kelipatan 5)",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "4)",
-                            "title": "Evaluasi semester 1 dan 2",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "5)",
-                            "title": "Kunci jawaban",
-                            "checked": false,
-                            "striked": false,
-                        },
-                    ]
-                },
-                {
-                    "label": "f.",
-                    "title": "Kegiatan (aktivitas siswa)/glosarium/daftar pustaka",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "g.",
-                    "title": "Gambar dan tabel",
-                    "checked": false,
-                    "striked": false,
-                    "child": [
-                        {
-                            "label": "1)",
-                            "title": "Nomor gambar dan tabel",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "2)",
-                            "title": "Judul gambar dan tabel",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "3)",
-                            "title": "Sumber gambar dan tabel (jika ada)",
-                            "checked": false,
-                            "striked": false,
-                        },
-                    ]
-                },
-                {
-                    "label": "h.",
-                    "title": "Fitur-fitur buku ada dan konsisten",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "i.",
-                    "title": "Halaman i lengkap",
-                    "checked": false,
-                    "striked": false,
-                },
-            ]
         },
         {
             "label": "3.",
-            "title": "Naskah telah di-proofread (bahasa Asing, bahasa daerah)",
-            "checked": false,
-            "striked": false,
-        },
-        {
-            "label": "4.",
-            "title": "Form pemesanan gambar",
+            "title": "Tanda tangan Editor, Koordinator, dan Manajer",
             "checked": false,
             "striked": false,
         },
@@ -257,12 +161,16 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
     let picSignCanvas = document.getElementById('pic-signature-pad');
     let approverSignCanvas = document.getElementById('approver-signature-pad');
+    let manajerSignCanvas = document.getElementById('manajer-signature-pad');
 
     // signature pad initialization
     let picSignaturePad = new SignaturePad(picSignCanvas, {
         backgroundColor: 'rgb(255, 255, 255)'
     });
     let approverSignaturePad = new SignaturePad(approverSignCanvas, {
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+    let manajerSignaturePad = new SignaturePad(manajerSignCanvas, {
         backgroundColor: 'rgb(255, 255, 255)'
     });
 
@@ -281,6 +189,10 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
         approverSignCanvas.width = approverSignCanvas.offsetWidth * ratio;
         approverSignCanvas.height = approverSignCanvas.offsetHeight * ratio;
         approverSignCanvas.getContext("2d").scale(ratio, ratio);
+
+        manajerSignCanvas.width = manajerSignCanvas.offsetWidth * ratio;
+        manajerSignCanvas.height = manajerSignCanvas.offsetHeight * ratio;
+        manajerSignCanvas.getContext("2d").scale(ratio, ratio);
     }
 
     let checkedOptions = []
@@ -296,6 +208,9 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
         });
         $('#clear-approver-sign').click(function () {
             approverSignaturePad.clear();
+        });
+        $('#clear-manajer-sign').click(function () {
+            manajerSignaturePad.clear();
         });
 
         showPICSignature = () => {
@@ -315,9 +230,9 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
             }
         }, 0)
 
-        const existingChecklist = "<?=$data->checklist ? 'true' : 'false'?>"
+        const existingChecklist = "<?=array_key_exists('checklist', $data) && $data->checklist ? 'true' : 'false'?>"
         if (existingChecklist == "true") {
-            const dbChecklist = existingChecklist == "true" ? JSON.parse(JSON.stringify(<?=$data->checklist ?? null?>)) : []
+            const dbChecklist = JSON.parse(JSON.stringify(<?=$data->checklist?>))
             options = dbChecklist
         } else {
             options = baseOptions
@@ -383,7 +298,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
         }
 
         saveOrSend = (isSend = false) => {
-            <?php if ($data->approver_id != sessionData('user_id')) { ?>
+            <?php if ($data->approver_id != sessionData('user_id') && sessionData('id_jabatan') != 3) { ?>
                 if ($('#approver_id').val() == null) {
                     Swal.fire({
                         icon: 'error',
@@ -398,8 +313,12 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
             const picSignature = picSignaturePad.toDataURL();
             const isPicDrawed = picSignaturePad.points.length;
+
             const approverSignature = approverSignaturePad.toDataURL();
             const isApproverDrawed = approverSignaturePad.points.length;
+            
+            const manajerSignature = manajerSignaturePad.toDataURL();
+            const isManajerDrawed = manajerSignaturePad.points.length;
 
             let data = {
                 naskahId: "<?=inputGet('id_naskah')?>",
@@ -421,6 +340,12 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                 }
             <?php } ?>
 
+            <?php if (sessionData('id_jabatan') == 3) { ?>
+                if (isManajerDrawed) {
+                    data.manajerSignature = manajerSignature
+                }
+            <?php } ?>
+
             $.ajax({
                 url: "<?=site_url('naskah/save_sop_pdf')?>",
                 data: data,
@@ -428,7 +353,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                 success: function () {
                     Swal.fire(
                         'Berhasil menyimpan!',
-                        'SOP PDF berhasil disimpan..',
+                        'Naskah telah ditutup dan ditambah ke Data Master Buku',
                         'success'
                     ).then(function() {
                         window.location.reload()

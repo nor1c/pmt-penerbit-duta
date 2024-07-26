@@ -1,3 +1,8 @@
+<?php
+$uri = uriSegment(1) == 'buku' ? 'buku' : 'naskah';
+$menu = uriSegment(1) == 'buku' ? 'Buku' : 'Naskah';
+?>
+
 <style>
     .each-field {
         margin-bottom: 10px;
@@ -38,28 +43,76 @@
 </style>
 
 <div class="container-fluid">
-    <a href="<?= site_url('naskah') ?>">
-        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Back to Naskah</button>
-    </a>
+    <div class="d-flex justify-content-between">
+        <div>
+            <a href="<?= site_url($uri . '/index') ?>">
+                <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Kembali ke  Daftar <?=$menu?></button>
+            </a>
+        </div>
+
+        <div>
+            <?php if (
+                ($this->session->userdata('id_jabatan') == 1 && $this->session->userdata('id_divisi') == 1) ||
+                $this->session->userdata('id_divisi') == 2
+            ) { ?>
+                <a href="#" onClick="enableEdit()">
+                    <button class="btn cur-p btn-warning mB-10">Edit <?=$menu?></button>
+                </a>
+            <?php } ?>
+
+            <?php if (!$naskah->is_sent_to_ppic && $uri == 'buku' && $this->session->userdata('id_jabatan') == 1 && $this->session->userdata('id_divisi') == 1) { ?>
+                <a href="#" onClick="kirimPPIC(<?=$naskah->id?>)">
+                    <button class="btn cur-p btn-danger mB-10">Kirim ke PPIC</button>
+                </a>
+            <?php } ?>
+        </div>
+    </div>
 
     <div class="bd bgc-white p-30 r-10">
-        <h5><b>Data Buku</b></h5>
+        <div class="row">
+            <div class="col-md-3">
+                <form action="" enctype="multipart/form-data">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <h4><b>Cover <?=$menu?></b></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <img src="<?=$naskah->cover != NULL ? base_url('uploads/cover_naskah/' . $naskah->cover) : 'https://marketplace.canva.com/EAFersXpW3g/1/0/1003w/canva-blue-and-white-modern-business-book-cover-cfxNJXYre8I.jpg'?>" width="200">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <?php if (
+                                ($this->session->userdata('id_jabatan') == 1 && $this->session->userdata('id_divisi') == 1) ||
+                                $this->session->userdata('id_divisi') == 2
+                            ) { ?>
+                                <div class="col-md-12 text-center mT-10">
+                                    <input class="d-none" type="file" id="fileInput" name="file" accept="image/*" onchange="uploadImage()">
+                                    <button type="button" id="uploadButton" class="btn btn-primary" onclick="chooseFile()">Ubah Cover</button>
+                                    <input class="d-none" type="submit" value="Submit">
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-        <div class="">
-            <form id="editNaskahForm" class="row">
-                <div class="col-md-4">
+            <form id="editNaskahForm" class="row col-md-9">
+                <div class="col-md-5">
                     <div class="each-field">
                         <h6><b>No Job</b></h6>
                         <span class="hide-on-edit"><?= $naskah->no_job; ?></span>
                         <input type="text" class="editable form-control" name="no_job" value="<?= $naskah->no_job; ?>" readonly>
                     </div>
                     <div class="each-field">
-                        <h6><b>Kode Buku</b></h6>
+                        <h6><b>Kode <?=$menu?></b></h6>
                         <span class="hide-on-edit"><?= $naskah->kode; ?></span>
                         <input type="text" class="editable form-control" name="kode" value="<?= $naskah->kode; ?>">
                     </div>
                     <div class="each-field">
-                        <h6><b>Judul Buku</b></h6>
+                        <h6><b>Judul <?=$menu?></b></h6>
                         <span class="hide-on-edit"><?= $naskah->judul; ?></span>
                         <input type="text" class="editable form-control" name="judul" value="<?= $naskah->judul; ?>">
                     </div>
@@ -94,7 +147,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-4">
+
+                <div class="col-md-5">
                     <div class="each-field">
                         <h6><b>Penulis</b></h6>
                         <span class="hide-on-edit"><?= $naskah->penulis; ?></span>
@@ -112,8 +166,13 @@
                     </div>
                     <div class="each-field">
                         <h6><b>Warna</b></h6>
-                        <span class="hide-on-edit"><?= $naskah->warna; ?></span>
-                        <input type="text" class="editable form-control" name="warna" value="<?= $naskah->warna; ?>">
+                        <span class="hide-on-edit"><?= $naskah->nama_warna; ?></span>
+                        <select name="id_warna" id="warna" class="editable form-control" required>
+                            <option selected disabled default>--Pilih Warna--</option>
+                            <?php foreach ($warnas as $warna) { ?>
+                                <option value="<?=$warna['id']?>" <?=$naskah->id_warna == $warna['id'] ? 'selected' : ''?>><?=$warna['nama_warna']?></option>
+                            <?php } ?>
+                        </select>
                     </div>
                     <div class="each-field">
                         <h6><b>Halaman</b></h6>
@@ -132,51 +191,39 @@
                     </div>
                     <div class="each-field">
                         <button id="save-button" type="submit" class="editable btn btn-success text-white">Save</button>
+                        <button type="button" onClick="disableEdit()" class="editable btn btn-primary">Cancel</button>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <form action="" enctype="multipart/form-data">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-md-12 text-center">
-                                    <h4><b>Cover Buku</b></h4>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 text-center">
-                                    <img src="<?=$naskah->cover != NULL ? base_url('uploads/cover_naskah/' . $naskah->cover) : 'https://marketplace.canva.com/EAFersXpW3g/1/0/1003w/canva-blue-and-white-modern-business-book-cover-cfxNJXYre8I.jpg'?>" width="200">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 text-center mT-10">
-                                    <input class="d-none" type="file" id="fileInput" name="file" accept="image/*" onchange="uploadImage()">
-                                    <button type="button" id="uploadButton" class="btn btn-primary" onclick="chooseFile()">Ubah Cover</button>
-                                    <input class="d-none" type="submit" value="Submit">
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+
+                <?php if (($this->session->userdata('id_jabatan') == 1 && $this->session->userdata('id_divisi') == 1) || $this->session->userdata('id_divisi') == 2) { ?>
                 <div class="col-md-2">
                     <div class="btn-group" role="group">
                         <i class="ti-more-alt no-after dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="float:right;transform:rotate(90deg);cursor:pointer;"></i>
 
                         <ul class="dropdown-menu fsz-sm" aria-labelledby="btnGroupDrop1" style="">
+                            <?php if (
+                                ($this->session->userdata('id_jabatan') == 1 && $this->session->userdata('id_divisi') == 1) ||
+                                $this->session->userdata('id_divisi') == 2
+                            ) { ?>
                             <li>
                                 <a id="edit-naskah-button" href="#" class="d-b td-n pY-5 pX-10 bgcH-grey-100 c-grey-700" onclick="enableEdit()">
-                                    <i class="ti-trash mR-10"></i>
-                                    <span>Edit Naskah</span>
+                                    <i class="c-yellow-700 ti-pencil mR-10"></i>
+                                    <span>Edit <?=$menu?></span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="" class="d-b td-n pY-5 pX-10 bgcH-grey-100 c-grey-700">
-                                    <i class="ti-alert mR-10"></i>
-                                    <span>Kirim ke PPIO</span>
-                                </a>
-                            </li>
+                            <?php } ?>
+                            <?php if (!$naskah->is_sent_to_ppic && $uri == 'buku' && $this->session->userdata('id_jabatan') == 1 && $this->session->userdata('id_divisi') == 1) { ?>
+                                <li>
+                                    <a href="#" class="d-b td-n pY-5 pX-10 bgcH-grey-100 c-grey-700" onClick="kirimPPIC(<?=$naskah->id?>)">
+                                        <i class="c-red-500 ti-alert mR-10"></i>
+                                        <span>Kirim ke PPIC</span>
+                                    </a>
+                                </li>
+                            <?php } ?>
                         </ul>
                     </div>
                 </div>
+                <?php } ?>
             </form>
         </div>
     </div>
@@ -202,6 +249,11 @@
         $('.hide-on-edit').hide()
         $('#save-button').show()
     }
+    function disableEdit() {
+        $('.editable').hide()
+        $('.hide-on-edit').show()
+        $('#save-button').hide()
+    }
 
     $(document).ready(function() {
         $('.editable').hide()
@@ -211,7 +263,7 @@
             e.preventDefault()
 
             $.ajax({
-                url: '<?= site_url($this->uri->segment(1)) ?>/' + 'update',
+                url: 'naskah/' + 'update',
                 type: 'POST',
                 data: new FormData($(this)[0]),
                 contentType: false,
@@ -240,6 +292,31 @@
             $('.editable').hide()
             $('.hide-on-edit').show()
         })
+
+        kirimPPIC = (idNaskah) => {
+            $.ajax({
+                url: '<?=site_url('naskah/kirimPPIC')?>?id_naskah=' + idNaskah,
+                type: 'POST',
+            }).then((res) => {
+                res = JSON.parse(res)
+
+                if (res.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal mengirim ke PPIC!',
+                        text: res.message,
+                    })
+                } else {
+                    window.location.href = "<?=site_url('ppic/index')?>"
+                }
+            }).catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal mengirim ke PPIC!',
+                    text: res.message,
+                })
+            })
+        }
     })
 
     function chooseFile() {
@@ -257,7 +334,7 @@
         formData.append('file', fileInput.files[0], newFileName)
 
         $.ajax({
-            url: "<?=site_url(uriSegment(1).'/changeCover?naskahId=' . $naskah->id) . '&prevFileName=' . $naskah->cover?>",
+            url: "<?=site_url('naskah/changeCover?naskahId=' . $naskah->id) . '&prevFileName=' . $naskah->cover?>",
             type: 'POST',
             data: formData,
             processData: false,

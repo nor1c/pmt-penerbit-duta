@@ -40,7 +40,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
 <div class="container-fluid">
     <a href="<?= site_url('naskah/view/' . inputGet('no_job')) ?>">
-        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Back to Naskah Detail</button>
+        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Kembali ke Detail Naskah</button>
     </a>
 
     <div class="bd bgc-white p-30 r-10">
@@ -79,7 +79,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                         <label class="form-label">Tanda tangan Koor. Editor</label>
                             <div style="<?=$data->approver_signature ? '' : 'display:none'?>">
                                 <img src="<?=base_url('signatures/sop/'.$data->approver_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
-                                Ditanda-tangani oleh <b><?=$data->nama_approver . ' ('.date('d/m/Y', strtotime($data->pic_signed_date)).')';?></b>
+                                Ditanda-tangani oleh <b><?=$data->nama_approver . ' ('.date('d/m/Y', strtotime($data->approver_signed_date)).')';?></b>
                             </div>
                             
                             <div>
@@ -122,133 +122,25 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
     let baseOptions = [
         {
             "label": 1,
-            "title": "Cek ulang materi sesuai kurikulum dengan cermat dan sedetil-detilnya",
+            "title": "Penetapan jumlah halaman final",
             "checked": false,
             "striked": false,
         },
         {
             "label": 2,
-            "title": "Konsep dan isi",
+            "title": "Cek koreksi sebelumnya (mengacu pada koreksi 1)",
             "checked": false,
             "striked": false,
-            "child": [
-                {
-                    "label": "a.",
-                    "title": "Materi sesuai teori",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "b.",
-                    "title": "Ejaan dan efektivitas bahasa",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "c.",
-                    "title": "Persamaan/formulasi/ayat/hadis benar dan tepat",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "d.",
-                    "title": "Tata nama dan istilah seragam, baku, dan konsisten",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "e.",
-                    "title": "Evaluasi",
-                    "checked": false,
-                    "striked": false,
-                    "child": [
-                        {
-                            "label": "1)",
-                            "title": "Keseragaman perintah soal",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "2)",
-                            "title": "Keseragaman tipe soal",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "3)",
-                            "title": "Banyaknya soal (kelipatan 5)",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "4)",
-                            "title": "Evaluasi semester 1 dan 2",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "5)",
-                            "title": "Kunci jawaban",
-                            "checked": false,
-                            "striked": false,
-                        },
-                    ]
-                },
-                {
-                    "label": "f.",
-                    "title": "Kegiatan (aktivitas siswa)/glosarium/daftar pustaka",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "g.",
-                    "title": "Gambar dan tabel",
-                    "checked": false,
-                    "striked": false,
-                    "child": [
-                        {
-                            "label": "1)",
-                            "title": "Nomor gambar dan tabel",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "2)",
-                            "title": "Judul gambar dan tabel",
-                            "checked": false,
-                            "striked": false,
-                        },
-                        {
-                            "label": "3)",
-                            "title": "Sumber gambar dan tabel (jika ada)",
-                            "checked": false,
-                            "striked": false,
-                        },
-                    ]
-                },
-                {
-                    "label": "h.",
-                    "title": "Fitur-fitur buku ada dan konsisten",
-                    "checked": false,
-                    "striked": false,
-                },
-                {
-                    "label": "i.",
-                    "title": "Halaman i lengkap",
-                    "checked": false,
-                    "striked": false,
-                },
-            ]
         },
         {
             "label": "3.",
-            "title": "Naskah telah di-proofread (bahasa Asing, bahasa daerah)",
+            "title": "Cek kunci jawaban",
             "checked": false,
             "striked": false,
         },
         {
             "label": "4.",
-            "title": "Form pemesanan gambar",
+            "title": "Bedah naskah internal editor",
             "checked": false,
             "striked": false,
         },
@@ -315,9 +207,9 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
             }
         }, 0)
 
-        const existingChecklist = "<?=$data->checklist ? 'true' : 'false'?>"
+        const existingChecklist = "<?=array_key_exists('checklist', $data) && $data->checklist ? 'true' : 'false'?>"
         if (existingChecklist == "true") {
-            const dbChecklist = existingChecklist == "true" ? JSON.parse(JSON.stringify(<?=$data->checklist ?? null?>)) : []
+            const dbChecklist = JSON.parse(JSON.stringify(<?=$data->checklist?>))
             options = dbChecklist
         } else {
             options = baseOptions

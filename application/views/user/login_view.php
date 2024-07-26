@@ -59,7 +59,7 @@
   }
   </style>
   <script defer="defer" src="main.js"></script>
-  <link href="<?=base_url('assets/adminator/style.css')?>" rel="stylesheet">
+  <link href="<?=base_url('assets/adminator/style.css')?>?v=1.0" rel="stylesheet">
 </head>
 
 <body class="app">

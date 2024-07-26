@@ -50,7 +50,7 @@
                     <thead>
                         <tr>
                             <th>NIK</th>
-                            <th>Nama</th>
+                            <th width="120">Nama</th>
                             <th>Hari, Tanggal</th>
                             <th>Waktu Datang</th>
                             <th>Datang Melalui</th>
@@ -80,8 +80,8 @@
         table = $('#attendanceHistoryTable').DataTable({
             "sDom": "Rlfrtip",
             "aLengthMenu": [
-                [5, 10, 15, 20],
-                [5, 10, 15, 20]
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 30,
             "processing": true,

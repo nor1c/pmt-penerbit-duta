@@ -53,4 +53,38 @@ class Holidays extends DUTA_Controller {
 
         echo json_encode($result);
     }
+
+    // To automatically generate weekend dates from the first date of current year until the next 5 years
+    public function generateWeekends() {
+        // Get the current year
+        $currentYear = date('Y');
+        
+        // Generate weekend dates for the next 5 years
+        $endDate = date('Y-m-d', strtotime('+5 years', strtotime($currentYear . '-01-01')));
+        $weekendDates = $this->getWeekendDates($currentYear . '-01-01', $endDate);
+
+        // Insert weekend dates into database using 'INSERT IGNORE'
+        $this->Holiday_model->insertWeekendDates($weekendDates);
+
+        echo json_encode(array(
+            'success' => true,
+            'message' => 'Weekend date has been generated successfully.',
+        ));
+    }
+
+    private function getWeekendDates($startDate, $endDate) {
+        $weekends = [];
+        $start = new DateTime($startDate);
+        $end = new DateTime($endDate);
+        $interval = new DateInterval('P1D');
+        $period = new DatePeriod($start, $interval, $end);
+
+        foreach ($period as $date) {
+            if ($date->format('N') == 6 || $date->format('N') == 7) { // 6 for Saturday, 7 for Sunday
+                $weekends[] = $date->format('Y-m-d');
+            }
+        }
+
+        return $weekends;
+    }
 }

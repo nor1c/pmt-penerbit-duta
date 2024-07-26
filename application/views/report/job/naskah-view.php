@@ -89,8 +89,8 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 10, 10, 150, 50, 100, 5],
-                [5, 10, 10, 150, 50, 100, 5],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,

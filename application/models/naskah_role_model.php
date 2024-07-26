@@ -67,16 +67,52 @@ class Naskah_role_model extends CI_Model {
     }
 
     public function getEveryPICs() {
-        $query = '
+        // $query = '
+        //     SELECT 
+        //         naskah_role_karyawan.role_key,
+        //         CONCAT(\'[\', GROUP_CONCAT(\'{"id":\', t_karyawan.id_karyawan, \',"nama":"\', t_karyawan.nama, \'"}\'), \']\') AS karyawan
+        //     FROM naskah_roles
+        //     LEFT JOIN naskah_role_karyawan ON (naskah_role_karyawan.role_key = naskah_roles.key)
+        //     LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan = naskah_role_karyawan.id_karyawan)
+        //     WHERE naskah_roles.is_active = "1"
+        //     GROUP BY naskah_role_karyawan.role_key;
+        // ';
+
+        $query = "
             SELECT 
-                naskah_role_karyawan.role_key,
-                CONCAT(\'[\', GROUP_CONCAT(\'{"id":\', t_karyawan.id_karyawan, \',"nama":"\', t_karyawan.nama, \'"}\'), \']\') AS karyawan
-            FROM naskah_roles
-            LEFT JOIN naskah_role_karyawan ON (naskah_role_karyawan.role_key = naskah_roles.key)
-            LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan = naskah_role_karyawan.id_karyawan)
-            WHERE naskah_roles.is_active = "1"
-            GROUP BY naskah_role_karyawan.role_key;
-        ';
+                'editor' AS role_key,
+                CONCAT(
+                    '[', 
+                    GROUP_CONCAT(
+                        CONCAT(
+                            '{\"id\": \"', id_karyawan, '\", \"nama\": \"', nama, '\"}'
+                        )
+                    ),
+                    ']'
+                ) AS karyawan
+            FROM t_karyawan
+            WHERE id_divisi = 2
+            AND id_jabatan = 5
+            AND t_karyawan.active = '1'
+            
+            UNION ALL
+            
+            SELECT 
+                'setter' AS role_key,
+                CONCAT(
+                    '[', 
+                    GROUP_CONCAT(
+                        CONCAT(
+                            '{\"id\": \"', id_karyawan, '\", \"nama\": \"', nama, '\"}'
+                        )
+                    ),
+                    ']'
+                ) AS karyawan
+            FROM t_karyawan
+            WHERE id_divisi = 1
+            AND id_jabatan = 5
+            AND t_karyawan.active = '1';
+        ";
 
         $data = DBS()->query($query)->result_array();
 

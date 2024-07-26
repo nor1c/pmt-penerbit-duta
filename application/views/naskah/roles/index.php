@@ -33,8 +33,8 @@
             // "scrollY": "300px",
             // "scrollCollapse": true,
             "aLengthMenu": [
-                [1, 10, 10, 5, 20],
-                [1, 10, 10, 5, 20],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,

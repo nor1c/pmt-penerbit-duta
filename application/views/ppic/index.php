@@ -1,18 +1,9 @@
-<style>
-    #naskahReportTable tbody tr:hover {
-        cursor: pointer;
-    }
-</style>
-
 <div class="container-fluid">
-    <h4 class="c-grey-900 mT-10 mB-30">Naskah</h4>
+    <h4 class="c-grey-900 mT-10 mB-30">Daftar Buku PPIC</h4>
     <div class="row">
         <div class="col-md-12">
             <div class="bgc-white bd bdrs-3 p-20 mB-20">
                 <div class="mB-20">
-                    <div class="alert alert-warning" role="alert">
-                        <b><i class="ti-info-alt"></i>&nbsp;&nbsp; Klik row Naskah untuk melihat detail report pekerjaannya.</b>
-                    </div>
                     <button type="button" class="btn cur-p btn-outline-secondary" onclick="refreshTable()">
                         <i class="ti-reload"></i>
                     </button>
@@ -66,15 +57,20 @@
                     </form>
                 </div>
 
-                <table id="naskahReportTable" class="table table-bordered table-hover" cellspacing="0" width="100%">
+                <table id="naskahTable" class="table table-bordered table-hover" cellspacing="0" width="100%">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
                             <th>No. Job</th>
                             <th>Kode Buku</th>
                             <th>Judul Buku</th>
+                            <th>Mata Pelajaran</th>
+                            <th>Jenjang</th>
+                            <th>Kategori</th>
+                            <th>Ukuran</th>
                             <th>Jilid</th>
                             <th>Penulis</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                 </table>
@@ -85,7 +81,7 @@
 
 <script>
     $(document).ready(function() {
-        table = $('#naskahReportTable').DataTable({
+        table = $('#naskahTable').DataTable({
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
@@ -97,7 +93,7 @@
             "serverSide": true,
             "searching": true,
             "ajax": {
-                "url": "<?=site_url($this->uri->segment(1)) . '/naskahData'?>",
+                "url": "<?=site_url('naskah/data?isPengajuan=false&isBuku=true&isPPIC=true') ?>",
                 'method': 'POST',
                 'data': function(d) {
                     d.draw = d.draw || 1
@@ -116,48 +112,28 @@
                         return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 },
-                {
-                    "orderable": false,
-                    "searchable": true,
-                },
-                {
-                    "orderable": false,
-                    "searchable": true,
-                },
-                {
-                    "orderable": false,
-                    "searchable": false,
-                },
-                {
-                    "orderable": false,
-                    "searchable": true,
-                },
-                {
-                    "orderable": false,
-                    "searchable": false,
-                },
             ],
             "columnDefs": [
-                // {
-                //     "targets": 6,
-                //     "render": function(data, type, row) {
-                //         const withButtons = '<div class="peers mR-15">' +
-                //                                 '<div class="peer">' +
-                //                                     '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                //                                         '<i class="c-orange-500 ti-agenda"></i>' +
-                //                                     '</a>' +
-                //                                 '</div>' +
-                //                             '</div>';
-
-                //         return withButtons
-                //     },
-                // },
+                {
+                    "targets": 10,
+                    "render": function(data, type, row) {
+                        const withButtons = '<div class="peers mR-15">' +
+                                                '<div class="peer peer-text mR-5">' +
+                                                '<a target="_blank" href="<?=site_url('/buku/view')?>/'+ row[1] +'" class="td-n c-gray-500 p-2">' +
+                                                'Lihat' +
+                                                '</a>' +
+                                                '</div>' +
+                                                '<div class="peer peer-text">' +
+                                                '<a href="#" class="td-n c-gray-500 p-2">' +
+                                                'Request Cetak' +
+                                                '</a>' +
+                                                '</div>' +
+                                            '</div>';
+                        
+                        return withButtons
+                    },
+                },
             ],
-            "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-                if (aData[6] == null) {
-                    $('td', nRow).css('background-color', '#ffd5d1');
-                }
-            },
             'select': {
                 'style': 'multi'
             },
@@ -168,14 +144,6 @@
                 "sSearch": "Pencarian",
                 "sProcessing": '<image style="width:150px" src="http://superstorefinder.net/support/wp-content/uploads/2018/01/blue_loading.gif">',
             }
-        });
-
-        
-        $('#naskahReportTable tbody').on('click', 'tr', function() {
-            const data = table.row(this).data();
-            const noJob = data[1]
-            const url = "<?=site_url('report/naskah')?>/" + noJob;
-            window.location.href = url;
-        });
+        })
     })
 </script>

@@ -218,8 +218,8 @@
         table = $('#laporanHarianTable').DataTable({
             "sDom": "Rlfrtip",
             "aLengthMenu": [
-                [5, 10, 15, 20],
-                [5, 10, 15, 20]
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 5,
             "processing": true,

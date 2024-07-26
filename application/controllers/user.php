@@ -1,21 +1,31 @@
 <?php
 
 class User extends CI_Controller{
+	private $login_status;
+
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('user_model');
 		$this->load->model('user_category_model');
 		$this->load->model(array('master/divisi_m','master/golongan_m','master/jabatan_m','master/jam_kerja_m'));
 		$this->load->library('template');
+
+		$login_status = $this->session->userdata('logged_in');
 	}
 
 	public function index(){
-		$this->loginstatus->check_login();
+		if (!$this->login_status) {
+			return redirect('/');
+		}
+
 		redirect('user/listdata');
 	}
 
 	public function listdata($start=0,$perpage=10){
-		$this->loginstatus->check_login();
+		if (!$this->login_status) {
+			return redirect('/');
+		}
+
 		$data = array();
 
 		$count = $this->user_model->get_all(false)->num_rows();
@@ -36,7 +46,10 @@ class User extends CI_Controller{
 	}
 
 	public function add(){
-		$this->loginstatus->check_login();
+		if (!$this->login_status) {
+			return redirect('/');
+		}
+
 		$this->form_validation->set_rules('nama_karyawan','Nama Karyawan','required');
 		$this->form_validation->set_rules('tempat_lahir','Tempat Lahir','required');
 		$this->form_validation->set_rules('tanggal_lahir','Tanggal Lahir','required');
@@ -125,7 +138,10 @@ class User extends CI_Controller{
 	}
 
 	public function edit($id){
-		$this->loginstatus->check_login();
+		if (!$this->login_status) {
+			return redirect('/');
+		}
+
 		if($id){
 			$this->form_validation->set_rules('nama_karyawan','Nama Karyawan');
 			$this->form_validation->set_rules('tempat_lahir','Tempat Lahir');
@@ -277,7 +293,10 @@ class User extends CI_Controller{
 	}
 
 	public function delete($id){
-		$this->loginstatus->check_login();
+		if (!$this->login_status) {
+			return redirect('/');
+		}
+
 		if($id){
 			$count = $this->user_model->get_by_id($id)->num_rows();
 			if($count > 0){
@@ -297,7 +316,11 @@ class User extends CI_Controller{
 		}
 	}
 
-	public function login(){
+	public function login() {
+		if ($this->login_status == true) {
+			return redirect('dashboard');
+		}
+
 		$this->form_validation->set_rules('username','Username','required');
 		$this->form_validation->set_rules('password','Password','required');
 
@@ -309,6 +332,7 @@ class User extends CI_Controller{
 				$data_user = $this->user_model->get_by_nik($this->input->post('username'))->row_array();
 				$user_sess = array(
 								'id_jabatan' => $data_user['id_jabatan'],
+								'id_divisi' => $data_user['id_divisi'],
 								'user_id' => $data_user['id_karyawan'],
 								'user_nik' => $data_user['nik'],
 								'user_fullname' => $data_user['nama'],
@@ -325,8 +349,7 @@ class User extends CI_Controller{
 		}
 	}
 
-	public function logout(){
-		$this->loginstatus->check_login();
+	public function logout() {
 		$this->session->sess_destroy();
 		redirect('user/login');
 	}

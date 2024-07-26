@@ -9,10 +9,16 @@ class Naskah_model extends CI_Model {
         $this->load->model(array('Holiday_model'));
     }
 
-    public function getAll($searchableFields, $search, $filters, $pagination, $isPengajuan) {
-        DBS()->select("$this->table.*, naskah_level_kerja.id_naskah as level_kerja");
+    public function getAll($searchableFields, $search, $filters, $pagination, $isPengajuan, $isBuku, $isPPIC) {
+        DBS()->select("$this->table.*, pengaju.nama as nama_pengaju, naskah_level_kerja.id_naskah as level_kerja, master_jenjang.nama_jenjang, master_kategori.nama_kategori, master_mapel.nama_mapel, master_ukuran.nama_ukuran, master_warna.nama_warna");
         DBS()->from($this->table);
         DBS()->join('naskah_level_kerja', "naskah_level_kerja.id_naskah=$this->table.id", 'left');
+        DBS()->join('master_jenjang', "master_jenjang.id=$this->table.id_jenjang", 'left');
+        DBS()->join('master_kategori', "master_kategori.id=$this->table.id_kategori", 'left');
+        DBS()->join('master_mapel', "master_mapel.id=$this->table.id_mapel", 'left');
+        DBS()->join('master_ukuran', "master_ukuran.id=$this->table.id_ukuran", 'left');
+        DBS()->join('master_warna', "master_warna.id=$this->table.id_warna", 'left');
+        DBS()->join('t_karyawan as pengaju', "pengaju.id_karyawan=$this->table.id_pengaju", 'left');
 
         if ($search) {
             foreach($searchableFields as $field) {
@@ -25,10 +31,12 @@ class Naskah_model extends CI_Model {
                 $filter = explode('=', $filter);
     
                 if ($filter[1] != '') {
+                    $keyword = str_replace('%20', ' ', $filter[1]);
+
                     if (in_array($filter[0], $this->likeCols)) {
-                        DBS()->like($filter[0], $filter[1]);
+                        DBS()->like($filter[0], $keyword);
                     } else {
-                        DBS()->where($filter[0], $filter[1]);
+                        DBS()->where($filter[0], $keyword);
                     }
                 }
             }
@@ -40,6 +48,24 @@ class Naskah_model extends CI_Model {
             } else {
                 DBS()->where('id_pengaju IS NOT NULL')->where('tgl_pengajuan IS NOT NULL');
             }
+        } else {
+            DBS()->where('is_pengajuan_processed', '1');
+        }
+
+        if ($isBuku == 'true') {
+            DBS()->where('is_finished', '1');
+
+            if ($isPPIC == 'true') {
+                DBS()->where('is_sent_to_ppic', '1');
+            }
+        } else {
+            DBS()->where('is_finished', '0');
+        }
+        
+        if ($isPPIC) {
+            DBS()->order_by('tgl_kirim_ppic', 'DESC');
+        } else {
+            DBS()->order_by('created_at', 'DESC');
         }
         
         DBS()->group_by("$this->table.id");
@@ -70,6 +96,20 @@ class Naskah_model extends CI_Model {
             }
         }
 
+        if ($isPengajuan == 'true') {
+            if (sessionData('id_jabatan') == 1) {
+                DBS()->where('id_pengaju IS NOT NULL')->where('tgl_pengajuan IS NOT NULL')->where('is_pengajuan_processed', '0');
+            } else {
+                DBS()->where('id_pengaju IS NOT NULL')->where('tgl_pengajuan IS NOT NULL');
+            }
+        }
+
+        if ($isBuku == 'true') {
+            DBS()->where('is_finished', '1');
+        } else {
+            DBS()->where('is_finished', '0');
+        }
+
         $tempdb = clone DBS();
 		$recordsTotal = $tempdb->count_all_results('', FALSE);
 
@@ -80,12 +120,13 @@ class Naskah_model extends CI_Model {
     }
 
     public function findById($id) {
-        $naskah = DBS()->select("$this->table.*, master_jenjang.nama_jenjang, master_mapel.nama_mapel, master_kategori.nama_kategori, master_ukuran.nama_ukuran")
+        $naskah = DBS()->select("$this->table.*, master_jenjang.nama_jenjang, master_mapel.nama_mapel, master_kategori.nama_kategori, master_ukuran.nama_ukuran, master_warna.nama_warna")
                 ->from($this->table)
                 ->join('master_jenjang', "master_jenjang.id=$this->table.id_jenjang", 'left')
                 ->join('master_mapel', "master_mapel.id=$this->table.id_mapel", 'left')
                 ->join('master_kategori', "master_kategori.id=$this->table.id_kategori", 'left')
                 ->join('master_ukuran', "master_ukuran.id=$this->table.id_ukuran", 'left')
+                ->join('master_warna', "master_warna.id=$this->table.id_warna", 'left')
                 ->where("$this->table.id", $id)
                 ->limit(1)
                 ->get()
@@ -95,12 +136,13 @@ class Naskah_model extends CI_Model {
     }
 
     public function findByNoJob($no_job) {
-        $naskah = DBS()->select("$this->table.*, master_jenjang.nama_jenjang, master_mapel.nama_mapel, master_kategori.nama_kategori, master_ukuran.nama_ukuran")
+        $naskah = DBS()->select("$this->table.*, master_jenjang.nama_jenjang, master_mapel.nama_mapel, master_kategori.nama_kategori, master_ukuran.nama_ukuran, master_warna.nama_warna")
                 ->from($this->table)
                 ->join('master_jenjang', "master_jenjang.id=$this->table.id_jenjang", 'left')
                 ->join('master_mapel', "master_mapel.id=$this->table.id_mapel", 'left')
                 ->join('master_kategori', "master_kategori.id=$this->table.id_kategori", 'left')
                 ->join('master_ukuran', "master_ukuran.id=$this->table.id_ukuran", 'left')
+                ->join('master_warna', "master_warna.id=$this->table.id_warna", 'left')
                 ->where("$this->table.no_job", $no_job)
                 ->limit(1)
                 ->get()
@@ -133,7 +175,7 @@ class Naskah_model extends CI_Model {
         $data['no_job'] = $this->nextNaskahNoJob();
         DBS()->insert('naskah', $data);
 
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function update($data) {
@@ -144,20 +186,29 @@ class Naskah_model extends CI_Model {
         DBS()->where('no_job', $data['no_job'])
             ->update($this->table);
 
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
+    }
+
+    public function kirimPPIC($id_naskah) {
+        DBS()->set('is_sent_to_ppic', '1')
+            ->set('tgl_kirim_ppic', date('Y-m-d H:i:s', time()))
+            ->where('id', $id_naskah)
+            ->update($this->table);
+
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function delete($no_job) {
         DBS()->where('no_job', $no_job)->delete($this->table);
 
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function updateCover($naskahId, $coverFileName) {
         DBS()->set('cover', $coverFileName);
         DBS()->where('id', $naskahId)->update($this->table);
 
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function getEndDate($duration, $startDate) {
@@ -233,10 +284,11 @@ class Naskah_model extends CI_Model {
                 LEFT JOIN (
                     SELECT id_naskah, waktu_mulai, level_kerja_key
                     FROM naskah_progress
+                    WHERE id_naskah=$idNaskah
                     ORDER BY created_at ASC
-                    LIMIT 1
                 ) npm ON npm.id_naskah=nlk.id_naskah AND npm.level_kerja_key=nlk.`key`
                 WHERE nlk.id_naskah=$idNaskah
+                AND nlk.is_disabled='0'
                 GROUP BY nlk.`key`";
 
         $progress = $this->db->query($query)->result_array();
@@ -255,27 +307,39 @@ class Naskah_model extends CI_Model {
         return $activePengajuan;
     }
 
+    public function countPPIC() {
+        $activePPIC = $this->db->select('COUNT(*) as total')->where('is_finished', '1')->where('is_sent_to_ppic', '1')->from($this->table)->get()->row()->total;
+        return $activePPIC;
+    }
+
     public function countSOPRequests() {
         $loginUserId = $this->session->userdata('user_id');
-        $query = "SELECT
+        
+        if ($this->session->userdata('id_jabatan') == 3) {
+            $query = "SELECT
+                    (SELECT COUNT(*) FROM sop_pdf WHERE manajer_signature IS NULL)
+                AS total_requests";
+        } else {
+            $query = "SELECT
                     (SELECT COUNT(*) FROM sop_editing WHERE approver_id=$loginUserId AND approver_signature IS NULL AND is_send='1') +
                     (SELECT COUNT(*) FROM sop_koreksi_1 WHERE approver_id=$loginUserId AND approver_signature IS NULL AND is_send='1') +
                     (SELECT COUNT(*) FROM sop_koreksi_2 WHERE approver_id=$loginUserId AND approver_signature IS NULL AND is_send='1') +
                     (SELECT COUNT(*) FROM sop_koreksi_3 WHERE approver_id=$loginUserId AND approver_signature IS NULL AND is_send='1') +
                     (SELECT COUNT(*) FROM sop_pdf WHERE approver_id=$loginUserId AND approver_signature IS NULL AND is_send='1')
                 AS total_requests";
+        }
 
         return $this->db->query($query)->row();
     }
 
     public function getProgressSOP($idNaskah) {
         $query = "SELECT
-                    (SELECT approver_signed_by AS editing_done FROM sop_editing WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS editing_done,
-                    (SELECT approver_signed_by AS koreksi_1_done FROM sop_koreksi_1 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_1_done,
-                    (SELECT approver_signed_by AS koreksi_2_done FROM sop_koreksi_2 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_2_done,
-                    (SELECT approver_signed_by AS koreksi_3_done FROM sop_koreksi_3 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_3_done,
-                    (SELECT approver_signed_by AS pdf_done FROM sop_pdf WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS pdf_done
-                ";
+            (SELECT approver_signed_by AS editing_done FROM sop_editing WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS editing_done,
+            (SELECT approver_signed_by AS koreksi_1_done FROM sop_koreksi_1 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_1_done,
+            (SELECT approver_signed_by AS koreksi_2_done FROM sop_koreksi_2 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_2_done,
+            (SELECT approver_signed_by AS koreksi_3_done FROM sop_koreksi_3 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_3_done,
+            (SELECT approver_signed_by AS pdf_done FROM sop_pdf WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS pdf_done
+        ";
 
         return DBS()->query($query)->row();
     }
@@ -283,7 +347,20 @@ class Naskah_model extends CI_Model {
     public function getSOPRequestList($searchableFields, $search, $filters, $pagination) {
         $select_query = "
             SELECT *
-            FROM (
+            FROM ( ";
+
+        if (sessionData('id_jabatan') == 3) {
+            $select_query .= "
+                (
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'pdf' AS type, t_karyawan.nama as nama_editor, sop_pdf.approver_signed_date as tanggal_request
+                    FROM sop_pdf
+                    LEFT JOIN naskah ON (naskah.id=sop_pdf.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_pdf.pic_signed_by)
+                    WHERE manajer_signature IS NULL
+                )
+            ";
+        } else {
+            $select_query .= "
                 (
                     SELECT naskah.id, naskah.no_job, naskah.judul, 'editing' AS type, t_karyawan.nama as nama_editor, sop_editing.send_date as tanggal_request
                     FROM sop_editing
@@ -319,6 +396,10 @@ class Naskah_model extends CI_Model {
                     LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_pdf.pic_signed_by)
                     WHERE is_send='1' AND approver_signature IS NULL
                 )
+            ";
+        }
+            
+        $select_query .= "
             ) AS requests
             LIMIT " . $pagination['length'] . "
             OFFSET " . $pagination['start'] . "
@@ -329,17 +410,59 @@ class Naskah_model extends CI_Model {
         // count all records
         $select_query = "
             SELECT COUNT(*) as total
-            FROM (
+            FROM ( ";
+            
+        if (sessionData('id_jabatan') == 3) {
+            $select_query .= "
                 (
-                    SELECT naskah.no_job, naskah.judul, 'editing' AS type
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'editing' AS type, t_karyawan.nama as nama_editor, sop_editing.send_date as tanggal_request
                     FROM sop_editing
                     LEFT JOIN naskah ON (naskah.id=sop_editing.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_editing.pic_signed_by)
+                    WHERE is_send='1' AND approver_signature IS NULL
                 ) UNION
                 (
-                    SELECT naskah.no_job, naskah.judul, 'koreksi' AS type
-                    FROM sop_editing
-                    LEFT JOIN naskah ON (naskah.id=sop_editing.id_naskah)
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'koreksi 1' AS type, t_karyawan.nama as nama_editor, sop_koreksi_1.send_date as tanggal_request
+                    FROM sop_koreksi_1
+                    LEFT JOIN naskah ON (naskah.id=sop_koreksi_1.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_koreksi_1.pic_signed_by)
+                    WHERE is_send='1' AND approver_signature IS NULL
+                ) UNION
+                (
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'koreksi 2' AS type, t_karyawan.nama as nama_editor, sop_koreksi_2.send_date as tanggal_request
+                    FROM sop_koreksi_2
+                    LEFT JOIN naskah ON (naskah.id=sop_koreksi_2.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_koreksi_2.pic_signed_by)
+                    WHERE is_send='1' AND approver_signature IS NULL
+                ) UNION
+                (
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'koreksi 3' AS type, t_karyawan.nama as nama_editor, sop_koreksi_3.send_date as tanggal_request
+                    FROM sop_koreksi_3
+                    LEFT JOIN naskah ON (naskah.id=sop_koreksi_3.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_koreksi_3.pic_signed_by)
+                    WHERE is_send='1' AND approver_signature IS NULL
+                ) UNION
+                (
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'pdf' AS type, t_karyawan.nama as nama_editor, sop_pdf.send_date as tanggal_request
+                    FROM sop_pdf
+                    LEFT JOIN naskah ON (naskah.id=sop_pdf.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_pdf.pic_signed_by)
+                    WHERE is_send='1' AND approver_signature IS NULL
                 )
+            ";
+        } else {
+            $select_query .= "
+                (
+                    SELECT naskah.id, naskah.no_job, naskah.judul, 'pdf' AS type, t_karyawan.nama as nama_editor, sop_pdf.send_date as tanggal_request
+                    FROM sop_pdf
+                    LEFT JOIN naskah ON (naskah.id=sop_pdf.id_naskah)
+                    LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=sop_pdf.pic_signed_by)
+                    WHERE manajer_signature IS NULL
+                )
+            ";
+        }
+        
+        $select_query .= "
             ) AS requests
         ";
 
@@ -374,7 +497,7 @@ class Naskah_model extends CI_Model {
             DBS()->insert('sop_editing', $data);
         }
         
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function sop_koreksi_1($idNaskah) {
@@ -400,7 +523,7 @@ class Naskah_model extends CI_Model {
             DBS()->insert('sop_koreksi_1', $data);
         }
         
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function sop_koreksi_2($idNaskah) {
@@ -426,7 +549,7 @@ class Naskah_model extends CI_Model {
             DBS()->insert('sop_koreksi_2', $data);
         }
         
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function sop_koreksi_3($idNaskah) {
@@ -452,15 +575,16 @@ class Naskah_model extends CI_Model {
             DBS()->insert('sop_koreksi_3', $data);
         }
         
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function sop_pdf($idNaskah) {
-        DBS()->select('sop_pdf.*, tpic.nama as nama_pic, ta.nama as nama_approver');
+        DBS()->select('sop_pdf.*, tpic.nama as nama_pic, ta.nama as nama_approver, tm.nama as nama_manajer');
         DBS()->where('id_naskah', $idNaskah);
         DBS()->from('sop_pdf');
         DBS()->join('t_karyawan as tpic', 'tpic.id_karyawan=sop_pdf.pic_signed_by', 'left');
         DBS()->join('t_karyawan as ta', 'ta.id_karyawan=sop_pdf.approver_signed_by', 'left');
+        DBS()->join('t_karyawan as tm', 'ta.id_karyawan=sop_pdf.manajer_signed_by', 'left');
         $data = DBS()->get()->row();
 
         return $data;
@@ -478,6 +602,6 @@ class Naskah_model extends CI_Model {
             DBS()->insert('sop_pdf', $data);
         }
         
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 }

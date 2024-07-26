@@ -50,6 +50,10 @@ $route['naskah/roles/getMappedKaryawans'] = 'naskah_roles/getMappedKaryawans';
 $route['naskah/roles/saveMapping'] = 'naskah_roles/saveMapping';
 $route['naskah/pengajuan'] = 'naskah/index';
 
+// buku
+$route['buku/index'] = 'naskah/index';
+$route['buku/view/(:any)'] = 'naskah/view/$1';
+
 $route['proses_job'] = 'proses_job/index';
 
 $route['report/daily'] = 'report/daily';

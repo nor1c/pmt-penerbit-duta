@@ -52,12 +52,18 @@ class Holiday_model extends CI_Model {
     public function create($data) {
         DBS()->insert($this->table, $data);
 
-        return catchQueryResult(DBS()->_error_message());
+        return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
     }
 
     public function isOffDay($date) {
         $count = DBS()->where('date', $date)->get($this->table)->num_rows();
 
         return $count > 0 ? true : false;
+    }
+
+    public function insertWeekendDates($weekendDates) {
+        foreach ($weekendDates as $date) {
+            $this->db->query("INSERT IGNORE INTO holidays (date, title) VALUES ('$date', 'Weekend')");
+        }
     }
 }

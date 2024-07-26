@@ -15,7 +15,7 @@
 
 <div class="container-fluid">
     <a href="<?= site_url('/dashboard') ?>">
-        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Back to Dashboard</button>
+        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Kembali ke Dashboard</button>
     </a>
 
     <div class="bd bgc-white p-30 r-10">
@@ -61,11 +61,11 @@
                 foreach ($progress as $p) {
             ?>
                 <tr>
-                    <td><?=$p['key']?></td>
-                    <td class="td-color-1"><?=getIndoDate($p['tgl_rencana_mulai'])?></td>
-                    <td class="td-color-2"><?=getIndoDate($p['tgl_rencana_selesai'])?></td>
-                    <td class="td-color-1"><?=getIndoDate($p['waktu_mulai'])?></td>
-                    <td class="td-color-2"><?=getIndoDate($p['waktu_selesai'])?></td>
+                    <td><?=$level_kerja_key_map[$p['key']]['text']?></td>
+                    <td class="td-color-1"><?=getIndoDateWithDay($p['tgl_rencana_mulai'])?></td>
+                    <td class="td-color-2"><?=getIndoDateWithDay($p['tgl_rencana_selesai'])?></td>
+                    <td class="td-color-1"><?=getIndoDateWithDay($p['waktu_mulai'])?></td>
+                    <td class="td-color-2"><?=getIndoDateWithDay($p['waktu_selesai'])?></td>
                     <td style="text-align:center;"><?=$p['catatan'] != '' ? '<i onClick="loadCatatan(\''.$p['catatan'].'\')" id="catatan-button" type="button" data-bs-toggle="modal" data-bs-target="#catatanModal" class="ti-notepad pR-10"></i>' : '' ?></td>
                 </tr>
             <?php } ?>

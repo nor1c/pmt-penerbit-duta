@@ -40,7 +40,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
 <div class="container-fluid">
     <a href="<?= site_url('naskah/view/' . inputGet('no_job')) ?>">
-        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Back to Naskah Detail</button>
+        <button class="btn cur-p btn-outline-secondary mB-10"><i class="c-light-blue-500 ti-angle-left mR-5"></i> Kembali ke Detail Naskah</button>
     </a>
 
     <div class="bd bgc-white p-30 r-10">
@@ -79,7 +79,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                         <label class="form-label">Tanda tangan Koor. Editor</label>
                             <div style="<?=$data->approver_signature ? '' : 'display:none'?>">
                                 <img src="<?=base_url('signatures/sop/'.$data->approver_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
-                                Ditanda-tangani oleh <b><?=$data->nama_approver . ' ('.date('d/m/Y', strtotime($data->pic_signed_date)).')';?></b>
+                                Ditanda-tangani oleh <b><?=$data->nama_approver . ' ('.date('d/m/Y', strtotime($data->approver_signed_date)).')';?></b>
                             </div>
                             
                             <div>
@@ -297,9 +297,9 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
             }
         }, 0)
 
-        const existingChecklist = "<?=$data->checklist ? 'true' : 'false'?>"
+        const existingChecklist = "<?=array_key_exists('checklist', $data) && $data->checklist ? 'true' : 'false'?>"
         if (existingChecklist == "true") {
-            const dbChecklist = existingChecklist == "true" ? JSON.parse(JSON.stringify(<?=$data->checklist ?? null?>)) : []
+            const dbChecklist = JSON.parse(JSON.stringify(<?=$data->checklist?>))
             options = dbChecklist
         } else {
             options = baseOptions

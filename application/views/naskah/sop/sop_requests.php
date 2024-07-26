@@ -11,7 +11,7 @@
                             <th>No. Job</th>
                             <th>Judul Naskah</th>
                             <th>Editor</th>
-                            <th>Tanggal Request</th>
+                            <th><?=sessionData('id_jabatan') == 3 ? 'Tanggal Approve Koordinator' : 'Tanggal Request'?></th>
                             <th>SOP</th>
                             <th>Aksi</th>
                         </tr>
@@ -28,8 +28,8 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 10, 10, 150, <?=uriSegment(2) == 'pengajuan' ? '50, 50,' : ''?> 50, 100, 5],
-                [5, 10, 10, 150, <?=uriSegment(2) == 'pengajuan' ? '50, 50,' : ''?> 50, 100, 5],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,
@@ -81,6 +81,16 @@
                 },
             ],
             "columnDefs": [
+                {
+                    "targets": 5,
+                    "render": function(data, type, row) {
+                        <?php if (sessionData('id_jabatan') == 3) { ?>
+                            return row[5].split(' ')[0]
+                        <?php } else { ?>
+                            return row[5]
+                        <?php } ?>
+                    }
+                },
                 {
                     "targets": 7,
                     "render": function(data, type, row) {

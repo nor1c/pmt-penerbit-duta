@@ -13,12 +13,15 @@
                     <button id="importCSVButton" type="button" class="btn btn-success btn-color" data-bs-toggle="modal" data-bs-target="#importHolidayFormModal">
                         <i class="ti-import"></i> Import .CSV
                     </button>
+                    <button id="generateWeekend" type="button" class="btn btn-danger btn-color">
+                        Generate Tanggal Akhir Pekan
+                    </button>
                 </div>
 
                 <table id="holidaysTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th>
+                            <th width="10">#</th>
                             <th>Tanggal</th>
                             <th>Keterangan</th>
                         </tr>
@@ -39,8 +42,8 @@
             "sDom": "Rlfrtip",
             "scrollX": true,
             "aLengthMenu": [
-                [1, 10, 30],
-                [1, 10, 30],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,
@@ -89,6 +92,24 @@
 
         $('#addNewHoliday').click(function() {
             holidayError.hide()
+        })
+
+        $('#generateWeekend').click(function() {
+            $.ajax({
+                method: 'POST',
+                url: "<?=site_url(uriSegment(1).'/generateWeekends')?>",
+            }).then((res) => {
+                res = JSON.parse(res)
+
+                if (res.success) {
+                    refreshTable()
+                    Swal.fire(
+                        'Berhasil membuat tanggal akhir pekan!',
+                        '',
+                        'success'
+                    )
+                }
+            })
         })
 
         $('#formHoliday').submit(function(e) {

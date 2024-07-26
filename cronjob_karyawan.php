@@ -31,6 +31,36 @@ $auto_clockout_query = 'UPDATE t_kehadiran t1
                         AND t1.tanggal > "2023-05-01"';
 $auto_clockout = mysqli_query($link, $auto_clockout_query);
  
+
+// Generate tanggal akhir pekan (Sabtu & Minggu)
+function getWeekendDates($startDate, $endDate) {
+    $weekends = [];
+    $start = new DateTime($startDate);
+    $end = new DateTime($endDate);
+    $interval = new DateInterval('P1D');
+    $period = new DatePeriod($start, $interval, $end);
+
+    foreach ($period as $date) {
+        if ($date->format('N') == 6 || $date->format('N') == 7) { // 6 for Saturday, 7 for Sunday
+            $weekends[] = $date->format('Y-m-d');
+        }
+    }
+
+    return $weekends;
+}
+
+// Get the current year
+$currentYear = date('Y');
+        
+// Generate weekend dates for the next 5 years
+$endDate = date('Y-m-d', strtotime('+2 years', strtotime($currentYear . '-01-01')));
+$weekendDates = getWeekendDates($currentYear . '-01-01', $endDate);
+
+// Insert weekend dates into database using 'INSERT IGNORE'
+foreach ($weekendDates as $date) {
+    mysqli_query($link, "INSERT IGNORE INTO holidays (date, title) VALUES ('$date', 'Weekend')");
+}
+
 // Close connection
 // mysqli_close($link);
 ?>

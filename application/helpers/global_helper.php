@@ -13,7 +13,25 @@ function getIndoDate($date) {
     return $date != '' ? date('d/m/Y', strtotime($date)) : '-';
 }
 
-function catchQueryResult($errorMessage) {
+function getIndoDateWithDay($date) {
+    $formatter = new IntlDateFormatter(
+        'id_ID',
+        IntlDateFormatter::SHORT,
+        IntlDateFormatter::NONE,
+        null,
+        null,
+        'EEEE, dd/MM/yyyy'
+    );
+    
+    // Format date
+    return $date != '' ? $formatter->format(new DateTime($date)) : '-';
+}
+
+function catchQueryResult($errorMessage, $errorCode = 0) {
+    if ($errorCode == '1451') {
+        return errorResponse('Data tidak dapat dihapus karena sedang digunakan atau direferensikan oleh data pada modul lain. Harap melepas referensi terlebih dahulu jika ingin menghapus data ini.');
+    }
+
     if (!$errorMessage && $errorMessage == '') {
         return array(
             "error" => false,

@@ -24,7 +24,7 @@ class Jobs extends DUTA_Controller {
         $naskah = $this->Job_model->getMyJob($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['kode'], $item['no_job'], $item['judul'], $item['halaman'], $item['key'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['status'], $item['catatan_cicil']];
+            return ['', $item['kode'], $item['no_job'], $item['judul'], $item['halaman'], $item['realisasi'], $item['key'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['status'], $item['catatan_cicil']];
         }, $naskah['data']);
 
         $data = array(
@@ -83,7 +83,7 @@ class Jobs extends DUTA_Controller {
         $jobDetail = $this->Job_model->viewJob($noJob, $levelKerja);
         $naskahDetail = $this->Naskah_model->findByNoJob($noJob);
         $naskahLevelKerja = $this->Job_model->getProgressEachLevelKerja($naskahDetail->id);
-        $naskahProgress = $this->Job_model->getProgressHalaman($naskahDetail->id);
+        $naskahProgress = $this->Job_model->getProgressHalaman($naskahDetail->id, $levelKerja);
         $naskahProgressDays = $this->Job_model->getProgressDays($this->userId, $naskahDetail->id, $levelKerja);
 
         echo json_encode(
@@ -143,7 +143,7 @@ class Jobs extends DUTA_Controller {
         $reports = $this->Job_model->getDailyJobReport($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['tanggal'], $item['nama'], $this->keyMap[$item['level_kerja_key']]['text'], $item['judul'], $item['catatan'], $item['kode'], $item['no_job'], $item['halaman'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['durasi'], $item['total_libur']];
+            return ['', date('d/m/Y H:i', strtotime($item['waktu_mulai'])), $item['waktu_selesai'] ? date('d/m/Y H:i', strtotime($item['waktu_selesai'])) : 0, $item['nama'], $this->keyMap[$item['level_kerja_key']]['text'], $item['judul'], $item['catatan'], $item['kode'], $item['no_job'], $item['halaman'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['durasi'], $item['total_libur']];
         }, $reports['data']);
 
         $data = array(

@@ -17,6 +17,7 @@ class Naskah extends DUTA_Controller {
         $data['mapels'] = $this->Mapel_model->getDropdown();
         $data['kategoris'] = $this->Kategori_model->getDropdown();
         $data['ukurans'] = $this->Ukuran_model->getDropdown();
+        $data['warnas'] = $this->Warna_model->getDropdown();
         $data['next_naskah_no_job'] = $this->Naskah_model->nextNaskahNoJob();
 
         $data['default_level_kerja'] = [
@@ -47,12 +48,18 @@ class Naskah extends DUTA_Controller {
         $filters = explode('&', $this->input->post('filters'));
 
         $isPengajuan = inputGet('isPengajuan');
-        $naskah = $this->Naskah_model->getAll($this->searchableFields, $search, $filters, $pagination, $isPengajuan);
+        $isBuku = inputGet('isBuku');
+        $isPPIC = inputGet('isPPIC');
+        $naskah = $this->Naskah_model->getAll($this->searchableFields, $search, $filters, $pagination, $isPengajuan, $isBuku, $isPPIC);
 
         $formattedData = array_map(function ($item) {
             $isPengajuan = inputGet('isPengajuan');
+            $isBuku = inputGet('isBuku');
+            
             if ($isPengajuan === 'true') {
-                return ['', $item['no_job'], $item['kode'], $item['judul'], $item['id_pengaju'], $item['tgl_pengajuan'], $item['jilid'], $item['penulis'], $item['level_kerja'], ($item['is_pengajuan_processed'] == 1 ? true : false)];
+                return ['', $item['no_job'], $item['kode'], $item['judul'], $item['nama_pengaju'], date('d/m/Y H:i', strtotime($item['tgl_pengajuan'])), $item['jilid'], $item['penulis'], $item['level_kerja'], ($item['is_pengajuan_processed'] == 1 ? true : false)];
+            } else if ($isBuku == 'true') {
+                return ['', $item['no_job'], $item['kode'], $item['judul'], $item['nama_mapel'], $item['nama_jenjang'], $item['nama_kategori'], $item['nama_ukuran'], $item['jilid'], $item['penulis'], $item['level_kerja']];
             } else {
                 return ['', $item['no_job'], $item['kode'], $item['judul'], $item['jilid'], $item['penulis'], $item['level_kerja']];
             }
@@ -91,6 +98,9 @@ class Naskah extends DUTA_Controller {
             $post_data['is_pengajuan'] = '1';
             $post_data['id_pengaju'] = $this->userId;
             $post_data['tgl_pengajuan'] = date('Y-m-d H:i:s', time());
+            $post_data['is_pengajuan_processed'] = '0';
+        } else {
+            $post_data['is_pengajuan_processed'] = '1';
         }
         
         $created = $this->Naskah_model->save($post_data);
@@ -130,6 +140,7 @@ class Naskah extends DUTA_Controller {
         $data['mapels'] = $this->Mapel_model->getDropdown();
         $data['kategoris'] = $this->Kategori_model->getDropdown();
         $data['ukurans'] = $this->Ukuran_model->getDropdown();
+        $data['warnas'] = $this->Warna_model->getDropdown();
         $data['sop_progress'] = $this->Naskah_model->getProgressSOP($data['naskah']->id);
 
         $this->template->display('naskah/view.php', $data);
@@ -138,6 +149,7 @@ class Naskah extends DUTA_Controller {
     public function detail() {
         $data['no_job'] = $this->uri->segment(3);
 
+        $data['level_kerja_key_map'] = $this->keyMap;
         $data['naskah'] = $this->Naskah_model->findByNoJob($data['no_job']);
         $data['progress'] = $this->Naskah_model->getProgressWithRealizationDate($data['naskah']->id);
 
@@ -250,7 +262,7 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_editing($idNaskah);
-        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
+        $data['pics'] = $this->Karyawan_model->getKoordinatorList();
 
         $this->template->display('naskah/sop/editing', $data);
     }
@@ -335,7 +347,7 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_koreksi_1($idNaskah);
-        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
+        $data['pics'] = $this->Karyawan_model->getKoordinatorList();
 
         $this->template->display('naskah/sop/koreksi_1', $data);
     }
@@ -399,7 +411,7 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_koreksi_2($idNaskah);
-        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
+        $data['pics'] = $this->Karyawan_model->getKoordinatorList();
 
         $this->template->display('naskah/sop/koreksi_2', $data);
     }
@@ -463,7 +475,7 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_koreksi_3($idNaskah);
-        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
+        $data['pics'] = $this->Karyawan_model->getKoordinatorList();
 
         $this->template->display('naskah/sop/koreksi_3', $data);
     }
@@ -527,7 +539,7 @@ class Naskah extends DUTA_Controller {
         $data['id_naskah'] = $idNaskah;
 
         $data['data'] = $this->Naskah_model->sop_pdf($idNaskah);
-        $data['pics'] = $this->Karyawan_model->getPICNaskahJSON();
+        $data['pics'] = $this->Karyawan_model->getKoordinatorList();
 
         $this->template->display('naskah/sop/pdf', $data);
     }
@@ -539,16 +551,22 @@ class Naskah extends DUTA_Controller {
         $picSignature = inputPost('picSignature');
         $approverId = inputPost('approverId');
         $approverSignature = inputPost('approverSignature');
+        $manajerId = inputPost('manajerId');
+        $manajerSignature = inputPost('manajerSignature');
         $isSend = inputPost('isSend');
         
         $picSignFileName = "pdf_editor_$naskahId.jpg";
         $approverSignFileName = "pdf_koor_editor_$naskahId.jpg";
+        $manajerSignFileName = "pdf_manajer_$naskahId.jpg";
 
         if ($picSignature) {
             $savePICSign = $this->save_signature($picSignature, $picSignFileName);
         }
         if ($approverSignature) {
             $saveApproverSign = $this->save_signature($approverSignature, $approverSignFileName);
+        }
+        if ($manajerSignature) {
+            $saveManajerSign = $this->save_signature($manajerSignature, $manajerSignFileName);
         }
 
         // save to database
@@ -581,7 +599,25 @@ class Naskah extends DUTA_Controller {
             $data = array_merge($data, $approver_sign_data);
         }
 
+        if ($manajerSignature) {
+            $manajer_sign_data = array(
+                'manajer_signature' => $manajerSignFileName,
+                'manajer_signed_by' => sessionData('user_id'),
+                'manajer_signed_date' => date('Y-m-d', time()),
+            );
+
+            $data = array_merge($data, $manajer_sign_data);
+        }
+
         $result = $this->Naskah_model->save_sop_pdf($data);
+
+        echo json_encode($result);
+    }
+
+    public function kirimPPIC() {
+        $id_naskah = $this->input->get('id_naskah');
+
+        $result = $this->Naskah_model->kirimPPIC($id_naskah);
 
         echo json_encode($result);
     }

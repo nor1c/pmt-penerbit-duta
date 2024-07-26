@@ -98,10 +98,15 @@ class DUTA_Controller extends CI_Controller {
         ),
     );
 
-    public $special_users = [14, 23, 28];
+    public $special_users = array(14, 23, 28);
 
     public function __construct() {
         parent::__construct();
+        
+		$signed_in = $this->session->userdata('logged_in');
+		if (!$signed_in) {
+			return redirect('dashboard');
+		}
 
         // Initiate default time & timezone
         // date_default_timezone_set('Asia/Jakarta');
@@ -143,6 +148,7 @@ class DUTA_Controller extends CI_Controller {
                 'master/Mapel_model',
                 'master/Kategori_model',
                 'master/Ukuran_model',
+                'master/Warna_model',
                 'Karyawan_model',
                 'Naskah_model',
             )

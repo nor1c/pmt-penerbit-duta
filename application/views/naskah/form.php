@@ -69,7 +69,12 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Warna</label>
-                            <input type="text" name="warna" id="" class="form-control" required>
+                            <select name="id_warna" id="warna" class="form-control" required>
+                                <option selected disabled default>--Pilih Warna--</option>
+                                <?php foreach ($warnas as $warna) { ?>
+                                    <option value="<?=$warna['id']?>"><?=$warna['nama_warna']?></option>
+                                <?php } ?>
+                            </select>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Ukuran</label>
@@ -266,8 +271,8 @@
         const duration = $('#duration_' + key).val()
         const kecepatan = (naskahPage/parseInt(duration)).toFixed(2).replace('.00', '')
 
-        $('#kecepatan_' + key).text(kecepatan);
-        $('#kecepatanInput_' + key).val(kecepatan);
+        $('#kecepatan_' + key).text(Math.round(kecepatan));
+        $('#kecepatanInput_' + key).val(Math.round(kecepatan));
 
         if ($('#startDate_' + key).val() != '') {
             startDateChanged(key)

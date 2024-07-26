@@ -8,7 +8,7 @@ class Proses_job_model extends CI_Model {
         parent::__construct();
     }
 
-    public function getAll($page, $perPage) {
+    public function getAll($filter, $page, $perPage) {
         $queryFrom = "FROM naskah
                     LEFT JOIN (
                         SELECT 
@@ -33,6 +33,7 @@ class Proses_job_model extends CI_Model {
                         LEFT JOIN t_karyawan ON t_karyawan.id_karyawan=nlk.id_pic_aktif
                         WHERE nlk.tgl_rencana_mulai IS NOT NULL
                         GROUP BY nlk.`key`, nlk.id_naskah
+                        ORDER BY nlk.order ASC
                     ) as nlk2 ON nlk2.id_naskah=naskah.id";
 
         $query = "SELECT
@@ -63,7 +64,17 @@ class Proses_job_model extends CI_Model {
 
         $countFoundRecordQuery = "SELECT COUNT(*) as foundRows FROM naskah";
 
-        $query .= "GROUP BY naskah.id
+        $where = "";
+        foreach ($filter as $k => $f) {
+            if ($f != '') {
+                $where .= " AND naskah.$k='$f' ";
+            }
+        }
+
+        $query .= "
+                WHERE total IS NOT NULL
+                $where
+                GROUP BY naskah.id
                 ORDER BY naskah.created_at DESC
                 LIMIT $perPage
                 OFFSET $page";
@@ -87,7 +98,7 @@ class Proses_job_model extends CI_Model {
                         ->update($this->lk_table, $data);
 
         if (!$updated) {
-            return catchQueryResult(DBS()->_error_message());
+            return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
         }
 
         if (DBS()->_error_message()) {

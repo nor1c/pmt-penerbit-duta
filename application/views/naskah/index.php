@@ -1,5 +1,26 @@
+<?php
+$is_pengajuan = uriSegment(2) == 'pengajuan';
+$uri = uriSegment(1) == 'buku' ? 'buku' : 'naskah';
+$menu = uriSegment(1) == 'buku' ? 'Buku' : ($is_pengajuan ? 'Permintaan No. Job' : 'Naskah');
+
+$show_add_button = false;
+if ($uri != 'buku') {
+    $show_add_button = true;
+} else if ($is_pengajuan) {
+    $show_add_button = true;
+} else if ($this->session->userdata('id_jabatan') == 1) {
+    $show_add_button = true;
+} else {
+    $show_add_button = false;
+}
+
+if ($this->session->userdata('id_jabatan') != 1 && !$is_pengajuan) {
+    $show_add_button = false;
+}
+?>
+
 <div class="container-fluid">
-    <h4 class="c-grey-900 mT-10 mB-30">Naskah</h4>
+    <h4 class="c-grey-900 mT-10 mB-30">Daftar <?=$menu?></h4>
     <div class="row">
         <div class="col-md-12">
             <div class="bgc-white bd bdrs-3 p-20 mB-20">
@@ -7,9 +28,11 @@
                     <button type="button" class="btn cur-p btn-outline-secondary" onclick="refreshTable()">
                         <i class="ti-reload"></i>
                     </button>
-                    <button id="addNaskahButton" type="button" class="btn btn-primary btn-color" data-bs-toggle="modal" data-bs-target="#naskahFormModal">
-                        <i class="ti-plus"></i> &nbsp; <?=uriSegment(2) == 'pengajuan' ? 'Ajukan' : ''?> Naskah Baru
-                    </button>
+                    <?php if ($show_add_button) { ?>
+                        <button id="addNaskahButton" type="button" class="btn btn-primary btn-color" data-bs-toggle="modal" data-bs-target="#naskahFormModal">
+                            <i class="ti-plus"></i> &nbsp; <?=uriSegment(2) == 'pengajuan' ? 'Ajukan' : ''?> Naskah Baru
+                        </button>
+                    <?php } ?>
                 </div>
 
                 <!-- filters -->
@@ -65,15 +88,21 @@
                         <tr>
                             <th>#</th>
                             <th>No. Job</th>
-                            <th>Kode Buku</th>
-                            <th>Judul Buku</th>
+                            <th>Kode <?=$menu?></th>
+                            <th>Judul <?=$menu?></th>
                             <?php if (uriSegment(2) == 'pengajuan') { ?>
                                 <th>Pengaju</th>
                                 <th>Tgl Pengajuan</th>
                             <?php } ?>
+                            <?php if (uriSegment(1) == 'buku') { ?>
+                                <th>Mata Pelajaran</th>
+                                <th>Jenjang</th>
+                                <th>Kategori</th>
+                                <th>Ukuran</th>
+                            <?php } ?>
                             <th>Jilid</th>
                             <th>Penulis</th>
-                            <th><?=uriSegment(2) == 'pengajuan' ? 'Status' : 'Aksi'?></th>
+                            <th width="100"><?=uriSegment(2) == 'pengajuan' ? 'Status' : 'Aksi'?></th>
                             <!-- <th>Spek</th>
                             <th>Rencana Produksi</th> -->
                         </tr>
@@ -92,15 +121,15 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 10, 10, 150, <?=uriSegment(2) == 'pengajuan' ? '50, 50,' : ''?> 50, 100, 5],
-                [5, 10, 10, 150, <?=uriSegment(2) == 'pengajuan' ? '50, 50,' : ''?> 50, 100, 5],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,
             "serverSide": true,
             "searching": true,
             "ajax": {
-                "url": "<?=site_url($this->uri->segment(1) . '/data?isPengajuan=' . (uriSegment(2) == 'pengajuan' ? 'true' : 'false')) ?>",
+                "url": "<?=site_url('naskah/data?isPengajuan=' . (uriSegment(2) == 'pengajuan' ? 'true' : 'false') . '&isBuku=' . (uriSegment(1) === 'buku' ? 'true' : 'false')) ?>",
                 'method': 'POST',
                 'data': function(d) {
                     d.draw = d.draw || 1
@@ -119,52 +148,29 @@
                         return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 },
-                {
-                    "orderable": false,
-                    "searchable": true,
-                },
-                {
-                    "orderable": false,
-                    "searchable": true,
-                },
-                {
-                    "orderable": false,
-                    "searchable": false,
-                },
-                {
-                    "orderable": false,
-                    "searchable": true,
-                },
-                {
-                    "orderable": false,
-                    "searchable": false,
-                },
             ],
             "columnDefs": [
                 {
-                    "targets": <?=uriSegment(2) == 'pengajuan' ? '8' : '6'?>,
+                    "targets": <?=uriSegment(2) == 'pengajuan' ? '8' : (uriSegment(1) == 'buku' ? '10' : '6')?>,
                     "render": function(data, type, row) {
                         const withButtons = '<div class="peers mR-15">' +
                                 '<div class="peer">' +
-                                '<a href="<?=site_url('/naskah/view')?>/'+ row[1] +'" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                                '<a href="<?=site_url('/'.$uri.'/view')?>/'+ row[1] +'" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
                                 '<i class="c-green-500 ti-eye"></i>' +
                                 '</a>' +
                                 '</div>' +
-                                '<div class="peer">' +
-                                '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
-                                '<i class="c-blue-500 ti-pencil"></i>' +
-                                '</a>' +
-                                '</div>' +
-                                '<div class="peer">' +
-                                '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                                '<i class="c-orange-500 ti-agenda"></i>' +
-                                '</a>' +
-                                '</div>' +
-                                '<div class="peer">' +
-                                '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
-                                '<i class="c-red-500 ti-trash"></i>' +
-                                '</a>' +
-                                '</div>' +
+                                <?php if (uriSegment(1) != 'buku' && ($this->session->userdata('id_jabatan') == 1)) { ?>
+                                    '<div class="peer">' +
+                                    '<a href="#" onclick="editNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5" data-bs-toggle="modal" data-bs-target="#naskahFormModal">' +
+                                    '<i class="c-blue-500 ti-pencil"></i>' +
+                                    '</a>' +
+                                    '</div>' +
+                                    '<div class="peer">' +
+                                    '<a href="#" onclick="deleteNaskah(' + row[1] + ')" class="td-n c-deep-purple-500 cH-blue-500 fsz-md p-5">' +
+                                    '<i class="c-red-500 ti-trash"></i>' +
+                                    '</a>' +
+                                    '</div>' +
+                                <?php } ?>
                                 '</div>';
 
                         <?php if (uriSegment(2) == 'pengajuan') { ?>
@@ -183,7 +189,7 @@
             ],
             "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
                 if (aData[6] == null) {
-                    $('td', nRow).css('background-color', '#ffd5d1');
+                    $('td', nRow).css('background-color', '#ffedef');
                 }
             },
             'select': {
@@ -247,11 +253,10 @@
 
                 $('#naskahFormTitle').html('Edit Naskah ' + data['no_job'])
                 $('#naskahId').html(data['id'])
-                $('#isEdit').html(true)
 
                 for (let column in data) {
                     if (data.hasOwnProperty(column)) {
-                        if (column === 'id_jenjang' || column === 'id_mapel' || column === 'id_kategori' || column === 'id_ukuran') {
+                        if (column === 'id_jenjang' || column === 'id_mapel' || column === 'id_kategori' || column === 'id_ukuran' || column === 'id_warna') {
                             $('#formNaskah select[name='+column+'] option[value="'+data[column]+'"]').attr('selected', 'selected')
                             $('#formNaskah select[name='+column+']').prop('disabled', true)
                         } else {

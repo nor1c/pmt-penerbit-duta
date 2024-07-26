@@ -6,9 +6,9 @@
                 <table id="naskahTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th>
+                            <th width="10">#</th>
                             <th>Jenjang</th>
-                            <th>Status</th>
+                            <th width="150">Status</th>
                         </tr>
                     </thead>
                 </table>
@@ -25,8 +25,8 @@
             // "scrollY": "300px",
             // "scrollCollapse": true,
             "aLengthMenu": [
-                [1, 25, 10],
-                [1, 25, 10],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,

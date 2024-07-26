@@ -6,6 +6,21 @@
         scroll-behavior: smooth;
     }
 
+    .btn.disabled, button:disabled {
+        /* text-decoration: line-through; */
+    }
+
+    .disabled-cursor {
+        cursor: not-allowed;
+    }
+    .disabled-cursor:hover {
+        cursor: not-allowed;
+    }
+
+    .a-hover:hover {
+        text-decoration: underline;
+    }
+
     .ignielToTop {
         width: 50px;
         height: 50px;
@@ -16,11 +31,11 @@
         cursor: pointer;
         border-radius: 100px;
         transition: all .5s;
-        background: #008c5f url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill='%23fff'/%3E%3C/svg%3E") no-repeat center center;
+        background: #008c5f url("data:image/svg+xml,%3Csvg viewBox= '0 0 24 24' xmlns= 'http://www.w3.org/2000/svg'%3E%3Cpath d= 'M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill= '%23fff'/%3E%3C/svg%3E") no-repeat center center;
     }
 
     .ignielToTop:hover {
-        background: #1d2129 url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill='%23fff'/%3E%3C/svg%3E") no-repeat center center;
+        background: #1d2129 url("data:image/svg+xml,%3Csvg viewBox= '0 0 24 24' xmlns= 'http://www.w3.org/2000/svg'%3E%3Cpath d= 'M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill= '%23fff'/%3E%3C/svg%3E") no-repeat center center;
     }
 
     .loader {
@@ -92,202 +107,258 @@
         </div>
     </div>
 
+    <?php
+        if ($this->session->userdata('id_jabatan') != 1) {
+    ?>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="bgc-white bd bdrs-3 p-20 mB-20">
+                    <fieldset>
+                        <h4>Progress Naskah</h4>
+                        <br>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="bgc-white bd bdrs-3 p-20 mB-20">
-                <fieldset>
-                    <legend>Progress Naskah</legend>
+                        <div id="instruction1" style="background-color:#faf8ac;border-radius:8px;padding:10px;margin-bottom:15px;border:solid 2px #dbd897;">
+                            Pilih Level Kerja yang ingin dikerjakan dengan <u>menekan</u> tombol <b>View</b> lalu <b>Mulai</b>, 
+                            Level Kerja yang saat ini <u>sedang dikerjakan/berjalan</u> akan <u>otomatis ditampilkan begitu halaman dibuka/di-refresh</u>.<br><br>
 
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <div class="content-box">
-                                <div class="row" style="margin:0 auto;">
-                                    <div class="col-sm">
-                                        <div style="margin-top:30%">
-                                            <div class="mb-4">
-                                                <div class="row">
-                                                    <div class="col-sm-2">
-                                                        <div style="width:15px;height:15px;background:#24b2f9;border-radius:100%;margin-top:4px">&nbsp;</div>
+                            Level kerja yang tampil pada dashboard ini merupakan <u>pekerjaan yang dilimpahkan kepada Anda</u> dan tidak akan tampil pada dashboard Editor lain kecuali tanggung-jawab pekerjaan tersebut dipindah-tangankan kepada Editor tersebut.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="content-box">
+                                    <div class="row" style="margin:0 auto;">
+                                        <div class="col-sm">
+                                            <div style="margin-top:30%">
+                                                <div class="mb-4">
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div style="width:15px;height:15px;background:#24b2f9;border-radius:100%;margin-top:4px">&nbsp;</div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <h5 class="font-weight-bold">Halaman</h5>
+                                                        </div>
                                                     </div>
-                                                    <div class="col-sm-2">
-                                                        <h5 class="font-weight-bold">Halaman</h5>
-                                                    </div>
+                                                    <div style="margin-left:28px"><span id="total_halaman_terkerjakan">0</span>/<span id="total_halaman">0</span> halaman</div>
                                                 </div>
-                                                <div style="margin-left:28px"><span id="total_halaman_terkerjakan">0</span>/<span id="total_halaman">0</span> halaman</div>
+                                                <div>
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div style="width:15px;height:15px;background:#5155c0;border-radius:100%;margin-top:4px">&nbsp;</div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <h5 class="font-weight-bold">Hari</h5>
+                                                        </div>
+                                                    </div>
+                                                    <div style="margin-left:28px"><span id="hari_pengerjaan">0</span>/<span id="total_hari_perencanaan">0</span> hari</div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div class="row">
-                                                    <div class="col-sm-2">
-                                                        <div style="width:15px;height:15px;background:#5155c0;border-radius:100%;margin-top:4px">&nbsp;</div>
-                                                    </div>
-                                                    <div class="col-sm-2">
-                                                        <h5 class="font-weight-bold">Hari</h5>
-                                                    </div>
-                                                </div>
-                                                <div style="margin-left:28px"><span id="hari_pengerjaan">0</span>/<span id="total_hari_perencanaan">0</span> hari</div>
+                                        </div>
+
+                                        <!-- doughtnut charts -->
+                                        <div class="col-sm">
+                                            <figure class="highcharts-figure">
+                                                <div id="progressChart"></div>
+                                            </figure>
+                                        </div>
+
+                                        <!-- buttons -->
+                                        <div class="col-sm">
+                                            <div style="margin-top:40%;">
+                                                <button id="start-naskah-button" onclick="startJob()" class="mb-2 form-control btn btn-primary">Mulai</button>
+                                                <button id="pause-naskah-button" type="button" class="form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#stopJobModal">Selesai</button>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- doughtnut charts -->
-                                    <div class="col-sm">
-                                        <figure class="highcharts-figure">
-                                            <div id="progressChart"></div>
-                                        </figure>
+                                    <div id="activeTrack" class="col-sm">
+                                        <table class="table table-md">
+                                            <tbody>
+                                                <tr>
+                                                    <td><b>START TIME</b></td>
+                                                    <td id="activeStartTime">2020-01-01</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>ELAPSED TIME</b></td>
+                                                    <td><div id="activeTimer"></div></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>STATUS</b></td>
+                                                    <td id="activeStatus"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
 
-                                    <!-- buttons -->
-                                    <div class="col-sm">
-                                        <div style="margin-top:40%;">
-                                            <button id="start-naskah-button" onclick="startJob()" class="mb-2 form-control btn btn-info">Mulai</button>
-                                            <button id="pause-naskah-button" type="button" class="form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#stopJobModal">Selesai</button>
+                                    <div id="realisasiFulfilled" class="row;mL-5" style="background:#f4fff2;border:solid 2px #e0fcdc;padding:10px;border-radius:10px;">
+                                        <div>
+                                            <div class="row">
+                                                <div class="col-md-1"><img width="28" src="https://cdn-icons-png.flaticon.com/256/5289/5289675.png" alt=""></div>
+                                                <div class="col-md-8">
+                                                    <b><h5>Pekerjaan Selesai!</h5></b>
+                                                </div>
+                                            </div>
+                                            Jumlah realisasi halaman sudah memenuhi target halaman.
                                         </div>
                                     </div>
                                 </div>
-                                <div id="activeTrack" class="col-sm">
-                                    <table class="table table-md">
-                                        <tbody>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="content-box">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div>
+                                                <img id="activeNaskahCover" style="border-radius:5px" width="100%">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="content-box">
+                                                <h8 id="activeNaskahKode">-</h8>
+                                                <h6 class="mT-5"><b id="activeNaskahJudul">-</b></h6>
+                                                <table class="mT-10 table table-sm">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Penulis</td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahPenulis">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Warna</td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahWarna">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Ukuran</td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahUkuran">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Halaman</td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahHalaman">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>ISBN</td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahISBN">-</td>
+                                                        </tr>
+                                                        <tr style="background:#eee">
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Level Kerja</b></td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahLevelKerja">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Realisasi</b></td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahRealisasi">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Timeline</b></td>
+                                                            <td>:</td>
+                                                            <td id="activeNaskahTime">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <br>
+                                                <center>
+                                                    <a id="activeNaskahDetailButton" href="#" target="_blank" class="btn btn-primary" style="margin:0 auto;">Detail Naskah</a>
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="content-box">
+                                    <table class="table table-sm">
+                                        <thead class="table-dark">
                                             <tr>
-                                                <td><b>START TIME</b></td>
-                                                <td id="activeStartTime">2020-01-01</td>
+                                                <th scope="col">LEVEL</th>
+                                                <th scope="col">PIC</th>
+                                                <th scope="col">STATUS</th>
+                                                <th scope="col">PROGRESS</th>
                                             </tr>
-                                            <tr>
-                                                <td><b>ELAPSED TIME</b></td>
-                                                <td><div id="activeTimer"></div></td>
-                                            </tr>
-                                            <tr>
-                                                <td><b>STATUS</b></td>
-                                                <td id="activeStatus"></td>
-                                            </tr>
-                                        </tbody>
+                                        </thead>
+                                        <tbody id="activeNaskahLevelKerjaList"></tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-sm-4">
-                            <div class="content-box">
-                                <div class="row">
-                                    <div class="col-sm-4">
-                                        <div>
-                                            <img id="activeNaskahCover" style="border-radius:5px" width="100%">
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="content-box">
-                                            <h8 id="activeNaskahKode">10-000-0000-0</h8>
-                                            <h6 class="mT-5"><b id="activeNaskahJudul">Judul Buku</b></h6>
-                                            <table class="mT-10 table table-sm">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Penulis</td>
-                                                        <td>:</td>
-                                                        <td id="activeNaskahPenulis"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Warna</td>
-                                                        <td>:</td>
-                                                        <td id="activeNaskahWarna">...</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Ukuran</td>
-                                                        <td>:</td>
-                                                        <td id="activeNaskahUkuran">...</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Halaman</td>
-                                                        <td>:</td>
-                                                        <td id="activeNaskahHalaman">...</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>ISBN</td>
-                                                        <td>:</td>
-                                                        <td id="activeNaskahISBN">...</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <br>
-                                            <center>
-                                                <a id="activeNaskahDetailButton" href="#" target="_blank" class="btn btn-primary" style="margin:0 auto;">Detail</a>
-                                            </center>
-                                        </div>
-                                    </div>
+                        <br><br><br>
+
+                        <!-- table -->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="content-box">
+                                    <h5>Daftar Pekerjaan</h5>
+
+                                    <table id="jobTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Kode Buku</th>
+                                                <th>No. Job</th>
+                                                <th>Judul Buku</th>
+                                                <th>Hal</th>
+                                                <th width="20">Realisasi</th>
+                                                <th>Level</th>
+                                                <th>Rencana Mulai</th>
+                                                <th>Rencana Selesai</th>
+                                                <th width="90">Status</th>
+                                                <th width="340">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <div class="content-box">
-                                <table class="table table-sm">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th scope="col">LEVEL</th>
-                                            <th scope="col">PIC</th>
-                                            <th scope="col">STATUS</th>
-                                            <th scope="col">PROGRESS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="activeNaskahLevelKerjaList"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <br><br><br>
-
-                    <!-- table -->
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="content-box">
-                                <table id="jobTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Kode Buku</th>
-                                            <th>No. Job</th>
-                                            <th>Judul Buku</th>
-                                            <th>Hal</th>
-                                            <th>Level</th>
-                                            <th>Rencana Mulai</th>
-                                            <th>Rencana Selesai</th>
-                                            <th>Status</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <br><br><br>
-
-                    <!-- table -->
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="content-box">
-                                <table id="dailyReportTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Tanggal</th>
-                                            <th>Nama</th>
-                                            <th>Level Kerja</th>
-                                            <th>Judul</th>
-                                            <th>Catatan</th>
-                                            <th>Kode Buku</th>
-                                            <th>No. Job</th>
-                                            <th>Realisasi</th>
-                                            <th>Accuracy Meter</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                </div>
             </div>
         </div>
-    </div>
+        
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="bgc-white bd bdrs-3 p-20 mB-20">
+                    <fieldset>
+                        <h4>Laporan Harian</h4>
+                        <br>
+                        <!-- table -->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="content-box">
+                                    <table id="dailyReportTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th width="10">#</th>
+                                                <th width="100">Waktu Mulai</th>
+                                                <th width="100">Waktu Submit</th>
+                                                <th width="60">PIC</th>
+                                                <th width="70">Level Kerja</th>
+                                                <th>Judul Naskah</th>
+                                                <th>Catatan</th>
+                                                <th width="85">Kode Buku</th>
+                                                <th width="50">No. Job</th>
+                                                <th width="50">Realisasi</th>
+                                                <th width="150">Accuracy Meter</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    <?php } ?>
 </div>
 
 <!-- modal untuk stop job hari ini -->
@@ -297,7 +368,7 @@
             <form id="formJobReport">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title">Form Laporan Pekerjaan Harian</h5>
-                    <span type="button" data-bs-dismiss="modal" aria-label="Close">
+                    <span type="button" data-bs-dismiss="modal" aria-label="Close" class="close">
                         <i class="ti-close"></i>
                     </span>
                 </div>
@@ -440,7 +511,7 @@
             bgColor: '#7de5ff'
         },
         paused: {
-            text: 'Sedang Ditunda',
+            text: 'Ditunda',
             bgColor: '#e3db94'
         },
         cicil: {
@@ -454,6 +525,13 @@
     }
 
     $(document).ready(function() {
+        $('#formJobReportError').hide()
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#activeNaskahDetailButton').hide()
+        $('#realisasiFulfilled').hide()
+        $('#start-naskah-button').attr('disabled', true)
+        $('#pause-naskah-button').attr('disabled', true)
+
         // jobs
         getActiveJob = function() {
             $.ajax({
@@ -463,19 +541,25 @@
                 res = JSON.parse(res)
                 if (res.noJob) {
                     viewJob(true, res.noJob, res.levelKerja)
-                    $('#activeStartTime').text(new Date(res.waktuMulai).toLocaleDateString() + ' ' + new Date(res.waktuMulai).toLocaleTimeString('id-ID'))
+                    $('#activeStartTime').text(new Date(res.waktuMulai).toLocaleDateString() + ' ' + new Date(res.waktuMulai).toLocaleTimeString('id-ID').replaceAll('.', ':'))
                     
                     $('#activeTrack').show()
-                    var targetDate = new Date(res.waktuMulai).getTime();
+                    var targetDateRAW = new Date(res.waktuMulai);
+                    var targetDate = targetDateRAW.getTime();
                     var elapsedTimeInterval = setInterval(function() {
-                        var currentDate = new Date().getTime();
+                        var currentDateRAW = new Date();
+                        var currentDate = currentDateRAW.getTime();
                         var timeDifference = currentDate - targetDate;
                         var elapsedHours = Math.floor(timeDifference / (1000 * 60 * 60));
                         var elapsedMinutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
                         var elapsedTimeText = elapsedHours + " jam " + elapsedMinutes + " menit";
                         $("#activeTimer").text(elapsedTimeText);
 
-                        if (elapsedHours > 16) {
+                        const sameDay = targetDateRAW.getFullYear() === currentDateRAW.getFullYear() &&
+                                        targetDateRAW.getMonth() === currentDateRAW.getMonth() &&
+                                        targetDateRAW.getDate() === currentDateRAW.getDate();
+
+                        if (elapsedHours > 16 || !sameDay) {
                             $('#activeStatus').html('<span style="color:red"><i class="ti-alert"></i> <b>BAD (Melebihi batas hari)</b></span>')
                         } else {
                             $('#activeStatus').html('<span style="color:green"><i class="ti-check"></i> <b>GOOD</b></span>')
@@ -492,10 +576,10 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 10, 15, 20],
-                [5, 10, 15, 20],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
-            "pageLength": 5,
+            "pageLength": 10,
             "processing": true,
             "serverSide": true,
             "searching": true,
@@ -523,51 +607,63 @@
             ],
             "columnDefs": [
                 {
+                    "targets": 3,
+                    "render": function(data, type, row) {
+                        return "<a target= '_blank' href= '<?=site_url('naskah/view')?>/"+row[2]+"' class= 'a-hover'>"+row[3]+"</a>";
+                    }
+                },
+                {
                     "targets": 5,
                     "render": function(data, type, row) {
-                        return levelKerjaMap[row[5]]
+                        return (row[5] ?? 0) + ' hal'
                     }
                 },
                 {
                     "targets": 6,
                     "render": function(data, type, row) {
-                        return '<div style="'+(new Date() > new Date(row[6]) ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[6]) ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[6]).toLocaleDateString('id-ID')+'</div>'
+                        return '<b>'+levelKerjaMap[row[6]]+'</b>'
                     }
                 },
                 {
                     "targets": 7,
                     "render": function(data, type, row) {
-                        return '<div style="'+(new Date() > new Date(row[7]) ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[7]) ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[7]).toLocaleDateString('id-ID')+'</div>'
+                        return '<div style="'+(new Date() > new Date(row[7]) && row[9] == 'open' ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[7]) && row[9] == 'open' ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[7]).toLocaleDateString('id-ID')+'</div>'
                     }
                 },
                 {
                     "targets": 8,
                     "render": function(data, type, row) {
-                        return '<div><button class="btn" style="border:none;cursor:default;'+(row[8]=='on_progress'?'font-weight:bold;':'')+';background-color:'+statusMap[row[8]].bgColor+'">'+statusMap[row[8]].text+'</button></div>'
+                        return '<div style="'+(new Date() > new Date(row[8]) ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[8]) ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[8]).toLocaleDateString('id-ID')+'</div>'
                     }
                 },
                 {
                     "targets": 9,
                     "render": function(data, type, row) {
+                        return '<div><button class="btn" style="border:none;cursor:default;'+(row[9] == 'on_progress'?'font-weight:bold;':'')+';background-color:'+statusMap[row[9]].bgColor+'">'+statusMap[row[9]].text+'</button></div>'
+                    }
+                },
+                {
+                    "targets": 10,
+                    "render": function(data, type, row) {
                         return '<div class="peers mR-15">' +
                             '<div class="peer mR-5">' +
-                                '<button onclick="viewJob('+false+', \''+row[2]+'\', \''+row[5]+'\')" class="btn btn-info">View</button>' +
+                                '<button onclick="viewJob('+false+', \''+row[2]+'\', \''+row[6]+'\')" class="btn btn-info">Lihat</button>' +
                             '</div>' +
-                            ((row[8] == 'open' || row[8] == 'paused') ? 
-                                '<div class="peer mR-5">' +
-                                '<button onclick="mulaiJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-success" '+(row[8]=='on_progress' || row[8]=='cicil'?'disabled':'')+'>'+(row[8] == 'paused' ? 'Lanjut' : 'Mulai')+'</button>' +
+                            ((row[9] == 'open' || row[9] == 'paused') ? 
+                                '<div class="peer mR-5 '+ (row[9]!= 'on_progress' || row[9] == 'cicil' ? 'disabled-cursor' : '') +'">' +
+                                    '<button onclick="mulaiJob(\''+row[2]+'\', \''+row[6]+'\', \''+row[7]+'\')" class="btn btn-success" '+(row[9] == 'on_progress' || row[9] == 'cicil' ? 'disabled' : '')+'>'+(row[9] == 'paused' ? 'Lanjut' : 'Mulai')+'</button>' +
                                 '</div>' 
                                 :
-                                '<div class="peer mR-5">' +
-                                '<button onclick="tundaJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-warning '+(row[8]!='on_progress' || row[8]=='cicil'?'disabled':'')+'">Tunda</button>' +
+                                '<div id="tundaButtonParent'+row[2]+row[6]+'" class="peer mR-5 '+ (row[9]!= 'on_progress' || row[9] == 'cicil' ? 'disabled-cursor' : '') +'">' +
+                                    '<button id="tundaButton'+row[2]+row[6]+'" onclick="tundaJob(\''+row[2]+'\', \''+row[6]+'\')" class="actionButton btn btn-warning '+(row[9]!= 'on_progress' || row[9] == 'cicil' ? 'disabled' : '')+'">Tunda</button>' +
                                 '</div>'
                             ) +
-                            '<div class="peer mR-5">' +
-                                // '<button onclick="kirimJob(\''+row[2]+'\', \''+row[5]+'\')" class="btn btn-primary"'+(row[8]=='on_progress'?'disabled':'')+'>Kirim</button>' +
-                                '<button id="kirim-job-button" onClick="kirimJobTrigger(\''+row[2]+'\', \''+row[5]+'\')" type="button" class="form-control btn btn-primary" data-bs-toggle="modal" data-bs-target="#kirimJobModal" class="btn btn-primary"'+((row[8]=='finished' || row[8]=='open' || row[9] != null)?'disabled':'')+'>Kirim</button>' +
+                            '<div id="kirimButtonParent'+row[3]+row[6]+'" class="peer mR-5 '+ ((row[9] == 'finished' || row[9] == 'open' || row[10] != null) ? 'disabled-cursor' : '') +'">' +
+                                // '<button onclick="kirimJob(\''+row[3]+'\', \''+row[6]+'\')" class="btn btn-primary"'+(row[9] == 'on_progress'?'disabled':'')+'>Kirim</button>' +
+                                '<button id="kirimButton'+row[3]+row[6]+'" onClick="kirimJobTrigger(\''+row[2]+'\', \''+row[6]+'\')" type="button" class="actionButton form-control btn btn-primary" data-bs-toggle="modal" data-bs-target="#kirimJobModal" class="btn btn-primary"'+((row[9] == 'finished' || row[9] == 'open' || row[10] != null) ? 'disabled':'')+'>Kirim</button>' +
                             '</div>' +
-                            '<div class="peer mR-5">' +
-                                '<button id="finish-job-button" onClick="finishJobTrigger(\''+row[2]+'\', \''+row[5]+'\', \''+row[4]+'\')" type="button" class="form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#finishJobModal" class="btn btn-danger" '+(row[8]=='finished' || row[8]=='open' ?'disabled':'')+'>Selesai</button>' +
+                            '<div id="finishButtonParent'+row[3]+row[6]+'" class="peer mR-5 '+ (row[9] == 'finished' || row[9] == 'open'  ? 'disabled-cursor':'') +'">' +
+                                '<button id="finishButton'+row[3]+row[6]+'" onClick="finishJobTrigger(\''+row[2]+'\', \''+row[6]+'\', \''+row[5]+'\')" type="button" class="actionButton form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#finishJobModal" class="btn btn-danger" '+(row[9] == 'finished' || row[9] == 'open'  ? 'disabled':'')+'>Selesai</button>' +
                             '</div>' +
                             '<div class="peer mR-5">' +
                                 '<a href="<?=site_url('naskah/detail')?>/'+row[2]+'" class="btn btn-primary">Detail</a>' +
@@ -582,6 +678,7 @@
             "oLanguage": {
                 "sSearch": "Pencarian",
                 "sProcessing": '<image style="width:150px" src="http://superstorefinder.net/support/wp-content/uploads/2018/01/blue_loading.gif">',
+                "sEmptyTable": "Belum ada pekerjaan",
             }
         });
 
@@ -590,8 +687,8 @@
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
-                [5, 30, 30, 30, 50, 50, 30, 10, 10, 30],
-                [5, 30, 30, 30, 50, 50, 30, 10, 10, 30],
+                [10, 15, 20, 25, 50],
+                [10, 15, 20, 25, 50],
             ],
             "pageLength": 10,
             "processing": true,
@@ -621,29 +718,37 @@
             ],
             "columnDefs": [
                 {
-                    "targets": 1,
+                    "targets": 2,
                     "render": function(data, type, row) {
-                        const splittedDate = (row[1].split(' ')[0]).split('-')
-                        return splittedDate[2] + '-' + splittedDate[1] + '-' + splittedDate[0]
+                        return row[2] == 0 ? '<span style="border-radius:5px;background-color:red;padding:3px 5px;color:#fff;font-weight:bold;"><i>Belum disubmit</i></span>' : row[2]
                     }
                 },
                 {
-                    "targets": 8,
+                    "targets": 5,
                     "render": function(data, type, row) {
-                        return row[8] ? row[8] + ' halaman' : '<i>~On Progress~</i>'
+                        return "<a target= '_blank' href= '<?=site_url('naskah/view')?>/"+row[8]+"' class= 'a-hover'>"+row[5]+"</a>";
                     }
                 },
                 {
                     "targets": 9,
                     "render": function(data, type, row) {
-                        const fromDate = new Date(row[9])
-                        const toDate = new Date(row[1].split(' ')[0])
+                        return row[9] ? row[9] + ' hal' : '-'
+                    }
+                },
+                {
+                    "targets": 10,
+                    "render": function(data, type, row) {
+                        const fromDate = new Date(row[10])
+                        
+                        const [tdDay, tdMonth, tdYear] = (row[1].split(' ')[0]).split('/');
+                        const toDate = new Date(tdYear+'-'+tdMonth+'-'+tdDay)
+
                         const difference = Math.abs(toDate - fromDate);
                         const daysDifference = Math.ceil(difference / (1000 * 60 * 60 * 24));
-                        const dayDiffWithoutHolidays = Math.abs(daysDifference - row[12])
+                        const dayDiffWithoutHolidays = /*Math.abs(daysDifference - row[13])*/ daysDifference+1;
 
                         let barColor = 'd94141'
-                        const barPercentage = ((dayDiffWithoutHolidays ?? 0)*100/row[11])
+                        const barPercentage = ((dayDiffWithoutHolidays ?? 0)*100/row[12])
                         if (barPercentage <= 33) {
                             barColor = '58a85e'
                         } else if (barPercentage > 33 && barPercentage <= 66) {
@@ -651,11 +756,11 @@
                         }
 
                         return '<div class="peers mR-15" style="width:100%">' +
-                            '<div class="peer mR-5" style="width:100%;'+ (dayDiffWithoutHolidays > row[11] ? 'color:red;font-weight:bold' : '') +'">' +
+                            '<div class="peer mR-5" style="width:100%;'+ (dayDiffWithoutHolidays > row[12] ? 'color:red;font-weight:bold' : '') +'">' +
                             '<div style="height:20px;width:100%;border:solid 1px #ddd;border-radius:5px;">'+
                             '<div style="height:18px;width100%;background:#'+barColor+';border-radius:5px;text-align:center;color:#fff"></div>' +
                             '</div>' +
-                            '<div style="text-align:center">' + dayDiffWithoutHolidays + ' dari ' + row[11] + ' hari' + '</div>' +
+                            '<div style="text-align:center">' + dayDiffWithoutHolidays + ' dari ' + row[12] + ' hari' + '</div>' +
                             '</div>' +
                             '</div>';
                     },
@@ -667,6 +772,7 @@
             "oLanguage": {
                 "sSearch": "Pencarian",
                 "sProcessing": '<image style="width:150px" src="http://superstorefinder.net/support/wp-content/uploads/2018/01/blue_loading.gif">',
+                "sEmptyTable": "Tidak ada laporan yang dapat ditampilkan",
             }
         });
 
@@ -1016,27 +1122,40 @@
         }]
     });
 
-    function mulaiJob(noJob, levelKerja) {
-        $.ajax({
-            url: "<?=site_url('jobs/startLevelKerja')?>?noJob=" + noJob + "&levelKerja=" + levelKerja,
-            method: "POST",
-            data: {
-                noJob,
-                levelKerja,
-            }
-        }).success(res => {
-            res = JSON.parse(res)
+    function mulaiJob(noJob, levelKerja, tglRencanaMulai) {
+        const today = new Date();
+        const givenDate = new Date(tglRencanaMulai);
 
-            if (res.success) {
-                refreshTable()
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal memulai level kerja!',
-                    text: res.message,
-                })
-            }
-        })
+        const canStart = today >= givenDate;
+
+        if (canStart) {
+            $.ajax({
+                url: "<?=site_url('jobs/startLevelKerja')?>?noJob=" + noJob + "&levelKerja=" + levelKerja,
+                method: "POST",
+                data: {
+                    noJob,
+                    levelKerja,
+                }
+            }).success(res => {
+                res = JSON.parse(res)
+
+                if (res.success) {
+                    refreshTable()
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal memulai level kerja!',
+                        text: res.message,
+                    })
+                }
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal memulai pekerjaan',
+                text: 'Belum memasuki tanggal Rencana Mulai, belum bisa memulai pekerjaan ini.'
+            })
+        }
     }
 
     function tundaJob(noJob, levelKerja) {
@@ -1136,12 +1255,15 @@
     })
 
     let runningJob = {}
-    function viewJob(isRunningJob = false, noJob, levelKerja) {
+    function viewJob(isRunningJob = false, noJob, levelKerja, pauseButtonClicked = false) {
         $.ajax({
             url: "<?=site_url('jobs/viewJob')?>?noJob=" + noJob + "&levelKerja=" + levelKerja,
             method: "GET"
         }).success(res => {
             res = JSON.parse(res)
+
+            $('#activeNaskahDetailButton').show()
+            $('#instruction1').hide();
 
             if (res.chart.status != 'on_progress' && res.chart.status != 'cicil') {
                 $('#start-naskah-button').attr('disabled', true)
@@ -1149,12 +1271,12 @@
             } else {
                 $('#start-naskah-button').attr('disabled', false)
                 $('#pause-naskah-button').attr('disabled', false)
-
                 activeJob = {
                     noJob: res.naskah.no_job,
                     naskahId: res.naskah.id,
                     levelKerja,
                 }
+                // disableActiveJobButtons()
 
                 if (!isRunningJob) {
                     $('#activeTrack').hide()
@@ -1164,18 +1286,27 @@
                     runningJob = activeJob
                 }
 
-                if (runningJob.naskahId) {
-                    $('#start-naskah-button').attr('disabled', true)
-
-                    if (runningJob.naskahId != activeJob.naskahId) {
+                if (!pauseButtonClicked) {
+                    if (!runningJob.naskahId) {
                         $('#pause-naskah-button').attr('disabled', true)
-                        $('#activeTrack').hide()
-                    } else {
-                        $('#pause-naskah-button').attr('disabled', false)
-                        if (!isRunningJob) {
-                            $('#activeTrack').show()
+                    }
+
+                    if (runningJob.naskahId) {
+                        $('#start-naskah-button').attr('disabled', true)
+
+                        if (runningJob.naskahId != activeJob.naskahId) {
+                            $('#pause-naskah-button').attr('disabled', true)
+                            $('#activeTrack').hide()
+                        } else {
+                            $('#pause-naskah-button').attr('disabled', false)
+
+                            if (!isRunningJob) {
+                                $('#activeTrack').show()
+                            }
                         }
                     }
+                } else {
+                    $('#pause-naskah-button').attr('disabled', true)
                 }
             }
 
@@ -1183,7 +1314,7 @@
             $('#activeNaskahKode').text(res.naskah.kode)
             $('#activeNaskahJudul').text(res.naskah.judul)
             $('#activeNaskahPenulis').text(res.naskah.penulis)
-            $('#activeNaskahWarna').text(res.naskah.warna)
+            $('#activeNaskahWarna').text(res.naskah.nama_warna)
             $('#activeNaskahUkuran').text(res.naskah.nama_ukuran)
             $('#activeNaskahHalaman').text(res.naskah.halaman)
             $('#activeNaskahISBN').text(res.naskah.isbn != '' ? res.naskah.isbn : '-')
@@ -1192,18 +1323,27 @@
             let naskahLevelKerjaListHtml = ''
             res.level_kerja.forEach((lk) => {
                 let barColor = '58a85e'
-                const barPercentage = (lk.total_hari ?? 0)*100/lk.durasi
+                // const barPercentage = (lk.total_hari ?? 0)*100/lk.durasi
+                const barPercentage = Math.round(lk.realisasi_halaman*100/res.naskah.halaman, 2);
                 if (barPercentage <= 33) {
                     barColor = 'd94141'
                 } else if (barPercentage > 33 && barPercentage <= 66) {
                     barColor = 'd1a847'
                 }
 
+                // const progressBarValue = lk.durasi == 0 ? '100' : ((lk.total_hari ?? 0)*100/lk.durasi).toFixed(0);
+                let progressBarValue = lk.realisasi_halaman*100/res.naskah.halaman;
+                progressBarValue = progressBarValue >= 100 ? 100 : progressBarValue;
+
+                // const barLength = ((lk.total_hari ?? 0)*100/lk.durasi);
+                let barLength = lk.realisasi_halaman*100/res.naskah.halaman;
+                barLength = barLength >= 100 ? 100 : barLength;
+
                 naskahLevelKerjaListHtml += '<tr>'+
                     '<td style="vertical-align:middle">'+levelKerjaMap[lk.key]+'</td>'+
                     '<td style="vertical-align:middle">'+(lk.nama == null ? '<i style="color:red">Tentatif</i>' : lk.nama)+'</td>'+
-                    '<td style="vertical-align:middle;"><button class="btn" style="border:none;cursor:default;'+(lk.status=='on_progress'?'font-weight:bold;':'')+';background-color:'+statusMap[lk.status].bgColor+'">'+statusMap[lk.status].text+'</button></td>'+
-                    '<td style="vertical-align:middle">'+('<div style="height:20px;width:100%;border:solid 1px #ddd;border-radius:5px;"><div style="height:18px;width:'+((lk.total_hari ?? 0)*100/lk.durasi)+'%;background:#'+barColor+';border-radius:5px;text-align:center;color:#fff">'+(lk.durasi == 0 ? '100' : ((lk.total_hari ?? 0)*100/lk.durasi).toFixed(0))+'%</div></div><div>'+(lk.total_hari ?? 0)+' dari ' + lk.durasi + ' hari</div>')+'</td>'+
+                    '<td style="vertical-align:middle;"><button class="btn" style="border:none;cursor:default;'+(lk.status== 'on_progress'?'font-weight:bold;':'')+';background-color:'+statusMap[lk.status].bgColor+'">'+statusMap[lk.status].text+'</button></td>'+
+                    '<td style="vertical-align:middle">'+('<div style="height:20px;width:100%;border:solid 1px #ddd;border-radius:5px;"><div style="height:18px;width:'+barLength+'%;background:#'+barColor+';border-radius:5px;text-align:center;color:#fff">'+progressBarValue+'%</div></div><div>'+(lk.total_hari ?? 0)+' dari ' + lk.durasi + ' hari</div>')+'</td>'+
                 '</tr>'
             })
             $('#activeNaskahLevelKerjaList').html(naskahLevelKerjaListHtml)
@@ -1211,18 +1351,41 @@
             // update progress halaman dan hari
             const progressHalaman = res.progress.halaman ?? 0
             const totalHalaman = parseInt(res.naskah.halaman)
+            const progressHalamanPercentage = res.progress.halaman*100/totalHalaman
             const progressHari = res.days.days ?? 0
             const totalHari = res.chart.durasi
 
+            $('#activeNaskahLevelKerja').html(levelKerjaMap[levelKerja])
+
             $('#total_halaman_terkerjakan').html(progressHalaman)
             $('#total_halaman').html(totalHalaman)
+            $('#activeNaskahRealisasi').html(progressHalaman + ' dari ' + totalHalaman + ' hal' + ' ('+progressHalamanPercentage+'%)')
+
             $('#hari_pengerjaan').html(progressHari)
             $('#total_hari_perencanaan').html(totalHari)
+            $('#activeNaskahTime').html(progressHari + ' dari ' + totalHari + ' hari')
+
+            if (progressHalaman >= totalHalaman) {
+                $('#realisasiFulfilled').show()
+            } else {
+                $('#realisasiFulfilled').hide()
+            }
             
             progressChart.series[0].data[0].update(Math.round(progressHalaman*100/totalHalaman), false)
             progressChart.series[1].data[0].update(Math.round(progressHari*100/totalHari), false)
             progressChart.redraw()
         })
+    }
+
+    function disableActiveJobButtons() {
+        $('#tundaButton'+activeJob.noJob+activeJob.levelKerja).attr('disabled', true)
+        $('#tundaButtonParent'+activeJob.noJob+activeJob.levelKerja).addClass('disabled-cursor')
+
+        $('#kirimButton'+activeJob.noJob+activeJob.levelKerja).attr('disabled', true)
+        $('#kirimButtonParent'+activeJob.noJob+activeJob.levelKerja).addClass('disabled-cursor')
+
+        $('#finishButton'+activeJob.noJob+activeJob.levelKerja).attr('disabled', true)
+        $('#finishButtonParent'+activeJob.noJob+activeJob.levelKerja).addClass('disabled-cursor')
     }
 
     let activeJob = {}
@@ -1252,10 +1415,6 @@
             }
         })
     }
-
-    $(document).ready(function() {
-        $('#formJobReportError').hide()
-    });
 
     // report pekerjaan harian
     $('#formJobReport').submit(function(e) {
@@ -1288,6 +1447,11 @@
                     'Terima kasih atas kerja kerasnya 😀',
                     'success'
                 )
+                
+                $('#pause-naskah-button').attr('disabled', true)
+                viewJob(false, runningJob.noJob, runningJob.levelKerja, true)
+
+                $("#formJobReport .close").click();
             }
         })
     })
