@@ -136,7 +136,7 @@
                                                     ?>
                                                 </div>
                                             <?php } ?>
-                                            <button class="btn btn-success">Detail</button>
+                                            <a href="<?=site_url('naskah/detail') .'/'. $job['no_job']?>" class="btn btn-success">Detail</a>
                                         </td>
                                     <?php if ($lk_idx != 0) { echo '</tr>'; } ?>
                                 <?php } ?>

@@ -263,7 +263,7 @@ $menu = uriSegment(1) == 'buku' ? 'Buku' : 'Naskah';
             e.preventDefault()
 
             $.ajax({
-                url: 'naskah/' + 'update',
+                url: "<?=site_url('naskah/update')?>",
                 type: 'POST',
                 data: new FormData($(this)[0]),
                 contentType: false,

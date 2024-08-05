@@ -50,7 +50,7 @@ $allowed_to_save = !$data->pic_signed_by ||
 
         <div class="">
             <form action="#" id="sop-form">
-                <table id="checklist-table" class="table" style="<?=$data->approver_id == sessionData('user_id') || $allowed_to_save ? 'pointer-events:none' : ''?>"></table>
+                <table id="checklist-table" class="table" style="<?=$data->approver_id == sessionData('user_id') || !$allowed_to_save ? 'pointer-events:none' : ''?>"></table>
                 <div class="col-md-12 row">
                     <div class="col-md-3">
                         <label class="form-label">Catatan</label>

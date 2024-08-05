@@ -60,6 +60,7 @@ class Naskah_model extends CI_Model {
             }
         } else {
             DBS()->where('is_finished', '0');
+            DBS()->or_where('is_finished', NULL);
         }
         
         if ($isPPIC) {
@@ -289,7 +290,8 @@ class Naskah_model extends CI_Model {
                 ) npm ON npm.id_naskah=nlk.id_naskah AND npm.level_kerja_key=nlk.`key`
                 WHERE nlk.id_naskah=$idNaskah
                 AND nlk.is_disabled='0'
-                GROUP BY nlk.`key`";
+                GROUP BY nlk.`key`
+                ORDER BY nlk.tgl_rencana_mulai ASC";
 
         $progress = $this->db->query($query)->result_array();
 

@@ -133,9 +133,9 @@ class Naskah extends DUTA_Controller {
     }
 
     public function view() {
-        $data['no_job'] = $this->uri->segment(3);
+        $no_job = $this->uri->segment(3);
 
-        $data['naskah'] = $this->Naskah_model->findByNoJob($data['no_job']);
+        $data['naskah'] = $this->Naskah_model->findByNoJob($no_job);
         $data['jenjangs'] = $this->Jenjang_model->getDropdown();
         $data['mapels'] = $this->Mapel_model->getDropdown();
         $data['kategoris'] = $this->Kategori_model->getDropdown();

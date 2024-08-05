@@ -355,6 +355,9 @@
                         const nextDay = addOneDay(res.endDate)
                         if (nextDay != 'NaN/NaN/NaN') {
                             $('#startDate_' + nextLevelKerja).val(nextDay)
+                            if (nextLevelKerja == 'setting_1') {
+                                console.log(nextDay);
+                            }
                         }
 
                         if (nextLevelKerja != null) {

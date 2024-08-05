@@ -92,7 +92,7 @@ class Naskah_role_model extends CI_Model {
                 ) AS karyawan
             FROM t_karyawan
             WHERE id_divisi = 2
-            AND id_jabatan = 5
+            AND (id_jabatan = 5 OR id_jabatan = 4)
             AND t_karyawan.active = '1'
             
             UNION ALL

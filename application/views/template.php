@@ -542,15 +542,34 @@
 			refreshTable()
 		})
 
-		function addOneDay(date) {
-			const initialDate = new Date(date)
-			initialDate.setDate(initialDate.getDate() + 1)
-			const day = String(initialDate.getDate()).padStart(2, '0')
-			const month = String(initialDate.getMonth() + 1).padStart(2, '0')
-			const year = initialDate.getFullYear()
-			const nextDate = day + '/' + month + '/' + year
+		function isWeekend(date) {
+			const nDate = new Date(date);
+			const dayOfWeek = nDate.getDay();
+			const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+			return isWeekend;
+		}
 
-			return nextDate
+		function addOneDay(date) {
+			let rDate = new Date(date);
+			rDate.setDate(rDate.getDate() + 1);
+			const year = rDate.getFullYear();
+			const month = String(rDate.getMonth() + 1).padStart(2, '0');
+			const day = String(rDate.getDate()).padStart(2, '0');
+			const newDate = `${year}-${month}-${day}`;
+
+			if (isWeekend(newDate)) {
+				return addOneDay(newDate)
+			} else {
+				const nDate = new Date(newDate);
+
+				const day = String(nDate.getDate()).padStart(2, '0');
+				const month = String(nDate.getMonth() + 1).padStart(2, '0');
+				const year = nDate.getFullYear();
+
+				const formattedDate = `${day}/${month}/${year}`;
+
+				return formattedDate
+			}
 		}
 	</script>
 	<!-- <script type="text/javascript" src="<?php echo base_url(); ?>assets/vendor/jquery-ui/jquery-ui.min.js"></script> -->

@@ -482,6 +482,8 @@
     let attendTime
     let stopWorkTimer = false
 
+    let dailyJobReportTable
+
     let getActiveJob
 
     let activeKirimJobNoJob = null
@@ -541,7 +543,10 @@
                 res = JSON.parse(res)
                 if (res.noJob) {
                     viewJob(true, res.noJob, res.levelKerja)
-                    $('#activeStartTime').text(new Date(res.waktuMulai).toLocaleDateString() + ' ' + new Date(res.waktuMulai).toLocaleTimeString('id-ID').replaceAll('.', ':'))
+                    $('#activeStartTime').text(
+                        new Date(res.waktuMulai).toLocaleDateString('en-GB') + ' ' + 
+                        new Date(res.waktuMulai).toLocaleTimeString('id-ID').replaceAll('.', ':')
+                    );
                     
                     $('#activeTrack').show()
                     var targetDateRAW = new Date(res.waktuMulai);
@@ -683,7 +688,7 @@
         });
 
         // table laporan pekerjaan
-        const dailyJobReportTable = $('#dailyReportTable').DataTable({
+        dailyJobReportTable = $('#dailyReportTable').DataTable({
             "sDom": "Rlfrtip",
             "scrollCollapse": true,
             "aLengthMenu": [
@@ -745,7 +750,8 @@
 
                         const difference = Math.abs(toDate - fromDate);
                         const daysDifference = Math.ceil(difference / (1000 * 60 * 60 * 24));
-                        const dayDiffWithoutHolidays = /*Math.abs(daysDifference - row[13])*/ daysDifference+1;
+
+                        const dayDiffWithoutHolidays = Math.abs(daysDifference - row[13])+1;
 
                         let barColor = 'd94141'
                         const barPercentage = ((dayDiffWithoutHolidays ?? 0)*100/row[12])
@@ -1406,6 +1412,7 @@
             } else {
                 refreshTable()
                 getActiveJob()
+                dailyJobReportTable.ajax.reload(null, false)
 
                 Swal.fire(
                     'Berhasil memulai pekerjaan!',
@@ -1442,6 +1449,8 @@
                     text: res.message,
                 })
             } else {
+                dailyJobReportTable.ajax.reload(null, false)
+
                 Swal.fire(
                     'Progress pekerjaan telah tersimpan!',
                     'Terima kasih atas kerja kerasnya 😀',
