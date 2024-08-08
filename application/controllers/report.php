@@ -38,7 +38,7 @@ class Report extends DUTA_Controller {
         $naskah = $this->Report_model->dailyData($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['no_job'], $item['judul'], $this->keyMap[$item['level_kerja']]['text'], $item['nama'], $item['waktu_mulai'], $item['waktu_selesai'], $item['halaman']];
+            return ['', $item['no_job'], $item['judul'], $this->keyMap[$item['level_kerja']]['text'], $item['nama'], $item['waktu_mulai'], $item['waktu_selesai'], $item['halaman'] . ' hal'];
         }, $naskah['data']);
 
         $data = [
@@ -48,6 +48,20 @@ class Report extends DUTA_Controller {
         ];
 
         echo json_encode($data);
+    }
+
+    public function dailyExport() {
+        $pagination = array(
+            'start' => 0,
+            'length' => 9999999999
+        );
+        $search = inputPost('search')['value'];
+        $filters = explode('&', $this->input->post('filters'));
+
+        $data['naskah'] = $this->Report_model->dailyData($this->searchableFields, $search, $filters, $pagination);
+        $data['keyMap'] = $this->keyMap;
+
+        $this->load->view('report/job/daily-export', $data);
     }
 
     /**

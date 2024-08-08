@@ -51,6 +51,7 @@
         <table class="table table-bordered">
             <tr style="font-weight:bold">
                 <td style="background-color: #2196f3;color:#fff;">Status</td>
+                <td class="td-color-1-head">PIC</td>
                 <td class="td-color-1-head">Rencana Start</td>
                 <td class="td-color-2-head">Rencana Finish</td>
                 <td class="td-color-1-head">Realisasi Start</td>
@@ -62,6 +63,7 @@
             ?>
                 <tr>
                     <td><?=$level_kerja_key_map[$p['key']]['text']?></td>
+                    <td class="td-color-1"><?=$p['pic']?></td>
                     <td class="td-color-1"><?=getIndoDateWithDay($p['tgl_rencana_mulai'])?></td>
                     <td class="td-color-2"><?=getIndoDateWithDay($p['tgl_rencana_selesai'])?></td>
                     <td class="td-color-1"><?=getIndoDateWithDay($p['waktu_mulai'])?></td>

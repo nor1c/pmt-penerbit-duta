@@ -9,7 +9,7 @@ class Job_model extends CI_Model {
         $userLoginId = sessionData('user_id');
 
         // 
-        DBS()->select("naskah.no_job, naskah.kode, naskah.judul, naskah.halaman, naskah_level_kerja.key, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.status, naskah_level_kerja.catatan_cicil, progress.realisasi");
+        DBS()->select("naskah.no_job, naskah.kode, naskah.judul, naskah.halaman, naskah_level_kerja.key, naskah_level_kerja.kecepatan, naskah_level_kerja.tgl_rencana_mulai, naskah_level_kerja.tgl_rencana_selesai, naskah_level_kerja.status, naskah_level_kerja.catatan_cicil, progress.realisasi");
         DBS()->from("naskah_level_kerja");
         DBS()->join("naskah", "naskah.id=naskah_level_kerja.id_naskah", "left");
         DBS()->join(
@@ -262,6 +262,7 @@ class Job_model extends CI_Model {
                     ->update('naskah_progress', array(
                         'waktu_selesai' => $data['waktu_selesai'],
                         'halaman' => $data['halaman'],
+                        'catatan' => $data['catatan'],
                     ));
         
                 return catchQueryResult(DBS()->_error_message(), DBS()->_error_number());
@@ -362,5 +363,24 @@ class Job_model extends CI_Model {
                 'success' => true
             );
         }
+    }
+
+    public function getCurrentStatusForToday($userId, $naskahId, $levelKerja) {
+        DBS()->where('id_pic', $userId)
+            ->where('id_naskah', $naskahId)
+            ->where('level_kerja_key', $levelKerja)
+            ->where('DATE(waktu_mulai)', date('Y-m-d', time()));
+            
+        $found = DBS()->count_all_results('naskah_progress');
+
+        return $found ? true : false;
+    }
+
+    public function countDaysOffTotal($fromDate, $toDate) {
+        $count = DBS()->where('date >=', $fromDate)
+                    ->where('date <=', $toDate)
+                    ->count_all_results('holidays');
+
+        return $count ?? 0;
     }
 }

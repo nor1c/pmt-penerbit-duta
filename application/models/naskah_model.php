@@ -280,7 +280,7 @@ class Naskah_model extends CI_Model {
 
     public function getProgressWithRealizationDate($idNaskah) {
         $query = "SELECT 
-                nlk.`key`, nlk.tgl_rencana_mulai, nlk.tgl_rencana_selesai, npm.waktu_mulai, IF(nlk.status='finished', nlk.tgl_selesai, '') AS waktu_selesai, nlk.catatan_selesai as catatan
+                nlk.`key`, nlk.tgl_rencana_mulai, nlk.tgl_rencana_selesai, npm.waktu_mulai, IF(nlk.status='finished', nlk.tgl_selesai, '') AS waktu_selesai, nlk.catatan_selesai as catatan, t_karyawan.nama as pic
                 FROM naskah_level_kerja nlk
                 LEFT JOIN (
                     SELECT id_naskah, waktu_mulai, level_kerja_key
@@ -288,6 +288,7 @@ class Naskah_model extends CI_Model {
                     WHERE id_naskah=$idNaskah
                     ORDER BY created_at ASC
                 ) npm ON npm.id_naskah=nlk.id_naskah AND npm.level_kerja_key=nlk.`key`
+                LEFT JOIN t_karyawan ON (t_karyawan.id_karyawan=nlk.id_pic_aktif)
                 WHERE nlk.id_naskah=$idNaskah
                 AND nlk.is_disabled='0'
                 GROUP BY nlk.`key`
@@ -340,7 +341,7 @@ class Naskah_model extends CI_Model {
             (SELECT approver_signed_by AS koreksi_1_done FROM sop_koreksi_1 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_1_done,
             (SELECT approver_signed_by AS koreksi_2_done FROM sop_koreksi_2 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_2_done,
             (SELECT approver_signed_by AS koreksi_3_done FROM sop_koreksi_3 WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS koreksi_3_done,
-            (SELECT approver_signed_by AS pdf_done FROM sop_pdf WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS pdf_done
+            (SELECT manajer_signed_by AS pdf_done FROM sop_pdf WHERE id_naskah=$idNaskah AND approver_signature IS NOT NULL) AS pdf_done
         ";
 
         return DBS()->query($query)->row();

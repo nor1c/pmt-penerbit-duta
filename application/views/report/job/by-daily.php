@@ -53,12 +53,12 @@
                         <div class="row mB-10">
                             <div class="col-md-2">
                                 <label class="form-label">Dari Tanggal</label>
-                                <input id="startDateInput" type="text" name="waktu_mulai" class="form-control start-date-picker" data-date-format="dd/mm/yyyy" data-provide="datepicker">
+                                <input id="startDateInput" type="text" name="waktu_mulai" class="form-control start-date-picker" data-date-format="dd/mm/yyyy" data-provide="datepicker" autocomplete="off">
                             </div>
 
                             <div class="col-md-2">
                                 <label class="form-label">Sampai Tanggal</label>
-                                <input id="startDateInput" type="text" name="waktu_selesai" class="form-control end-date-picker" data-date-format="dd/mm/yyyy" data-provide="datepicker">
+                                <input id="startDateInput" type="text" name="waktu_selesai" class="form-control end-date-picker" data-date-format="dd/mm/yyyy" data-provide="datepicker" autocomplete="off">
                             </div>
 
                             <div class="col-md-2">
@@ -84,7 +84,8 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                <button type="submit" class="btn btn-primary btn-color" style="float:right">Filter</button>
+                                <a href="<?=site_url('report/dailyExport')?>" target="_blank" class="btn btn-info btn-color" style="float:right">Export</a>
+                                <button type="submit" class="btn btn-primary btn-color mR-5" style="float:right">Filter</button>
                             </div>
                         </div>
                     </form>

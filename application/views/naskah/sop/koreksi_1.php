@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-$allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData('user_id') || $data->approver_id == sessionData('user_id'));
+$allowed_to_save = (!$data->pic_signed_by || ($data->pic_signed_by == sessionData('user_id') || $data->approver_id == sessionData('user_id'))) && $this->session->userdata('id_divisi') == 2;
 ?>
 
 <style>
@@ -48,11 +48,11 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
 
         <div class="">
             <form action="#" id="sop-form">
-                <table id="checklist-table" class="table" style="<?=$data->approver_id == sessionData('user_id') ? 'pointer-events:none' : ''?>"></table>
+                <table id="checklist-table" class="table" style="<?=$data->approver_id == sessionData('user_id') || !$allowed_to_save ? 'pointer-events:none' : ''?>"></table>
                 <div class="col-md-12 row">
                     <div class="col-md-6">
                         <label class="form-label">Catatan</label>
-                        <textarea id="catatan" name="catatan" cols="30" rows="10" class="form-control" placeholder="Catatan" <?=$data->approver_id == sessionData('user_id') ? 'readonly disabled' : ''?>><?=$data->catatan ? $data->catatan : ''?></textarea>
+                        <textarea id="catatan" name="catatan" cols="30" rows="10" class="form-control" placeholder="Catatan" <?=$data->approver_id == sessionData('user_id') || !$allowed_to_save ? 'readonly disabled' : ''?>><?=$data->catatan ? $data->catatan : ''?></textarea>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Tanda tangan Editor</label>
@@ -67,7 +67,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                             <div id="pic-signature-jpg">
                                 <img src="<?=base_url('signatures/sop/'.$data->pic_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
 
-                                <?php if ($data->approver_id != sessionData('user_id') && !$data->approver_signature) { ?>
+                                <?php if ($data->approver_id != sessionData('user_id') && !$data->approver_signature && $data->pic_signed_by == $this->session->userdata('id_user')) { ?>
                                     <button type="button" onClick="showPICSignature()" class="btn btn-info mT-5" id="clear-pic-sign">Tanda-tangani Ulang</button>
                                 <?php } else {
                                     echo 'Ditanda-tangani oleh <b> ' . $data->nama_pic . '('.date('d/m/Y', strtotime($data->pic_signed_date)).')</b>';
@@ -87,7 +87,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                                     <canvas id="approver-signature-pad" class="signature-pad"></canvas>
                                     <button type="button" class="btn btn-info" id="clear-approver-sign">Clear Signature</button>
                                 </div>
-                                <div class="signature-pad disabled-canvas" style="background-color:#eee;margin-bottom:5px;<?=($data->approver_signature != '' || $data->approver_id == sessionData('user_id')) ? 'display:none' : ''?>"></div>
+                                <div class="signature-pad disabled-canvas" style="background-color:#eee;margin-bottom:5px;<?=(($data->approver_signature != '' || $data->approver_id == sessionData('user_id')) || ($data->approver_id == sessionData('user_id') && $this->is_send != 0)) ? 'display:none' : ''?>"></div>
                             </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@ $allowed_to_save = !$data->pic_signed_by || ($data->pic_signed_by == sessionData
                                     <?php } ?>
                                 <?php } ?>
                             </select>
-                            <button onClick="saveOrSend(true); return false;" class="btn btn-danger">Kirim</button>
+                            <button onClick="saveOrSend(true); return false;" class="btn btn-danger <?=$allowed_to_save ? '' : 'disabled'?>">Kirim</button>
                         <?php } ?>
                     </div>
                 <?php } ?>

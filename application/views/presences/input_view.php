@@ -306,6 +306,7 @@
                                                 <th>No. Job</th>
                                                 <th>Judul Buku</th>
                                                 <th>Hal</th>
+                                                <th>Kecepatan</th>
                                                 <th width="20">Realisasi</th>
                                                 <th>Level</th>
                                                 <th>Rencana Mulai</th>
@@ -383,6 +384,10 @@
                     <div class="mb-3">
                         <label class="form-label">Halaman</label>
                         <input type="number" min="0" max="999" value="0" name="halaman" class="form-control" placeholder="Progress Jumlah Halaman Hari Ini" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea type="text" name="catatan" class="form-control" rows="8" placeholder="Catatan" required></textarea>
                     </div>
                 </div>
 
@@ -620,55 +625,61 @@
                 {
                     "targets": 5,
                     "render": function(data, type, row) {
-                        return (row[5] ?? 0) + ' hal'
+                        return (row[5] ?? 0) + ' hal/hari'
                     }
                 },
                 {
                     "targets": 6,
                     "render": function(data, type, row) {
-                        return '<b>'+levelKerjaMap[row[6]]+'</b>'
+                        return (row[6] ?? 0) + ' hal'
                     }
                 },
                 {
                     "targets": 7,
                     "render": function(data, type, row) {
-                        return '<div style="'+(new Date() > new Date(row[7]) && row[9] == 'open' ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[7]) && row[9] == 'open' ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[7]).toLocaleDateString('id-ID')+'</div>'
+                        return '<b>'+levelKerjaMap[row[7]]+'</b>';
                     }
                 },
                 {
                     "targets": 8,
                     "render": function(data, type, row) {
-                        return '<div style="'+(new Date() > new Date(row[8]) ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[8]) ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[8]).toLocaleDateString('id-ID')+'</div>'
+                        return '<div style="'+(new Date() > new Date(row[8]) && row[10] == 'open' ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[8]) && row[10] == 'open' ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[8]).toLocaleDateString('id-ID')+'</div>';
                     }
                 },
                 {
                     "targets": 9,
                     "render": function(data, type, row) {
-                        return '<div><button class="btn" style="border:none;cursor:default;'+(row[9] == 'on_progress'?'font-weight:bold;':'')+';background-color:'+statusMap[row[9]].bgColor+'">'+statusMap[row[9]].text+'</button></div>'
+                        return '<div style="'+(new Date() > new Date(row[9]) ? 'color:red;font-weight:bold;' : '')+'">'+(new Date() > new Date(row[9]) ? '<i class="ti-alert"></i>' : '')+' '+new Date(row[9]).toLocaleDateString('id-ID')+'</div>';
                     }
                 },
                 {
                     "targets": 10,
                     "render": function(data, type, row) {
+                        return '<div><button class="btn" style="border:none;cursor:default;'+(row[10] == 'on_progress'?'font-weight:bold;':'')+';background-color:'+statusMap[row[10]].bgColor+'">'+statusMap[row[10]].text+'</button></div>';
+                    }
+                },
+                {
+                    "targets": 11,
+                    "render": function(data, type, row) {
                         return '<div class="peers mR-15">' +
                             '<div class="peer mR-5">' +
-                                '<button onclick="viewJob('+false+', \''+row[2]+'\', \''+row[6]+'\')" class="btn btn-info">Lihat</button>' +
+                                '<button onclick="viewJob('+false+', \''+row[2]+'\', \''+row[7]+'\')" class="btn btn-info">Lihat</button>' +
                             '</div>' +
-                            ((row[9] == 'open' || row[9] == 'paused') ? 
-                                '<div class="peer mR-5 '+ (row[9]!= 'on_progress' || row[9] == 'cicil' ? 'disabled-cursor' : '') +'">' +
-                                    '<button onclick="mulaiJob(\''+row[2]+'\', \''+row[6]+'\', \''+row[7]+'\')" class="btn btn-success" '+(row[9] == 'on_progress' || row[9] == 'cicil' ? 'disabled' : '')+'>'+(row[9] == 'paused' ? 'Lanjut' : 'Mulai')+'</button>' +
+                            ((row[10] == 'open' || row[10] == 'paused') ? 
+                                '<div class="peer mR-5 '+ (row[10] != 'on_progress' || row[10] == 'cicil' ? 'disabled-cursor' : '') +'">' +
+                                    '<button onclick="mulaiJob(\''+row[2]+'\', \''+row[7]+'\', \''+row[8]+'\')" class="btn btn-success" '+(row[10] == 'on_progress' || row[10] == 'cicil' ? 'disabled' : '')+'>'+(row[10] == 'paused' ? 'Lanjut' : 'Mulai')+'</button>' +
                                 '</div>' 
                                 :
-                                '<div id="tundaButtonParent'+row[2]+row[6]+'" class="peer mR-5 '+ (row[9]!= 'on_progress' || row[9] == 'cicil' ? 'disabled-cursor' : '') +'">' +
-                                    '<button id="tundaButton'+row[2]+row[6]+'" onclick="tundaJob(\''+row[2]+'\', \''+row[6]+'\')" class="actionButton btn btn-warning '+(row[9]!= 'on_progress' || row[9] == 'cicil' ? 'disabled' : '')+'">Tunda</button>' +
+                                '<div id="tundaButtonParent'+row[2]+row[7]+'" class="peer mR-5 '+ (row[10] != 'on_progress' || row[10] == 'cicil' ? 'disabled-cursor' : '') +'">' +
+                                    '<button id="tundaButton'+row[2]+row[7]+'" onclick="tundaJob(\''+row[3]+'\', \''+row[7]+'\')" class="actionButton btn btn-warning '+(row[10] != 'on_progress' || row[10] == 'cicil' ? 'disabled' : '')+'">Tunda</button>' +
                                 '</div>'
                             ) +
-                            '<div id="kirimButtonParent'+row[3]+row[6]+'" class="peer mR-5 '+ ((row[9] == 'finished' || row[9] == 'open' || row[10] != null) ? 'disabled-cursor' : '') +'">' +
-                                // '<button onclick="kirimJob(\''+row[3]+'\', \''+row[6]+'\')" class="btn btn-primary"'+(row[9] == 'on_progress'?'disabled':'')+'>Kirim</button>' +
-                                '<button id="kirimButton'+row[3]+row[6]+'" onClick="kirimJobTrigger(\''+row[2]+'\', \''+row[6]+'\')" type="button" class="actionButton form-control btn btn-primary" data-bs-toggle="modal" data-bs-target="#kirimJobModal" class="btn btn-primary"'+((row[9] == 'finished' || row[9] == 'open' || row[10] != null) ? 'disabled':'')+'>Kirim</button>' +
+                            '<div id="kirimButtonParent'+row[4]+row[7]+'" class="peer mR-5 '+ ((row[10] == 'finished' || row[10] == 'open' || row[11] != null) ? 'disabled-cursor' : '') +'">' +
+                                // '<button onclick="kirimJob(\''+row[4]+'\', \''+row[7]+'\')" class="btn btn-primary"'+(row[10] == 'on_progress'?'disabled':'')+'>Kirim</button>' +
+                                '<button id="kirimButton'+row[4]+row[7]+'" onClick="kirimJobTrigger(\''+row[2]+'\', \''+row[7]+'\')" type="button" class="actionButton form-control btn btn-primary" data-bs-toggle="modal" data-bs-target="#kirimJobModal" class="btn btn-primary"'+((row[10] == 'finished' || row[10] == 'open' || row[11] != null) ? 'disabled':'')+'>Kirim</button>' +
                             '</div>' +
-                            '<div id="finishButtonParent'+row[3]+row[6]+'" class="peer mR-5 '+ (row[9] == 'finished' || row[9] == 'open'  ? 'disabled-cursor':'') +'">' +
-                                '<button id="finishButton'+row[3]+row[6]+'" onClick="finishJobTrigger(\''+row[2]+'\', \''+row[6]+'\', \''+row[5]+'\')" type="button" class="actionButton form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#finishJobModal" class="btn btn-danger" '+(row[9] == 'finished' || row[9] == 'open'  ? 'disabled':'')+'>Selesai</button>' +
+                            '<div id="finishButtonParent'+row[4]+row[7]+'" class="peer mR-5 '+ (row[10] == 'finished' || row[10] == 'open'  ? 'disabled-cursor':'') +'">' +
+                                '<button id="finishButton'+row[4]+row[7]+'" onClick="finishJobTrigger(\''+row[2]+'\', \''+row[7]+'\', \''+row[6]+'\')" type="button" class="actionButton form-control btn btn-danger" data-bs-toggle="modal" data-bs-target="#finishJobModal" class="btn btn-danger" '+(row[10] == 'finished' || row[10] == 'open'  ? 'disabled':'')+'>Selesai</button>' +
                             '</div>' +
                             '<div class="peer mR-5">' +
                                 '<a href="<?=site_url('naskah/detail')?>/'+row[2]+'" class="btn btn-primary">Detail</a>' +
@@ -751,7 +762,9 @@
                         const difference = Math.abs(toDate - fromDate);
                         const daysDifference = Math.ceil(difference / (1000 * 60 * 60 * 24));
 
-                        const dayDiffWithoutHolidays = Math.abs(daysDifference - row[13])+1;
+                        const totalDaysOff = getTotalDaysOffBetweenTwoDates(fromDate, toDate);
+
+                        const dayDiffWithoutHolidays = Math.abs((daysDifference+1) - totalDaysOff);
 
                         let barColor = 'd94141'
                         const barPercentage = ((dayDiffWithoutHolidays ?? 0)*100/row[12])
@@ -781,6 +794,30 @@
                 "sEmptyTable": "Tidak ada laporan yang dapat ditampilkan",
             }
         });
+
+        function getTotalDaysOffBetweenTwoDates(fromDate, toDate) {
+            const year = fromDate.getFullYear();
+            const month = String(fromDate.getMonth() + 1).padStart(2, '0');
+            const day = String(fromDate.getDate()).padStart(2, '0');
+            const fFromDate = `${year}-${month}-${day}`;
+
+            const t_year = fromDate.getFullYear();
+            const t_month = String(fromDate.getMonth() + 1).padStart(2, '0');
+            const t_day = String(fromDate.getDate()).padStart(2, '0');
+            const fToDate = `${t_year}-${t_month}-${t_day}`;
+            
+            let totalDaysOff = 0
+
+            $.ajax({
+                url: "<?=site_url('jobs/getTotalDaysOffBetweenTwoDates')?>?fromDate=" + fFromDate + "&toDate=" + fToDate,
+                method: "GET",
+                success: function(res) {
+                    totalDaysOff = JSON.parse(res)
+                }
+            })
+
+            return totalDaysOff
+        }
 
         // fitur absensi (new) May 3rd, 2023
         // on load check for attendance status
@@ -1275,8 +1312,14 @@
                 $('#start-naskah-button').attr('disabled', true)
                 $('#pause-naskah-button').attr('disabled', true)
             } else {
-                $('#start-naskah-button').attr('disabled', false)
-                $('#pause-naskah-button').attr('disabled', false)
+                if (res.is_done_today) {
+                    $('#start-naskah-button').attr('disabled', true)
+                    $('#pause-naskah-button').attr('disabled', true)
+                } else {
+                    $('#start-naskah-button').attr('disabled', false)
+                    $('#pause-naskah-button').attr('disabled', false)
+                }
+
                 activeJob = {
                     noJob: res.naskah.no_job,
                     naskahId: res.naskah.id,

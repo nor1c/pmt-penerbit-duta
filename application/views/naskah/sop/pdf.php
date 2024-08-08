@@ -1,9 +1,16 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-$allowed_to_save = !$data->pic_signed_by || 
-                    sessionData('id_jabatan') == 3 ||
-                    ($data->pic_signed_by == sessionData('user_id') || $data->approver_id == sessionData('user_id'));
+$allowed_to_save = (
+                        !$data->pic_signed_by || 
+                        sessionData('id_jabatan') == 3 ||
+                        ($data->pic_signed_by == sessionData('user_id') || $data->approver_id == sessionData('user_id'))
+                    )
+                    && 
+                    (
+                        ($data->approver_id != sessionData('user_id') ? $this->session->userdata('id_divisi') == 1 : true) ||
+                        ($this->session->userdata('id_jabatan') != 3 ? $this->session->userdata('id_divisi') == 1 : true)
+                    );
 ?>
 
 <style>
@@ -54,7 +61,7 @@ $allowed_to_save = !$data->pic_signed_by ||
                 <div class="col-md-12 row">
                     <div class="col-md-3">
                         <label class="form-label">Catatan</label>
-                        <textarea id="catatan" name="catatan" cols="30" rows="10" class="form-control" placeholder="Catatan" <?=$data->approver_id == sessionData('user_id') || $allowed_to_save ? 'readonly disabled' : ''?>><?=$data->catatan ? $data->catatan : ''?></textarea>
+                        <textarea id="catatan" name="catatan" cols="30" rows="10" class="form-control" placeholder="Catatan" <?=$data->approver_id == sessionData('user_id') || !$allowed_to_save ? 'readonly disabled' : ''?>><?=$data->catatan ? $data->catatan : ''?></textarea>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Tanda tangan Editor</label>
@@ -69,7 +76,7 @@ $allowed_to_save = !$data->pic_signed_by ||
                             <div id="pic-signature-jpg">
                                 <img src="<?=base_url('signatures/sop/'.$data->pic_signature).'?'.time()?>" cache-control="no-cache" style="border: solid 1px #bbb;border-radius:10px;" />
 
-                                <?php if ($data->approver_id != sessionData('user_id') && !$data->approver_signature) { ?>
+                                <?php if ($data->approver_id != sessionData('user_id') && !$data->approver_signature && $data->pic_signed_by == $this->session->userdata('id_user')) { ?>
                                     <button type="button" onClick="showPICSignature()" class="btn btn-info mT-5" id="clear-pic-sign">Tanda-tangani Ulang</button>
                                 <?php } else {
                                     echo 'Ditanda-tangani oleh <b> ' . $data->nama_pic . '('.date('d/m/Y', strtotime($data->pic_signed_date)).')</b>';
@@ -123,7 +130,7 @@ $allowed_to_save = !$data->pic_signed_by ||
                                     <?php } ?>
                                 <?php } ?>
                             </select>
-                            <button onClick="saveOrSend(true); return false;" class="btn btn-danger">Kirim</button>
+                            <button onClick="saveOrSend(true); return false;" class="btn btn-danger <?=$allowed_to_save ? '' : 'disabled'?>">Kirim</button>
                         <?php } ?>
                     </div>
                 <?php } ?>

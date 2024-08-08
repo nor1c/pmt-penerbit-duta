@@ -46,9 +46,12 @@ class Report_model extends CI_Model {
                     }
                 }
             }
+        } else {
+            DBS()->where('DATE_FORMAT(waktu_mulai, "%Y-%m-%d") >=', date('Y-m-d', time()));
         }
 
         DBS()->group_by("$table.id_naskah, $table.id_pic, $table.waktu_mulai");
+        DBS()->order_by('waktu_mulai', 'DESC');
 
         // clone query until this line
         $tempdb = clone $this->db;

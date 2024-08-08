@@ -24,7 +24,7 @@ class Jobs extends DUTA_Controller {
         $naskah = $this->Job_model->getMyJob($this->searchableFields, $search, $filters, $pagination);
 
         $formattedData = array_map(function ($item) {
-            return ['', $item['kode'], $item['no_job'], $item['judul'], $item['halaman'], $item['realisasi'], $item['key'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['status'], $item['catatan_cicil']];
+            return ['', $item['kode'], $item['no_job'], $item['judul'], $item['halaman'], $item['kecepatan'], $item['realisasi'], $item['key'], $item['tgl_rencana_mulai'], $item['tgl_rencana_selesai'], $item['status'], $item['catatan_cicil']];
         }, $naskah['data']);
 
         $data = array(
@@ -85,6 +85,7 @@ class Jobs extends DUTA_Controller {
         $naskahLevelKerja = $this->Job_model->getProgressEachLevelKerja($naskahDetail->id);
         $naskahProgress = $this->Job_model->getProgressHalaman($naskahDetail->id, $levelKerja);
         $naskahProgressDays = $this->Job_model->getProgressDays($this->userId, $naskahDetail->id, $levelKerja);
+        $isDoneToday = $this->Job_model->getCurrentStatusForToday($this->userId, $naskahDetail->id, $levelKerja);
 
         echo json_encode(
             array(
@@ -92,7 +93,8 @@ class Jobs extends DUTA_Controller {
                 'naskah' => $naskahDetail,
                 'level_kerja' => $naskahLevelKerja,
                 'progress' => $naskahProgress,
-                'days' => $naskahProgressDays
+                'days' => $naskahProgressDays,
+                'is_done_today' => $isDoneToday,
             )
         );
     }
@@ -178,5 +180,14 @@ class Jobs extends DUTA_Controller {
         $result = $this->Job_model->finishJob($data);
 
         echo json_encode($result);
+    }
+
+    public function getTotalDaysOffBetweenTwoDates() {
+        $fromDate = $this->input->get('fromDate');
+        $toDate = $this->input->get('toDate');
+
+        $daysOff = $this->Job_model->countDaysOffTotal($fromDate, $toDate);
+
+        echo json_encode($daysOff);
     }
 }
