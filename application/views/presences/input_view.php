@@ -298,6 +298,12 @@
                                 <div class="content-box">
                                     <h5>Daftar Pekerjaan</h5>
 
+                                    <div id="filter" style="text-align:center;" class="mB-10">
+                                        <label for="show-hide-finished-jobs" style="display: inline-flex; align-items: center; cursor: pointer;">
+                                            <input onChange="triggerFilter(event)" name="show_hide_finished_jobs" type="checkbox" id="show-hide-finished-jobs" class="mR-5"> Tampilkan Pekerjaan Selesai
+                                        </label>
+                                    </div>
+
                                     <table id="jobTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                         <thead class="table-dark">
                                             <tr>
@@ -408,7 +414,7 @@
             <form id="formKirimJob">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title">Form Catatan Kirim Job</h5>
-                    <span type="button" data-bs-dismiss="modal" aria-label="Close">
+                    <span type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <i class="ti-close"></i>
                     </span>
                 </div>

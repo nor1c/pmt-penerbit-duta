@@ -56,7 +56,8 @@
                 <td class="td-color-2-head">Rencana Finish</td>
                 <td class="td-color-1-head">Realisasi Start</td>
                 <td class="td-color-2-head">Realisasi Finish</td>
-                <td style="background-color: #2196f3;color:#fff;" width="10">Catatan</td>
+                <td style="background-color: #2196f3;color:#fff;" width="120">Catatan Cicil</td>
+                <td style="background-color: #2196f3;color:#fff;" width="120">Catatan Finish</td>
             </tr>
             <?php
                 foreach ($progress as $p) {
@@ -68,6 +69,7 @@
                     <td class="td-color-2"><?=getIndoDateWithDay($p['tgl_rencana_selesai'])?></td>
                     <td class="td-color-1"><?=getIndoDateWithDay($p['waktu_mulai'])?></td>
                     <td class="td-color-2"><?=getIndoDateWithDay($p['waktu_selesai'])?></td>
+                    <td style="text-align:center;"><?=$p['catatan_cicil'] != '' ? '<i onClick="loadCatatan(\''.$p['catatan_cicil'].'\')" id="catatan-button" type="button" data-bs-toggle="modal" data-bs-target="#catatanModal" class="ti-notepad pR-10"></i>' : '' ?></td>
                     <td style="text-align:center;"><?=$p['catatan'] != '' ? '<i onClick="loadCatatan(\''.$p['catatan'].'\')" id="catatan-button" type="button" data-bs-toggle="modal" data-bs-target="#catatanModal" class="ti-notepad pR-10"></i>' : '' ?></td>
                 </tr>
             <?php } ?>

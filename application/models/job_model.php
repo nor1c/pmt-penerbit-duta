@@ -23,6 +23,20 @@ class Job_model extends CI_Model {
         );
 
         DBS()->where('naskah_level_kerja.id_pic_aktif', $userLoginId);
+        
+        if (isset($filters) && $filters != [""] && count($filters)) {
+            foreach ($filters as $filter) {
+                $filter = explode('=', $filter);
+                
+                if ($filter[0] == 'show_hide_finished_jobs') {
+                    if ($filter[1] == 'on') {
+                    } else {
+                    }
+                }
+            }
+        } else {
+            DBS()->where('status !=', 'finished');
+        }
 
         DBS()->group_by("naskah_level_kerja.order, naskah_level_kerja.key, naskah_level_kerja.id_naskah");
         DBS()->order_by("naskah_level_kerja.tgl_rencana_selesai", "ASC");
@@ -34,6 +48,19 @@ class Job_model extends CI_Model {
         // count all records
         DBS()->from("naskah_level_kerja");
         DBS()->where('naskah_level_kerja.id_pic_aktif', $userLoginId);
+        
+        if (isset($filters) && $filters != [""] && count($filters)) {
+            foreach ($filters as $filter) {
+                $filter = explode('=', $filter);
+    
+                if ($filter[0] == 'show_hide_finished_jobs') {
+                    if ($filter[1] != 'on') {
+                        DBS()->where('status !=', 'finished');
+                    }
+                }
+            }
+        }
+
         DBS()->group_by("naskah_level_kerja.order, naskah_level_kerja.key, naskah_level_kerja.id_naskah");
 
 		$recordsTotal = DBS()->get()->num_rows();
@@ -312,6 +339,7 @@ class Job_model extends CI_Model {
         unset($data['noJob']);
         unset($data['levelKerja']);
         unset($data['halaman']);
+        unset($data['catatan']);
 
         $updated = DBS()->where('id_naskah', $naskahId)
             ->where('key', $levelKerja)

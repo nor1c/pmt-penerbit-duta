@@ -536,11 +536,17 @@
 		let filters = []
 		$('#filter').submit(function (e) {
 			e.preventDefault()
-
 			filters.filters = $('#filter :input').serialize().replace(/\+/g, '%20');
-			
 			refreshTable()
 		})
+
+		function triggerFilter(e) {
+			console.log('filter triggered');
+			e.preventDefault()
+			filters.filters = $('#filter :input').serialize().replace(/\+/g, '%20');
+			console.log(filters);
+			refreshTable()
+		}
 
 		function isWeekend(date) {
 			const nDate = new Date(date);

@@ -280,7 +280,7 @@ class Naskah_model extends CI_Model {
 
     public function getProgressWithRealizationDate($idNaskah) {
         $query = "SELECT 
-                nlk.`key`, nlk.tgl_rencana_mulai, nlk.tgl_rencana_selesai, npm.waktu_mulai, IF(nlk.status='finished', nlk.tgl_selesai, '') AS waktu_selesai, nlk.catatan_selesai as catatan, t_karyawan.nama as pic
+                nlk.`key`, nlk.tgl_rencana_mulai, nlk.tgl_rencana_selesai, npm.waktu_mulai, IF(nlk.status='finished', nlk.tgl_selesai, '') AS waktu_selesai, nlk.catatan_selesai as catatan, nlk.catatan_cicil, t_karyawan.nama as pic
                 FROM naskah_level_kerja nlk
                 LEFT JOIN (
                     SELECT id_naskah, waktu_mulai, level_kerja_key
